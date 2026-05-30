@@ -1,72 +1,30 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Login</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Grand+Hotel&family=Roboto&display=swap" rel="stylesheet">
-
 <style>
-body {
-  margin:0;
-  font-family:'Roboto',sans-serif;
-  background:#fafafa;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  height:100vh;
-}
-
-.box {
-  background:white;
-  border:1px solid #dbdbdb;
-  padding:30px;
-  width:300px;
-  text-align:center;
-}
-
-.logo {
-  font-family:'Grand Hotel',cursive;
-  font-size:40px;
-  margin-bottom:20px;
-}
-
-input {
-  width:100%;
-  padding:10px;
-  margin:6px 0;
-  box-sizing: border-box;
-}
-
-button {
-  width:100%;
-  padding:10px;
-  background:#0095f6;
-  color:white;
-  border:none;
-  cursor: pointer;
-}
+body{display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;background:#fafafa}
+.box{background:#fff;padding:30px;border:1px solid #ddd;text-align:center}
+input{width:100%;padding:10px;margin:5px 0}
+button{width:100%;padding:10px;background:#0095f6;color:#fff;border:none}
 </style>
 </head>
 
 <body>
-
 <div class="box">
-  <div class="logo">Instagram</div>
-
-  <input type="text" placeholder="Username">
+  <h2>Instagram</h2>
+  <input placeholder="Username">
   <input type="password" placeholder="Password">
-
-  <button onclick="login()">Log In</button>
+  <button onclick="login()">Login</button>
 </div>
 
 <script>
 function login(){
   localStorage.setItem("loggedIn","true");
-  window.location.href = "home.html"; /* Yeh user ko home.html page par bhej dega */
+  window.location.href="home.html";
 }
 </script>
-
 </body>
 </html>
