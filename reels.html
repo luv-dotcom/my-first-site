@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Reels</title>
+<title>Reels Advanced</title>
 
 <style>
 body {
@@ -13,11 +13,17 @@ body {
   overflow: hidden;
 }
 
-/* Full screen video */
-.video-container {
+.reels-container {
+  height: 100vh;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+}
+
+.reel {
   position: relative;
   height: 100vh;
   width: 100%;
+  scroll-snap-align: start;
 }
 
 video {
@@ -26,7 +32,7 @@ video {
   object-fit: cover;
 }
 
-/* Right side icons */
+/* Right side actions */
 .actions {
   position: absolute;
   right: 10px;
@@ -53,47 +59,78 @@ video {
   font-weight: bold;
 }
 
-.caption {
-  font-size: 14px;
+.heart {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  font-size: 80px;
+  color: white;
+  opacity: 0.8;
+  transition: 0.3s;
 }
+
 </style>
 </head>
 
 <body>
 
-<div class="video-container">
+<div class="reels-container">
 
-  <!-- Video -->
-  <video src="https://www.w3schools.com/html/mov_bbb.mp4" autoplay loop muted></video>
+  <!-- Reel 1 -->
+  <div class="reel" ondblclick="bigLike(this)">
+    <video src="https://www.w3schools.com/html/mov_bbb.mp4" autoplay loop muted></video>
 
-  <!-- Right side buttons -->
-  <div class="actions">
-    <div onclick="like()">❤️<br><span id="likeCount">120</span></div>
-    <div>💬<br>45</div>
-    <div>📤</div>
+    <div class="heart">❤️</div>
+
+    <div class="actions">
+      <div onclick="like(this)">❤️<br><span>120</span></div>
+      <div>💬<br>30</div>
+      <div>📤</div>
+    </div>
+
+    <div class="bottom">
+      <div class="username">user1</div>
+      <div>Amazing reel 😍</div>
+    </div>
   </div>
 
-  <!-- Bottom info -->
-  <div class="bottom">
-    <div class="username">travel_user</div>
-    <div class="caption">Amazing view 😍</div>
+  <!-- Reel 2 -->
+  <div class="reel" ondblclick="bigLike(this)">
+    <video src="https://www.w3schools.com/html/movie.mp4" autoplay loop muted></video>
+
+    <div class="heart">❤️</div>
+
+    <div class="actions">
+      <div onclick="like(this)">❤️<br><span>89</span></div>
+      <div>💬<br>12</div>
+      <div>📤</div>
+    </div>
+
+    <div class="bottom">
+      <div class="username">user2</div>
+      <div>Travel vibes 🌍</div>
+    </div>
   </div>
 
 </div>
 
 <script>
-let liked = false;
-let count = 120;
+// like button
+function like(el){
+  let span = el.querySelector("span");
+  let count = parseInt(span.innerText);
+  span.innerText = count + 1;
+}
 
-function like(){
-  if(!liked){
-    count++;
-    liked = true;
-  } else {
-    count--;
-    liked = false;
-  }
-  document.getElementById("likeCount").innerText = count;
+// double tap animation
+function bigLike(reel){
+  let heart = reel.querySelector(".heart");
+  heart.style.transform = "translate(-50%, -50%) scale(1)";
+  
+  setTimeout(()=>{
+    heart.style.transform = "translate(-50%, -50%) scale(0)";
+  }, 400);
 }
 </script>
 
