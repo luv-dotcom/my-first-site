@@ -1,1 +1,22 @@
+<script>
+    // Global Navigation & Interaction Controller
+    document.addEventListener('DOMContentLoaded', () => {
+        // Story Timer logic (Agar story page hai toh)
+        if(window.location.pathname.includes('story.html')) {
+            setTimeout(() => { window.location.href = 'home.html'; }, 5000);
+        }
 
+        // Double Click Heart Logic (Agar home page hai toh)
+        if(window.location.pathname.includes('home.html')) {
+            document.querySelectorAll('.post-image-container').forEach(container => {
+                container.addEventListener('dblclick', () => {
+                    const heart = container.querySelector('.insta-heart-pop');
+                    if(heart) {
+                        heart.classList.add('animate');
+                        setTimeout(() => { heart.classList.remove('animate'); }, 800);
+                    }
+                });
+            });
+        }
+    });
+</script>
