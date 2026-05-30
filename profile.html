@@ -108,7 +108,6 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-        // Humne data fetch karne ke liye doc aur getDoc import kiya hai
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
         
         const firebaseConfig = {
@@ -122,17 +121,15 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         
-        // Yeh function Firebase se data lekar aayega
         async function fetchProfileData() {
             try {
-                // "users" collection ke andar jo humne "rahul123" id banayi thi use target kiya
-                const docRef = doc(db, "users", "rahul123");
+                // Yahan humne ab luv_5 set kar diya hai
+                const docRef = doc(db, "users", "luv_5");
                 const docSnap = await getDoc(docRef);
 
                 if (docSnap.exists()) {
                     const userData = docSnap.data();
                     
-                    // Ab JavaScript se HTML badal rahe hain
                     document.getElementById("prof-username").innerText = userData.username;
                     document.getElementById("prof-name").innerText = userData.fullName;
                     document.getElementById("prof-bio").innerText = userData.bio;
@@ -144,7 +141,6 @@
             }
         }
 
-        // Page load hote hi function ko call kar diya
         fetchProfileData();
     </script>
 </body>
