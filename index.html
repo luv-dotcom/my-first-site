@@ -15,6 +15,7 @@
   button { width: 100%; padding: 7px; border: none; border-radius: 4px; font-weight: 600; cursor: pointer; margin-top: 10px; }
   #loginBtn { background-color: var(--primary-color); color: white; }
   #signupBtn { background-color: #e0e0e0; color: #333; }
+  #saveDataBtn { background-color: #34a853; color: white; } /* Naya green button */
 </style>
 </head>
 <body>
@@ -26,11 +27,15 @@
   
   <button id="loginBtn">Log In</button>
   <button id="signupBtn">Sign Up (Naya Account)</button>
+  
+  <button id="saveDataBtn">Data Save Karein</button>
 </div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
   import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+  // Firestore ke imports
+  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBrqMn7FrFW3jslaDNM0ui-VW4w6K_3Nmk",
@@ -44,6 +49,7 @@
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
+  const db = getFirestore(app); // Database access
 
   // Login Logic
   document.getElementById("loginBtn").addEventListener("click", () => {
@@ -61,6 +67,19 @@
     createUserWithEmailAndPassword(auth, email, password)
       .then(() => { alert("Account ban gaya! Ab Log In karo."); })
       .catch((error) => { alert("Sign Up Error: " + error.message); });
+  });
+
+  // Database Save Logic
+  document.getElementById("saveDataBtn").addEventListener("click", async () => {
+    try {
+      await addDoc(collection(db, "my_posts"), {
+        message: "Hello! Ye data tumhare Firebase Database mein save ho gaya hai.",
+        timestamp: new Date().toISOString()
+      });
+      alert("Data Firebase Database mein save ho gaya!");
+    } catch (e) {
+      alert("Error: " + e.message);
+    }
   });
 </script>
 
