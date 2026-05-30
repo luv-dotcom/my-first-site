@@ -8,42 +8,35 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --bg-color: #fafafa;
-            --border-color: #dbdbdb;
-            --text-main: #262626;
-            --text-muted: #8e8e8e;
-            --card-bg: #ffffff;
+            --bg-color: #121212;
+            --border-color: #262626;
+            --text-main: #ffffff;
+            --text-muted: #a8a8a8;
+            --card-bg: #000000;
             --link-color: #0095f6;
             --error-color: #ed4956;
             --success-color: #2ed573;
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-main); display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
-        
         .auth-container { width: 100%; max-width: 350px; display: flex; flex-direction: column; gap: 10px; }
-        .auth-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 4px; padding: 40px 30px; display: flex; flex-direction: column; align-items: center; text-align: center; }
-        
-        .logo-text { font-family: 'Grand Hotel', cursive; font-size: 50px; margin-bottom: 20px; cursor: pointer; }
-        .subtitle { color: var(--text-muted); font-size: 17px; font-weight: 600; line-height: 20px; margin-bottom: 20px; }
-        
+        .auth-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 4px; padding: 30px 25px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+        .logo-text { font-family: 'Grand Hotel', cursive; font-size: 50px; margin-bottom: 15px; }
+        .subtitle { color: var(--text-muted); font-size: 14px; margin-bottom: 20px; }
         form { width: 100%; display: flex; flex-direction: column; gap: 6px; }
-        .input-box { width: 100%; position: relative; }
-        .input-box input { width: 100%; padding: 10px 8px; background: #fafafa; border: 1px solid var(--border-color); border-radius: 4px; font-size: 12px; outline: none; color: var(--text-main); }
-        .input-box input:focus { border-color: #a8a8a8; }
+        .input-box input, .input-box select { width: 100%; padding: 10px 8px; background: #121212; border: 1px solid var(--border-color); border-radius: 4px; font-size: 12px; outline: none; color: white; }
+        .input-box input:focus, .input-box select:focus { border-color: #555; }
         
-        /* Profile Details Section (Initially Hidden) */
+        /* Hidden Profile Fields Section */
         .profile-details-section { display: none; flex-direction: column; gap: 6px; margin-top: 10px; border-top: 1px dashed var(--border-color); padding-top: 15px; animation: slideDown 0.3s ease-in-out; }
         @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-        
         .section-title { font-size: 13px; color: var(--text-muted); font-weight: 600; text-align: left; margin-bottom: 4px; }
 
-        .auth-btn { background: var(--link-color); color: white; border: none; border-radius: 4px; padding: 7px; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 8px; width: 100%; }
-        .auth-btn:disabled { opacity: 0.7; cursor: not-allowed; }
-        
-        .msg-box { margin-top: 15px; font-size: 14px; display: none; font-weight: 500; width: 100%; }
+        .auth-btn { background: var(--link-color); color: white; border: none; border-radius: 4px; padding: 8px; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 8px; }
+        .auth-btn:disabled { opacity: 0.6; }
+        .msg-box { margin-top: 15px; font-size: 13px; display: none; font-weight: 500; }
         .error-msg { color: var(--error-color); }
         .success-msg { color: var(--success-color); }
-
         .redirect-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 4px; padding: 20px; text-align: center; font-size: 14px; }
         .redirect-card a { color: var(--link-color); font-weight: 600; text-decoration: none; }
     </style>
@@ -64,15 +57,23 @@
                 </div>
 
                 <div class="profile-details-section" id="profile-details">
-                    <p class="section-title"><i class="fa-solid fa-user-gear"></i> Complete Your Profile</p>
+                    <p class="section-title"><i class="fa-solid fa-user-plus"></i> Setup Your Profile</p>
                     <div class="input-box">
-                        <input type="text" id="username-input" placeholder="Username (Unique handle)">
+                        <input type="text" id="username-input" placeholder="Username">
                     </div>
                     <div class="input-box">
                         <input type="text" id="fullname-input" placeholder="Full Name">
                     </div>
                     <div class="input-box">
                         <input type="text" id="bio-input" placeholder="Bio">
+                    </div>
+                    <div class="input-box">
+                        <select id="gender-input">
+                            <option value="" disabled selected>Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Custom">Prefer not to say</option>
+                        </select>
                     </div>
                     <div class="input-box">
                         <input type="url" id="pic-input" placeholder="Profile Pic URL (Optional)">
@@ -86,7 +87,7 @@
         </div>
 
         <div class="redirect-card">
-            Have an account? <a href="login.html">Log in</a>
+            Have an account? <a href="index.html">Log in</a>
         </div>
     </div>
 
@@ -109,16 +110,15 @@
         const usernameInput = document.getElementById("username-input");
         const fullnameInput = document.getElementById("fullname-input");
         const bioInput = document.getElementById("bio-input");
+        const genderInput = document.getElementById("gender-input");
         const picInput = document.getElementById("pic-input");
         
         const profileSection = document.getElementById("profile-details");
         const actionBtn = document.getElementById("action-btn");
         const statusMsg = document.getElementById("status-msg");
-        const formSubtitle = document.getElementById("form-subtitle");
 
         let isEmailVerified = false;
 
-        // Reset fields if user edits email field after verification
         emailInput.addEventListener("input", () => {
             if (isEmailVerified) {
                 isEmailVerified = false;
@@ -126,131 +126,98 @@
                 actionBtn.innerText = "Check Email Availability";
                 actionBtn.style.background = "#0095f6";
                 statusMsg.style.display = "none";
-                formSubtitle.innerText = "Sign up to see photos and videos from your friends.";
-                
-                usernameInput.removeAttribute("required");
-                fullnameInput.removeAttribute("required");
-                bioInput.removeAttribute("required");
             }
         });
 
         actionBtn.addEventListener("click", async () => {
-            // Email parsing safely standard clean formatting
             const email = emailInput.value.trim().toLowerCase();
             const password = passwordInput.value.trim();
 
             if (!email || !password) {
-                showStatus("⚠️ Please fill in both Email and Password fields!", "error");
+                showStatus("⚠️ Email and Password are required!", "error");
                 return;
             }
 
-            // Simple basic Regex validation structure check for email format
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                showStatus("❌ Please enter a valid email address!", "error");
-                return;
-            }
-
-            // --- STEP 1: DYNAMIC EMAIL AVAILABILITY GUARD ---
+            // --- STEP 1: CHECK ACC EXISTENCE ---
             if (!isEmailVerified) {
                 actionBtn.disabled = true;
-                actionBtn.innerText = "Verifying email...";
+                actionBtn.innerText = "Checking email...";
                 
                 try {
-                    // Firebase users collection query check tracking for existing email matches
                     const usersRef = collection(db, "users");
                     const q = query(usersRef, where("email", "==", email));
                     const querySnapshot = await getDocs(q);
 
                     if (!querySnapshot.empty) {
-                        // User exists with this email -> TRIGGER ERROR
-                        showStatus("❌ This email is already registered! Please log in instead.", "error");
-                        actionBtn.innerText = "Check Email Availability";
+                        showStatus("❌ Account already exists with this email!", "error");
                     } else {
-                        // Safe fresh dynamic state route -> UNLOCK NEXT SUB-STEPS FOR REGISTRATION
                         isEmailVerified = true;
-                        showStatus("✨ Email available! Now create your unique user identifier handle.", "success");
-                        
-                        formSubtitle.innerText = "Complete your identity profile configuration parameters.";
+                        showStatus("✨ Email available! Fill profile details below.", "success");
                         profileSection.style.display = "flex";
-                        
-                        usernameInput.setAttribute("required", "true");
-                        fullnameInput.setAttribute("required", "true");
-                        bioInput.setAttribute("required", "true");
-                        
-                        actionBtn.innerText = "Finalize Sign Up";
+                        actionBtn.innerText = "Complete Sign Up";
                         actionBtn.style.background = "#2ed573";
                     }
                 } catch (err) {
-                    console.error("Firestore security query crash trace: ", err);
-                    showStatus("Database check pipeline dropped. Try again.", "error");
-                    actionBtn.innerText = "Check Email Availability";
+                    showStatus("Database error. Try again.", "error");
                 } finally {
                     actionBtn.disabled = false;
                 }
             } 
-            // --- STEP 2: FINALIZE PIPELINE & CREATE PAYLOAD ---
+            // --- STEP 2: REGISTER NEW USER ---
             else {
                 const username = usernameInput.value.trim().toLowerCase();
                 const name = fullnameInput.value.trim();
                 const bio = bioInput.value.trim();
+                const gender = genderInput.value;
                 let profilePic = picInput.value.trim();
 
-                // Validation checkpoint for profiles parameters setup
-                if (!username || !name || !bio) {
-                    showStatus("⚠️ Username, Name, and Bio are mandatory fields!", "error");
+                if (!username || !name || !bio || !gender) {
+                    showStatus("⚠️ All profile fields (except Pic) are mandatory!", "error");
                     return;
                 }
-
-                // Spaces checking validation in user handle
                 if (username.includes(" ")) {
-                    showStatus("❌ Username handle cannot contain spaces!", "error");
+                    showStatus("❌ Username cannot contain spaces!", "error");
                     return;
                 }
 
                 actionBtn.disabled = true;
-                actionBtn.innerText = "Creating secure profile data record...";
+                actionBtn.innerText = "Creating Account...";
 
                 try {
-                    // Pre-check verification step: Make sure username document ID key path is unique
-                    const userDocRef = doc(db, "users", username);
-                    const userDocSnap = await getDoc(userDocRef);
-
+                    // Check if unique username document ID path already exists
+                    const userDocSnap = await getDoc(doc(db, "users", username));
                     if (userDocSnap.exists()) {
-                        showStatus("❌ This username handle is taken. Try another nickname context!", "error");
+                        showStatus("❌ Username handle already taken!", "error");
                         actionBtn.disabled = false;
-                        actionBtn.innerText = "Finalize Sign Up";
+                        actionBtn.innerText = "Complete Sign Up";
                         return;
                     }
 
                     if (!profilePic) {
-                        profilePic = `https://picsum.photos/150/150?random=${Math.floor(Math.random() * 120)}`;
+                        profilePic = `https://picsum.photos/150/150?random=${Math.floor(Math.random() * 100)}`;
                     }
 
-                    // Set payload document record base
+                    // Save Data
                     await setDoc(doc(db, "users", username), {
                         username: username,
                         email: email,
-                        password: password, 
+                        password: password,
                         name: name,
                         bio: bio,
+                        gender: gender,
                         profilePic: profilePic
                     });
 
-                    showStatus("🎉 Account created smoothly! Dispatching entry parameters...", "success");
-                    
-                    // Session allocation state logic
+                    showStatus("🎉 Account created! Redirecting to feed...", "success");
                     localStorage.setItem("active_user", username);
                     
                     setTimeout(() => {
                         window.location.href = "home.html";
-                    }, 1800);
+                    }, 2000);
 
                 } catch (err) {
-                    console.error("Error committing record profile data document payload: ", err);
-                    showStatus("Failed processing record structure configuration.", "error");
+                    showStatus("Failed to create profile.", "error");
                     actionBtn.disabled = false;
-                    actionBtn.innerText = "Finalize Sign Up";
                 }
             }
         });
