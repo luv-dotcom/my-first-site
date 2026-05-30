@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram - Messages</title>
+
+    <!-- Instagram style font for the Logo Text -->
+    <link href="https://fonts.googleapis.com/css2?family=Grand+Hotel&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome for Authentic Instagram Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* --- GLOBAL RESETS & VARIABLES --- */
+        :root {
+            --bg-color: #fafafa;
+            --border-color: #dbdbdb;
+            --text-main: #262626;
+            --text-muted: #8e8e8e;
+            --link-color: #0095f6;
+            --card-bg: #ffffff;
+            --transition-speed: 0.2s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding-bottom: 60px;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* --- LOGO TEXT FONT --- */
+        .logo-text {
+            font-family: 'Grand Hotel', cursive;
+            font-size: 30px;
+            cursor: pointer;
+            user-select: none;
+            color: var(--text-main);
+            text-decoration: none;
+        }
+
+        /* --- TOP NAVBAR --- */
+        .top-navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            width: 100%;
+            max-width: 975px;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-icons {
+            display: flex;
+            gap: 22px;
+            align-items: center;
+        }
+        .nav-icons a {
+            color: var(--text-main);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+        .nav-icons i { font-size: 22px; cursor: pointer; }
+        .nav-icons i.active-nav { color: #000; font-weight: 900; }
+        .nav-profile-pic { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; }
+
+        /* --- MOBILE BOTTOM NAVBAR --- */
+        .bottom-navbar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 52px;
+            background-color: var(--card-bg);
+            border-top: 1px solid var(--border-color);
+            display: none; 
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+        }
+        .bottom-navbar a { color: var(--text-main); text-decoration: none; }
+        .bottom-navbar i { font-size: 22px; }
+
+        /* --- CHAT LAYOUT SYSTEM --- */
+        .chat-layout {
+            max-width: 935px;
+            margin: 80px auto 0 auto;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            height: calc(100vh - 110px);
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            overflow: hidden;
+        }
+
+        /* Inbox Left Panel */
+        .inbox-panel {
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            background-color: var(--card-bg);
+        }
+        .inbox-header {
+            height: 60px;
+            padding: 0 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            font-size: 16px;
+        }
+        .chat-list { overflow-y: auto; flex: 1; }
+        .chat-user-row {
+            display: flex; align-items: center; gap: 12px; padding: 12px 20px; cursor: pointer;
+        }
+        .chat-user-row:hover, .chat-user-row.active-chat { background-color: #fafafa; }
+        .chat-user-row img { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; }
+        .chat-user-meta .chat-username { font-size: 14px; font-weight: 500; }
+        .chat-user-meta .chat-preview { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+        /* Right Pane Chat Window */
+        .chat-window {
+            display: flex;
+            flex-direction: column;
+            background-color: #fff;
+        }
+        .chat-window-header {
+            height: 60px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            gap: 12px;
+        }
+        
+        .back-btn {
+            display: none;
+            font-size: 20px;
+            cursor: pointer;
+            margin-right: 8px;
+            color: var(--text-main);
+        }
+
+        .chat-window-header img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
+        .chat-window-header .window-username { font-size: 14px; font-weight: 600; }
+
+        .chat-messages-area {
+            flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px;
+        }
+        .msg-bubble { max-width: 65%; padding: 12px 16px; border-radius: 22px; font-size: 14px; line-height: 18px; }
+        .msg-incoming { background-color: #efefef; color: var(--text-main); align-self: flex-start; }
+        .msg-outgoing { background-color: #3797f0; color: #fff; align-self: flex-end; }
+
+        .chat-input-bar { padding: 20px; background-color: #fff; }
+        .input-wrapper {
+            border: 1px solid var(--border-color); border-radius: 22px; display: flex; align-items: center; padding: 10px 18px; gap: 12px;
+        }
+        .input-wrapper input { flex: 1; border: none; outline: none; font-size: 14px; }
+        .input-wrapper .send-msg-btn { color: var(--link-color); font-weight: 600; background: none; border: none; cursor: pointer; }
+
+        /* --- 📱 MOBILE ADAPTIVE BREAKPOINTS --- */
+        @media (max-width: 650px) {
+            .top-navbar .nav-icons { display: none; }
+            .bottom-navbar { display: flex; }
+            
+            .chat-layout {
+                grid-template-columns: 1fr;
+                margin-top: 60px;
+                height: calc(100vh - 112px);
+                border: none;
+            }
+
+            .chat-layout.show-chat-window .inbox-panel { display: none; }
+            .chat-layout.show-chat-window .chat-window { display: flex; }
+
+            .chat-layout:not(.show-chat-window) .inbox-panel { display: flex; }
+            .chat-layout:not(.show-chat-window) .chat-window { display: none; }
+
+            .back-btn { display: inline-block; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TOP NAVBAR -->
+    <nav class="top-navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <a href="home.html" class="logo-text">Instagram</a>
+            </div>
+            <div class="nav-icons">
+                <a href="home.html"><i class="fa-regular fa-house"></i></a>
+                <a href="messages.html"><i class="fa-solid fa-paper-plane active-nav"></i></a>
+                <a href="#"><i class="fa-regular fa-square-plus"></i></a>
+                <a href="#"><i class="fa-regular fa-compass"></i></a>
+                <a href="#"><i class="fa-regular fa-heart"></i></a>
+                <img src="https://picsum.photos/150/150?random=1" alt="Profile" class="nav-profile-pic">
+            </div>
+        </div>
+    </nav>
+
+    <!-- CHAT MAIN BLOCK -->
+    <main class="chat-layout" id="chat-container-box">
+        
+        <!-- Left Inbox Panel -->
+        <section class="inbox-panel">
+            <div class="inbox-header">my_username ▼</div>
+            <div class="chat-list">
+                <div class="chat-user-row active-chat" onclick="openUserChat('ananya_p', 'https://picsum.photos/150/150?random=3')">
+                    <img src="https://picsum.photos/150/150?random=3">
+                    <div class="chat-user-meta">
+                        <div class="chat-username">ananya_p</div>
+                        <div class="chat-preview">Active 1h ago</div>
+                    </div>
+                </div>
+                <div class="chat-user-row" onclick="openUserChat('tech_guru', 'https://picsum.photos/150/150?random=4')">
+                    <img src="https://picsum.photos/150/150?random=4">
+                    <div class="chat-user-meta">
+                        <div class="chat-username">tech_guru</div>
+                        <div class="chat-preview">Sent a message • 2h ago</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Chat Window -->
+        <section class="chat-window">
+            <div class="chat-window-header">
+                <i class="fa-solid fa-arrow-left back-btn" onclick="closeChatWindowMobile()"></i>
+                <img src="https://picsum.photos/150/150?random=3" id="active-chat-img">
+                <div class="window-username" id="active-chat-name">ananya_p</div>
+            </div>
+            
+            <div class="chat-messages-area">
+                <div class="msg-bubble msg-incoming">Hey! Did you check out the new design template?</div>
+                <div class="msg-bubble msg-outgoing">Yes! Looks absolutely clean and responsive. 🔥</div>
+                <div class="msg-bubble msg-incoming">Awesome, let's connect later! 🙌</div>
+            </div>
+
+            <div class="chat-input-bar">
+                <div class="input-wrapper">
+                    <i class="fa-regular fa-face-smile"></i>
+                    <input type="text" placeholder="Message...">
+                    <button type="button" class="send-msg-btn">Send</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- MOBILE BOTTOM NAVBAR -->
+    <div class="bottom-navbar">
+        <a href="home.html"><i class="fa-solid fa-house"></i></a>
+        <a href="#"><i class="fa-solid fa-magnifying-glass"></i></a>
+        <a href="#"><i class="fa-regular fa-square-plus"></i></a>
+        <a href="#"><i class="fa-solid fa-clapperboard"></i></a>
+        <a href="messages.html"><i class="fa-solid fa-paper-plane"></i></a>
+    </div>
+
+    <!-- MOBILE SCREEN SCRIPT ENGINE -->
+    <script>
+        function openUserChat(username, profileImgUrl) {
+            document.getElementById('active-chat-name').innerText = username;
+            document.getElementById('active-chat-img').src = profileImgUrl;
+            document.getElementById('chat-container-box').classList.add('show-chat-window');
+        }
+
+        function closeChatWindowMobile() {
+            document.getElementById('chat-container-box').classList.remove('show-chat-window');
+        }
+    </script>
+</body>
+</html>
