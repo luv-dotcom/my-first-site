@@ -43,6 +43,7 @@
         .post-controls i:hover { transform: scale(1.1); }
         .fa-heart:hover { color: #ed4956; }
         .post-body-content { padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; font-size: 14px; }
+        .comments-container { padding: 0 14px 10px 14px; font-size: 14px; }
         .likes-count { font-weight: 600; }
         .caption-line .bold-user { font-weight: 600; margin-right: 6px; cursor: pointer; }
         .view-comments-link { color: var(--text-muted); cursor: pointer; margin-top: 4px; display: inline-block; }
@@ -102,7 +103,10 @@
                 </div>
                 <div class="post-image-box"><img src="https://picsum.photos/600/600?random=50" alt="Post Graphic"></div>
                 <div class="post-controls"><div class="left-controls"><i class="fa-regular fa-heart"></i><a href="comments.html"><i class="fa-regular fa-comment"></i></a><i class="fa-regular fa-paper-plane"></i></div><i class="fa-regular fa-bookmark"></i></div>
-                <div class="post-body-content"><span class="likes-count">1,245,612 likes</span><p class="caption-line"><span class="bold-user">virat.kohli</span>Great win tonight! Proud of the boys. On to the next one! 🏏🏆</p><a href="comments.html" class="view-comments-link">View all 4,810 comments</a><span class="post-time-stamp">2 hours ago</span></div>
+                <div class="post-body-content"><span class="likes-count">1,245,612 likes</span><p class="caption-line"><span class="bold-user">virat.kohli</span>Great win tonight!</p></div>
+                
+                <div class="comments-container"></div>
+
                 <div class="comment-input-area">
                     <input type="text" class="comment-input" placeholder="Add a comment...">
                     <button class="comment-post-btn">Post</button>
@@ -116,7 +120,10 @@
                 </div>
                 <div class="post-image-box"><img src="https://picsum.photos/600/600?random=51" alt="Post Graphic"></div>
                 <div class="post-controls"><div class="left-controls"><i class="fa-regular fa-heart"></i><a href="comments.html"><i class="fa-regular fa-comment"></i></a><i class="fa-regular fa-paper-plane"></i></div><i class="fa-regular fa-bookmark"></i></div>
-                <div class="post-body-content"><span class="likes-count">4,310 likes</span><p class="caption-line"><span class="bold-user">nature_clicks</span>Winter morning bliss. The mountains are calling! 🏔️❄️</p><a href="comments.html" class="view-comments-link">View all 86 comments</a><span class="post-time-stamp">5 hours ago</span></div>
+                <div class="post-body-content"><span class="likes-count">4,310 likes</span><p class="caption-line"><span class="bold-user">nature_clicks</span>Winter morning bliss.</p></div>
+
+                <div class="comments-container"></div>
+                
                 <div class="comment-input-area">
                     <input type="text" class="comment-input" placeholder="Add a comment...">
                     <button class="comment-post-btn">Post</button>
@@ -128,8 +135,7 @@
             <div class="self-profile-row"><div class="self-meta"><a href="profile.html"><img src="https://picsum.photos/150/150?random=1" alt="My Profile"></a><div class="s-text-box"><a href="profile.html" class="s-username">my_username</a><span class="s-reason" style="font-size: 14px;">Your Name</span></div></div><span class="switch-link">Switch</span></div>
             <div class="suggestions-header"><span>Suggestions for you</span><span class="see-all-btn">See All</span></div>
             <div class="suggestion-list">
-                <div class="suggested-user-row"><div class="s-user-meta"><img src="https://picsum.photos/100/100?random=80" alt="user"><div class="s-text-box"><span class="s-username">ms_dhoni_fan</span><span class="s-reason">Followed by virat.kohli + 3 more</span></div></div><span class="follow-link">Follow</span></div>
-                <div class="suggested-user-row"><div class="s-user-meta"><img src="https://picsum.photos/100/100?random=81" alt="user"><div class="s-text-box"><span class="s-username">web_coder_hub</span><span class="s-reason">New to Instagram</span></div></div><span class="follow-link">Follow</span></div>
+                <div class="suggested-user-row"><div class="s-user-meta"><img src="https://picsum.photos/100/100?random=80" alt="user"><div class="s-text-box"><span class="s-username">ms_dhoni_fan</span></div></div><span class="follow-link">Follow</span></div>
             </div>
         </aside>
     </main>
@@ -144,7 +150,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBrqMn7FrFW3jslaDNM0ui-VW4w6K_3Nmk",
@@ -154,16 +160,27 @@
             messagingSenderId: "599343109250",
             appId: "1:599343109250:web:1306ec63908ba21c54509b"
         };
+        const db = getFirestore(initializeApp(firebaseConfig));
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        // Real-time fetching
+        const containers = document.querySelectorAll(".comments-container");
+        onSnapshot(query(collection(db, "comments"), orderBy("timestamp", "asc")), (snapshot) => {
+            containers.forEach(container => container.innerHTML = ""); 
+            snapshot.forEach((doc) => {
+                containers.forEach(container => {
+                    const p = document.createElement("p");
+                    p.innerHTML = `<strong>User:</strong> ${doc.data().text}`;
+                    container.appendChild(p);
+                });
+            });
+        });
 
+        // Add Comment
         document.querySelectorAll(".comment-post-btn").forEach(btn => {
             btn.addEventListener("click", async (e) => {
                 const input = e.target.previousElementSibling;
                 if (input.value.trim() !== "") {
                     await addDoc(collection(db, "comments"), { text: input.value, timestamp: new Date() });
-                    alert("Comment Saved!");
                     input.value = "";
                 }
             });
