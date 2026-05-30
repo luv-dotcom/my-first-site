@@ -129,16 +129,19 @@
                 if (docSnap.exists()) {
                     const userData = docSnap.data();
                     
+                    // Humne console mein pura data print karwa diya taaki hum spelling dekh sakein
+                    console.log("Firebase ka asli data ye hai:", userData);
+
                     document.getElementById("prof-username").innerText = userData.username || "No Username";
                     document.getElementById("prof-bio").innerText = userData.bio || "No Bio";
 
-                    // SMART CHECK FOR NAME: Agar fullName field hai toh wo dikhaye, nahi toh name field dikhaye
-                    if (userData.fullName) {
-                        document.getElementById("prof-name").innerText = userData.fullName;
-                    } else if (userData.name) {
-                        document.getElementById("prof-name").innerText = userData.name;
+                    // POSSIBILITIES CHECK: Har tarah ki common spelling check karega
+                    const userAsliName = userData.fullName || userData.name || userData.fullname || userData.Name;
+                    
+                    if (userAsliName) {
+                        document.getElementById("prof-name").innerText = userAsliName;
                     } else {
-                        document.getElementById("prof-name").innerText = "Your Name";
+                        document.getElementById("prof-name").innerText = "Spelling Galat Hai Bhai!";
                     }
 
                 } else {
