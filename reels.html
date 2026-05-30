@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reels</title>
+
+<style>
+body {
+  margin: 0;
+  background: black;
+  font-family: Arial;
+  overflow: hidden;
+}
+
+/* Full screen video */
+.video-container {
+  position: relative;
+  height: 100vh;
+  width: 100%;
+}
+
+video {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+}
+
+/* Right side icons */
+.actions {
+  position: absolute;
+  right: 10px;
+  bottom: 80px;
+  color: white;
+  text-align: center;
+}
+
+.actions div {
+  margin: 15px 0;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+/* Bottom text */
+.bottom {
+  position: absolute;
+  bottom: 20px;
+  left: 10px;
+  color: white;
+}
+
+.username {
+  font-weight: bold;
+}
+
+.caption {
+  font-size: 14px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="video-container">
+
+  <!-- Video -->
+  <video src="https://www.w3schools.com/html/mov_bbb.mp4" autoplay loop muted></video>
+
+  <!-- Right side buttons -->
+  <div class="actions">
+    <div onclick="like()">❤️<br><span id="likeCount">120</span></div>
+    <div>💬<br>45</div>
+    <div>📤</div>
+  </div>
+
+  <!-- Bottom info -->
+  <div class="bottom">
+    <div class="username">travel_user</div>
+    <div class="caption">Amazing view 😍</div>
+  </div>
+
+</div>
+
+<script>
+let liked = false;
+let count = 120;
+
+function like(){
+  if(!liked){
+    count++;
+    liked = true;
+  } else {
+    count--;
+    liked = false;
+  }
+  document.getElementById("likeCount").innerText = count;
+}
+</script>
+
+</body>
+</html>
