@@ -1,1 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram - Comments</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Grand+Hotel&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --border-color: #dbdbdb;
+            --text-main: #262626;
+            --text-muted: #8e8e8e;
+            --card-bg: #ffffff;
+            --link-blue: #0095f6;
+        }
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding-top: 60px;
+            padding-bottom: 70px; /* Extra bottom padding typing bar ke liye */
+        }
+
+        a { text-decoration: none; color: inherit; }
+
+        /* --- 📌 TOP NAVIGATION BAR --- */
+        .top-navbar {
+            position: fixed; top: 0; left: 0; width: 100%; height: 60px;
+            background-color: var(--card-bg); border-bottom: 1px solid var(--border-color);
+            display: flex; justify-content: center; align-items: center; z-index: 1000;
+        }
+        .nav-container {
+            width: 100%; max-width: 975px; padding: 0 20px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .logo-text { font-family: 'Grand Hotel', cursive; font-size: 30px; }
+        .nav-icons { display: flex; gap: 22px; align-items: center; }
+        .nav-icons i { font-size: 22px; cursor: pointer; }
+        .nav-profile-pic { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 1px solid black; }
+
+        /* --- 💬 COMMENTS MAIN WRAPPER --- */
+        .comments-container {
+            max-width: 600px;
+            margin: 20px auto 0 auto;
+            padding: 0 20px;
+        }
+
+        .comments-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+        .comments-header i { font-size: 20px; cursor: pointer; }
+        .comments-header h2 { font-size: 18px; font-weight: 600; }
+
+        /* Comments Stream */
+        .comments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .comment-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .comment-left {
+            display: flex;
+            gap: 14px;
+            font-size: 14px;
+            line-height: 18px;
+        }
+        .comment-left img {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .comment-text-block .username {
+            font-weight: 600;
+            margin-right: 6px;
+        }
+
+        .comment-meta {
+            display: flex;
+            gap: 12px;
+            color: var(--text-muted);
+            font-size: 12px;
+            margin-top: 6px;
+        }
+        .comment-meta span { cursor: pointer; }
+
+        .comment-right i {
+            color: var(--text-muted);
+            font-size: 12px;
+            cursor: pointer;
+            padding-top: 4px;
+        }
+        .comment-right i:hover { color: #ff3040; } /* Heart turns red on hover */
+
+        /* --- ⌨️ BOTTOM FIXED TYPING BAR --- */
+        .comment-input-bar {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 600px;
+            background-color: #ffffff;
+            border-top: 1px solid var(--border-color);
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            z-index: 1000;
+        }
+
+        .user-mini-pic {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .comment-input-bar input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 14px;
+            padding: 8px 0;
+        }
+
+        .post-comment-btn {
+            color: var(--link-blue);
+            font-weight: 600;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        /* --- 📱 MOBILE VIEW ADJUSTMENTS --- */
+        @media (max-width: 768px) {
+            .top-navbar { display: none; } /* Mobile par main top navbar hata dete hain space ke liye */
+            body { padding-top: 16px; }
+            .comments-container { padding: 0 16px; }
+            .comment-input-bar { max-width: 100vw; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="top-navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <a href="home.html" class="logo-text">Instagram</a>
+            </div>
+            <div class="nav-icons">
+                <a href="home.html"><i class="fa-regular fa-house"></i></a>
+                <a href="messages.html"><i class="fa-regular fa-paper-plane"></i></a>
+                <a href="create.html"><i class="fa-regular fa-square-plus"></i></a>
+                <a href="explore.html"><i class="fa-regular fa-compass"></i></a>
+                <a href="notifications.html"><i class="fa-regular fa-heart"></i></a>
+                <a href="profile.html"><img src="https://picsum.photos/150/150?random=1" alt="Profile" class="nav-profile-pic"></a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="comments-container">
+        
+        <div class="comments-header">
+            <a href="home.html"><i class="fa-solid fa-arrow-left"></i></a>
+            <h2>Comments</h2>
+        </div>
+
+        <div class="comments-list">
+            
+            <div class="comment-item">
+                <div class="comment-left">
+                    <img src="https://picsum.photos/150/150?random=1" alt="user">
+                    <div class="comment-text-block">
+                        <p><span class="username">my_username</span>Building a premium clone backend with Firebase live system! 💻🔥</p>
+                        <div class="comment-meta">
+                            <span>1h</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="comment-right"></div>
+            </div>
+
+            <div class="comment-item">
+                <div class="comment-left">
+                    <img src="https://picsum.photos/100/100?random=6" alt="user">
+                    <div class="comment-text-block">
+                        <p><span class="username">virat.kohli</span>Bhai coding ekdum bawal chal rhi hai teri! Sahi hai. 🙌</p>
+                        <div class="comment-meta">
+                            <span>45m</span>
+                            <span>12 likes</span>
+                            <span>Reply</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="comment-right">
+                    <i class="fa-regular fa-heart"></i>
+                </div>
+            </div>
+
+            <div class="comment-item">
+                <div class="comment-left">
+                    <img src="https://picsum.photos/100/100?random=5" alt="user">
+                    <div class="comment-text-block">
+                        <p><span class="username">rohit_sharma</span>Next match se pehle mujhe bhi sikha de ye Firebase dynamic database connect karna! 😉</p>
+                        <div class="comment-meta">
+                            <span>20m</span>
+                            <span>4 likes</span>
+                            <span>Reply</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="comment-right">
+                    <i class="fa-regular fa-heart"></i>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="comment-input-bar">
+            <img src="https://picsum.photos/150/150?random=1" class="user-mini-pic" alt="my avatar">
+            <input type="text" placeholder="Add a comment for my_username...">
+            <button class="post-comment-btn">Post</button>
+        </div>
+
+    </main>
+
+</body>
+</html>
