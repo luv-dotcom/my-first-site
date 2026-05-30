@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instagram UI Ultimate Edition</title>
+    <title>Instagram - Home</title>
 
+    <!-- Instagram style font for the Logo Text -->
     <link href="https://fonts.googleapis.com/css2?family=Grand+Hotel&display=swap" rel="stylesheet">
     
+    <!-- Font Awesome for Authentic Instagram Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
@@ -31,7 +33,8 @@
         body {
             background-color: var(--bg-color);
             color: var(--text-main);
-            padding-bottom: 60px; /* Space for mobile bottom nav */
+            padding-bottom: 60px;
+            overflow-x: hidden;
             -webkit-tap-highlight-color: transparent;
         }
 
@@ -41,14 +44,12 @@
             font-size: 30px;
             cursor: pointer;
             user-select: none;
-            transition: opacity var(--transition-speed);
-        }
-        
-        .logo-text:hover {
-            opacity: 0.7;
+            color: var(--text-main);
+            text-decoration: none;
+            display: inline-block;
         }
 
-        /* --- DESKTOP TOP NAVBAR --- */
+        /* --- TOP NAVBAR --- */
         .top-navbar {
             position: fixed;
             top: 0;
@@ -72,10 +73,7 @@
             align-items: center;
         }
 
-        .search-box {
-            position: relative;
-        }
-
+        .search-box { position: relative; }
         .search-box input {
             background-color: #efefef;
             border: none;
@@ -84,13 +82,7 @@
             font-size: 14px;
             width: 268px;
             outline: none;
-            transition: background-color var(--transition-speed);
         }
-
-        .search-box input:focus {
-            background-color: #e2e2e2;
-        }
-
         .search-box i {
             position: absolute;
             left: 12px;
@@ -105,30 +97,26 @@
             gap: 22px;
             align-items: center;
         }
-
+        .nav-icons a {
+            color: var(--text-main);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
         .nav-icons i {
             font-size: 22px;
             cursor: pointer;
-            color: var(--text-main);
             transition: transform var(--transition-speed);
         }
-
         .nav-icons i:hover {
             transform: scale(1.1);
         }
-
         .nav-profile-pic {
             width: 26px;
             height: 26px;
             border-radius: 50%;
             object-fit: cover;
             border: 1px solid var(--border-color);
-            cursor: pointer;
-            transition: transform var(--transition-speed);
-        }
-
-        .nav-profile-pic:hover {
-            transform: scale(1.1);
         }
 
         /* --- MOBILE BOTTOM NAVBAR --- */
@@ -140,24 +128,21 @@
             height: 52px;
             background-color: var(--card-bg);
             border-top: 1px solid var(--border-color);
-            display: none; /* Desktop hidden */
+            display: none; 
             justify-content: space-around;
             align-items: center;
             z-index: 1000;
         }
-
+        .bottom-navbar a {
+            color: var(--text-main);
+            text-decoration: none;
+        }
         .bottom-navbar i {
             font-size: 22px;
             cursor: pointer;
-            color: var(--text-main);
-            transition: transform 0.1s;
         }
 
-        .bottom-navbar i:active {
-            transform: scale(0.85); /* Mobile tap feedback */
-        }
-
-        /* --- MAIN CONTENT LAYOUT --- */
+        /* --- HOME FEED LAYOUT --- */
         .main-layout {
             max-width: 935px;
             margin: 85px auto 0 auto;
@@ -167,12 +152,6 @@
             padding: 0 20px;
         }
 
-        /* --- FEED SECTION (LEFT) --- */
-        .feed-area {
-            width: 100%;
-        }
-
-        /* Stories Wrapper */
         .stories-wrapper {
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -182,13 +161,8 @@
             gap: 16px;
             overflow-x: auto;
             margin-bottom: 24px;
-            scroll-behavior: smooth;
-            -webkit-overflow-scrolling: touch;
         }
-
-        .stories-wrapper::-webkit-scrollbar {
-            display: none; /* Clean look */
-        }
+        .stories-wrapper::-webkit-scrollbar { display: none; }
 
         .story-item {
             display: flex;
@@ -197,39 +171,20 @@
             font-size: 12px;
             cursor: pointer;
             min-width: 66px;
-            transition: transform var(--transition-speed);
         }
-
-        .story-item:hover {
-            transform: scale(1.03);
-        }
-
         .story-ring {
             width: 66px;
             height: 66px;
             border-radius: 50%;
-            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            background: linear-gradient(45deg, #f09433, #dc2743, #bc1888);
             padding: 2.5px;
             display: flex;
             justify-content: center;
             align-items: center;
             margin-bottom: 6px;
         }
-
         .story-ring img {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid var(--card-bg);
-        }
-
-        .story-item span {
-            max-width: 65px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            color: var(--text-main);
+            width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid var(--card-bg);
         }
 
         /* Post Card */
@@ -239,426 +194,149 @@
             border-radius: 8px;
             margin-bottom: 24px;
         }
-
         .post-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 14px 16px;
+            display: flex; justify-content: space-between; align-items: center; padding: 14px 16px;
         }
+        .post-user { display: flex; align-items: center; gap: 10px; }
+        .post-user img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
+        .post-main-img img { width: 100%; height: auto; display: block; }
+        .post-actions-bar { display: flex; justify-content: space-between; padding: 12px 16px; }
+        .action-left-group { display: flex; gap: 16px; }
+        .post-actions-bar i { font-size: 24px; cursor: pointer; }
+        .post-actions-bar a { color: var(--text-main); text-decoration: none; }
+        .likes-display { font-size: 14px; font-weight: 600; padding: 0 16px; margin-bottom: 6px; }
+        .caption-display { font-size: 14px; padding: 0 16px; margin-bottom: 8px; }
+        .caption-user { font-weight: 600; margin-right: 6px; }
+        .comment-section-input { border-top: 1px solid #efefef; display: flex; align-items: center; padding: 14px 16px; }
+        .comment-section-input input { flex: 1; border: none; outline: none; }
+        .comment-section-input button { border: none; background: none; color: var(--link-color); font-weight: 600; cursor: pointer; }
 
-        .post-user {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-        }
+        /* Sidebar Right */
+        .sidebar-area { display: flex; flex-direction: column; padding-top: 10px; }
+        .sidebar-self-profile { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+        .sidebar-self-profile img { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; }
+        .suggested-user-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; }
+        .suggested-user-info { display: flex; align-items: center; gap: 12px; }
+        .suggested-user-info img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
+        .suggested-meta span { display: block; font-size: 12px; color: var(--text-muted); }
 
-        .post-user img {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        .post-username {
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .post-header i {
-            cursor: pointer;
-            color: var(--text-main);
-        }
-
-        .post-main-img img {
-            width: 100%;
-            height: auto;
-            display: block;
-        }
-
-        .post-actions-bar {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 16px 6px 16px;
-        }
-
-        .action-left-group {
-            display: flex;
-            gap: 16px;
-        }
-
-        .post-actions-bar i {
-            font-size: 24px;
-            cursor: pointer;
-            transition: transform 0.1s ease, color var(--transition-speed);
-        }
-
-        .post-actions-bar i:hover {
-            transform: scale(1.1);
-        }
-        
-        /* Interactive colors on action hover */
-        .fa-heart:hover { color: #ed4956; }
-        .fa-comment:hover { color: #8e8e8e; }
-        .fa-paper-plane:hover { color: #1da1f2; }
-
-        .likes-display {
-            font-size: 14px;
-            font-weight: 600;
-            padding: 0 16px;
-            margin-bottom: 6px;
-            cursor: pointer;
-        }
-
-        .caption-display {
-            font-size: 14px;
-            padding: 0 16px;
-            margin-bottom: 8px;
-            line-height: 18px;
-        }
-
-        .caption-user {
-            font-weight: 600;
-            margin-right: 6px;
-            cursor: pointer;
-        }
-
-        .view-comments-link {
-            font-size: 14px;
-            color: var(--text-muted);
-            padding: 0 16px;
-            margin-bottom: 6px;
-            cursor: pointer;
-        }
-
-        .post-date {
-            font-size: 10px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            padding: 0 16px;
-            margin-bottom: 14px;
-        }
-
-        .comment-section-input {
-            border-top: 1px solid #efefef;
-            display: flex;
-            align-items: center;
-            padding: 14px 16px;
-        }
-
-        .comment-section-input i {
-            font-size: 24px;
-            margin-right: 16px;
-            cursor: pointer;
-        }
-
-        .comment-section-input input {
-            flex: 1;
-            border: none;
-            outline: none;
-            font-size: 14px;
-        }
-
-        .comment-section-input button {
-            border: none;
-            background: none;
-            color: var(--link-color);
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 14px;
-            transition: opacity var(--transition-speed);
-        }
-
-        .comment-section-input button:hover {
-            opacity: 0.6;
-        }
-
-        /* --- SIDEBAR SECTION (RIGHT) --- */
-        .sidebar-area {
-            display: flex;
-            flex-direction: column;
-            padding-top: 10px;
-        }
-
-        .sidebar-self-profile {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-
-        .self-profile-info {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            cursor: pointer;
-        }
-
-        .self-profile-info img {
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        .self-meta .self-fullname {
-            font-size: 14px;
-            color: var(--text-muted);
-        }
-
-        .action-link-btn {
-            color: var(--link-color);
-            font-size: 12px;
-            font-weight: 600;
-            border: none;
-            background: none;
-            cursor: pointer;
-            transition: color var(--transition-speed);
-        }
-
-        .action-link-btn:hover {
-            color: #00376b;
-        }
-
-        .suggestions-title-bar {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 12px;
-        }
-
-        .suggestions-title-bar span {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-muted);
-        }
-
-        .suggestions-title-bar a {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-main);
-            text-decoration: none;
-        }
-
-        .suggested-user-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 8px 0;
-        }
-
-        .suggested-user-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            cursor: pointer;
-        }
-
-        .suggested-user-info img {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        .suggested-meta span {
-            display: block;
-            font-size: 12px;
-            color: var(--text-muted);
-        }
-
-        /* --- RESPONSIVE MEDIA BREAKPOINTS --- */
-        
-        /* Laptop/Tablet Screens (Sidebar hidden) */
+        /* --- RESPONSIVE BREAKPOINTS --- */
         @media (max-width: 1000px) {
-            .main-layout {
-                grid-template-columns: 1fr;
-                max-width: 600px;
-            }
-            .sidebar-area {
-                display: none;
-            }
+            .main-layout { grid-template-columns: 1fr; max-width: 600px; }
+            .sidebar-area { display: none; }
         }
 
-        /* Mobile Screens (Pure App View) */
         @media (max-width: 650px) {
-            body {
-                background-color: var(--card-bg);
-            }
-            .top-navbar .search-box, 
-            .top-navbar .nav-icons {
-                display: none;
-            }
-            .bottom-navbar {
-                display: flex;
-            }
-            .main-layout {
-                margin-top: 60px;
-                padding: 0;
-            }
-            .stories-wrapper {
-                border-radius: 0;
-                border-left: none;
-                border-right: none;
-                border-top: none;
-                padding: 12px 10px;
-                margin-bottom: 0;
-            }
-            .post-container {
-                border-radius: 0;
-                border-left: none;
-                border-right: none;
-                border-top: 1px solid var(--border-color);
-                margin-bottom: 15px;
-            }
+            body { background-color: var(--card-bg); }
+            .top-navbar .search-box, .top-navbar .nav-icons { display: none; }
+            .bottom-navbar { display: flex; }
+            .main-layout { margin-top: 60px; padding: 0; }
+            .stories-wrapper { border-radius: 0; border-left: none; border-right: none; border-top: none; }
+            .post-container { border-radius: 0; border-left: none; border-right: none; }
         }
     </style>
 </head>
 <body>
 
+    <!-- TOP NAVBAR -->
     <nav class="top-navbar">
         <div class="nav-container">
             <div class="logo">
-                <div class="logo-text">Instagram</div>
+                <a href="home.html" class="logo-text">Instagram</a>
             </div>
             <div class="search-box">
                 <i class="fa-solid fa-magnifying-glass"></i>
                 <input type="text" placeholder="Search">
             </div>
             <div class="nav-icons">
-                <i class="fa-solid fa-house"></i>
-                <i class="fa-regular fa-paper-plane"></i>
-                <i class="fa-regular fa-square-plus"></i>
-                <i class="fa-regular fa-compass"></i>
-                <i class="fa-regular fa-heart"></i>
+                <a href="home.html"><i class="fa-solid fa-house"></i></a>
+                <!-- Messages link -->
+                <a href="messages.html"><i class="fa-regular fa-paper-plane"></i></a>
+                <a href="#"><i class="fa-regular fa-square-plus"></i></a>
+                <a href="#"><i class="fa-regular fa-compass"></i></a>
+                <a href="#"><i class="fa-regular fa-heart"></i></a>
                 <img src="https://picsum.photos/150/150?random=1" alt="Profile" class="nav-profile-pic">
             </div>
         </div>
     </nav>
 
+    <!-- FEED MAIN CONTENT -->
     <main class="main-layout">
-        
         <section class="feed-area">
-            
+            <!-- Stories -->
             <div class="stories-wrapper">
                 <div class="story-item">
-                    <div class="story-ring">
-                        <img src="https://picsum.photos/150/150?random=2" alt="user">
-                    </div>
+                    <div class="story-ring"><img src="https://picsum.photos/150/150?random=2"></div>
                     <span>rohit_sharma</span>
                 </div>
                 <div class="story-item">
-                    <div class="story-ring">
-                        <img src="https://picsum.photos/150/150?random=3" alt="user">
-                    </div>
+                    <div class="story-ring"><img src="https://picsum.photos/150/150?random=3"></div>
                     <span>ananya_p</span>
                 </div>
                 <div class="story-item">
-                    <div class="story-ring">
-                        <img src="https://picsum.photos/150/150?random=4" alt="user">
-                    </div>
+                    <div class="story-ring"><img src="https://picsum.photos/150/150?random=4"></div>
                     <span>tech_guru</span>
-                </div>
-                <div class="story-item">
-                    <div class="story-ring">
-                        <img src="https://picsum.photos/150/150?random=5" alt="user">
-                    </div>
-                    <span>riya_sen</span>
-                </div>
-                <div class="story-item">
-                    <div class="story-ring">
-                        <img src="https://picsum.photos/150/150?random=6" alt="user">
-                    </div>
-                    <span>travel_vlog</span>
                 </div>
             </div>
 
+            <!-- Post Unit -->
             <div class="post-container">
                 <div class="post-header">
                     <div class="post-user">
-                        <img src="https://picsum.photos/150/150?random=3" alt="User profile">
+                        <img src="https://picsum.photos/150/150?random=3">
                         <span class="post-username">ananya_p</span>
                     </div>
                     <i class="fa-solid fa-ellipsis"></i>
                 </div>
-                
                 <div class="post-main-img">
-                    <img src="https://picsum.photos/800/600?random=10" alt="Feed Post">
+                    <img src="https://picsum.photos/800/600?random=10">
                 </div>
-
                 <div class="post-actions-bar">
                     <div class="action-left-group">
                         <i class="fa-regular fa-heart"></i>
                         <i class="fa-regular fa-comment"></i>
-                        <i class="fa-regular fa-paper-plane"></i>
+                        <!-- Post DM click goes to messages.html -->
+                        <a href="messages.html"><i class="fa-regular fa-paper-plane"></i></a>
                     </div>
                     <i class="fa-regular fa-bookmark"></i>
                 </div>
-
                 <div class="likes-display">3,412 likes</div>
-                <div class="caption-display">
-                    <span class="caption-user">ananya_p</span> Weekend vibes done right! ☕🍂 #aesthetic #morning
-                </div>
-                <div class="view-comments-link">View all 89 comments</div>
-                <div class="post-date">1 Day Ago</div>
-
-                <div class="comment-section-input">
-                    <i class="fa-regular fa-face-smile"></i>
-                    <input type="text" placeholder="Add a comment...">
-                    <button type="button">Post</button>
-                </div>
+                <div class="caption-display"><span class="caption-user">ananya_p</span> Weekend vibes done right! ☕🍂</div>
             </div>
-
         </section>
 
+        <!-- Sidebar Right -->
         <aside class="sidebar-area">
             <div class="sidebar-self-profile">
-                <div class="self-profile-info">
-                    <img src="https://picsum.photos/150/150?random=1" alt="My Profile">
-                    <div class="self-meta">
+                <div class="suggested-user-info">
+                    <img src="https://picsum.photos/150/150?random=1">
+                    <div>
                         <div class="post-username">my_username</div>
-                        <div class="self-fullname">Your Name</div>
+                        <div class="suggested-meta"><span>Your Name</span></div>
                     </div>
                 </div>
                 <button class="action-link-btn">Switch</button>
             </div>
-
-            <div class="suggestions-title-bar">
-                <span>Suggestions for you</span>
-                <a href="#">See All</a>
-            </div>
-
             <div class="suggested-user-row">
                 <div class="suggested-user-info">
-                    <img src="https://picsum.photos/150/150?random=20" alt="Suggestion">
-                    <div class="suggested-meta">
+                    <img src="https://picsum.photos/150/150?random=20">
+                    <div>
                         <div class="post-username">kabir_singh</div>
-                        <span>Followed by tech_guru</span>
-                    </div>
-                </div>
-                <button class="action-link-btn">Follow</button>
-            </div>
-
-            <div class="suggested-user-row">
-                <div class="suggested-user-info">
-                    <img src="https://picsum.photos/150/150?random=21" alt="Suggestion">
-                    <div class="suggested-meta">
-                        <div class="post-username">sneha_art</div>
-                        <span>Popular</span>
+                        <div class="suggested-meta"><span>Followed by tech_guru</span></div>
                     </div>
                 </div>
                 <button class="action-link-btn">Follow</button>
             </div>
         </aside>
-
     </main>
 
+    <!-- MOBILE BOTTOM NAVBAR -->
     <div class="bottom-navbar">
-        <i class="fa-solid fa-house"></i>
-        <i class="fa-solid fa-magnifying-glass"></i>
-        <i class="fa-regular fa-square-plus"></i>
-        <i class="fa-solid fa-clapperboard"></i>
-        <img src="https://picsum.photos/150/150?random=1" alt="Profile" style="width: 24px; height: 24px; border-radius: 50%;">
+        <a href="home.html"><i class="fa-solid fa-house"></i></a>
+        <a href="#"><i class="fa-solid fa-magnifying-glass"></i></a>
+        <a href="#"><i class="fa-regular fa-square-plus"></i></a>
+        <a href="#"><i class="fa-solid fa-clapperboard"></i></a>
+        <a href="messages.html"><i class="fa-regular fa-paper-plane"></i></a>
     </div>
 
 </body>
