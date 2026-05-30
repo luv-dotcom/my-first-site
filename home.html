@@ -1,69 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Home</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Grand+Hotel&family=Roboto&display=swap" rel="stylesheet">
-
 <style>
-body { margin:0; font-family:Roboto, sans-serif; background:#fafafa; }
-
-.header {
-  display:flex;
-  justify-content:space-between;
-  padding:10px;
-  border-bottom:1px solid #ddd;
-  background:white;
-}
-
-.logo {
-  font-family:'Grand Hotel',cursive;
-  font-size:28px;
-}
-
-.stories {
-  display:flex;
-  overflow-x:auto;
-  padding:10px;
-  background:white;
-}
-
-.story {
-  text-align:center;
-  margin-right:10px;
-}
-
-.story img {
-  width:60px;
-  height:60px;
-  border-radius:50%;
-  border:2px solid red;
-}
-
-.post {
-  margin-top:10px;
-  background:white;
-}
-
-.post img {
-  width:100%;
-  max-width: 500px;
-  display: block;
-  margin: 0 auto;
-}
-
-.logout {
-  position:fixed;
-  top:10px;
-  right:10px;
-  background:red;
-  color:white;
-  padding:5px 10px;
-  cursor:pointer;
-  z-index: 10;
-}
+body{margin:0;font-family:sans-serif;background:#fafafa}
+.header{padding:10px;border-bottom:1px solid #ddd;background:#fff}
+.stories{display:flex;overflow:auto;padding:10px;background:#fff}
+.story img{width:60px;border-radius:50%;margin-right:10px}
+.post{margin-top:10px;background:#fff}
+.post img{width:100%}
+.nav{position:fixed;bottom:0;width:100%;display:flex;justify-content:space-around;background:#fff;border-top:1px solid #ddd;padding:10px}
+.nav div{cursor:pointer}
+.logout{position:fixed;top:10px;right:10px;background:red;color:#fff;padding:5px}
 </style>
 </head>
 
@@ -71,36 +21,40 @@ body { margin:0; font-family:Roboto, sans-serif; background:#fafafa; }
 
 <div class="logout" onclick="logout()">Logout</div>
 
-<div class="header">
-  <div class="logo">Instagram</div>
-</div>
+<div class="header"><b>Instagram</b></div>
 
 <div class="stories">
-  <div class="story">
-    <img src="https://i.pravatar.cc/100?img=1" alt="user">
-    <p>You</p>
-  </div>
-  <div class="story">
-    <img src="https://i.pravatar.cc/100?img=2" alt="user">
-    <p>Rahul</p>
-  </div>
+  <div class="story"><img src="https://i.pravatar.cc/100?img=1"></div>
+  <div class="story"><img src="https://i.pravatar.cc/100?img=2"></div>
 </div>
 
 <div class="post">
-  <img src="https://picsum.photos/400" alt="post">
-  <p style="text-align:center; padding:10px"><b>user</b> Nice post 😍</p>
+  <img src="https://picsum.photos/400">
+  <p style="padding:10px"><b>user</b> Nice post 😍</p>
+</div>
+
+<!-- Bottom Navigation -->
+<div class="nav">
+  <div onclick="goHome()">🏠</div>
+  <div onclick="goReels()">🎬</div>
 </div>
 
 <script>
-// 🔒 login check
-if(localStorage.getItem("loggedIn") !== "true"){
-  window.location.href = "index.html"; /* Agar user login nahi hai, toh wapas login page par bhejo */
+if(localStorage.getItem("loggedIn")!=="true"){
+  window.location.href="index.html";
 }
 
-// logout
 function logout(){
   localStorage.removeItem("loggedIn");
-  window.location.href = "index.html";
+  window.location.href="index.html";
+}
+
+function goReels(){
+  window.location.href="reels.html";
+}
+
+function goHome(){
+  window.location.href="home.html";
 }
 </script>
 
