@@ -65,7 +65,7 @@
             <div class="avatar-section"><img src="https://picsum.photos/150/150?random=1" alt="My Big Avatar"></div>
             <div class="info-section">
                 <div class="username-row">
-                    <h2 class="profile-username">my_username</h2>
+                    <h2 class="profile-username" id="prof-username">Loading...</h2>
                     <button class="edit-profile-btn">Edit Profile</button>
                     <a href="settings.html"><i class="fa-solid fa-gear" style="font-size: 20px; cursor: pointer; color: #262626;"></i></a>
                 </div>
@@ -75,8 +75,8 @@
                     <li><span>189</span> following</li>
                 </ul>
                 <div class="bio-row">
-                    <span class="full-name">Your Name</span>
-                    <p>Developer & Creator 💻🔥<br>Building a premium clone backend with Firebase live system!</p>
+                    <span class="full-name" id="prof-name">Loading Name...</span>
+                    <p id="prof-bio">Loading Bio...</p>
                     <a href="https://github.com" target="_blank" class="bio-link">github.com/your-repo</a>
                 </div>
             </div>
@@ -108,7 +108,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-        import { getFirestore } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+        // Humne data fetch karne ke liye doc aur getDoc import kiya hai
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
         
         const firebaseConfig = {
             apiKey: "AIzaSyBrqMn7FrFW3jslaDNM0ui-VW4w6K_3Nmk",
@@ -121,7 +122,30 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         
-        console.log("Firebase initialized in profile page!");
+        // Yeh function Firebase se data lekar aayega
+        async function fetchProfileData() {
+            try {
+                // "users" collection ke andar jo humne "rahul123" id banayi thi use target kiya
+                const docRef = doc(db, "users", "rahul123");
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const userData = docSnap.data();
+                    
+                    // Ab JavaScript se HTML badal rahe hain
+                    document.getElementById("prof-username").innerText = userData.username;
+                    document.getElementById("prof-name").innerText = userData.fullName;
+                    document.getElementById("prof-bio").innerText = userData.bio;
+                } else {
+                    console.log("Firebase mein aisa koi user nahi mila!");
+                }
+            } catch (error) {
+                console.error("Data laane mein dikkat hui: ", error);
+            }
+        }
+
+        // Page load hote hi function ko call kar diya
+        fetchProfileData();
     </script>
 </body>
 </html>
