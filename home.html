@@ -213,7 +213,8 @@
         };
         const db = getFirestore(initializeApp(firebaseConfig));
 
-        let currentUsername = "luv_5";
+        // UPGRADE: LocalStorage se logged-in user dynamically uthayega, agar nahi mila to fallback "luv_5" chalega
+        let currentUsername = localStorage.getItem("active_user") || "luv_5";
         let currentProfilePic = "https://picsum.photos/150/150?random=1";
         let latestStoryImg = null;
         let storyTimer = null;
@@ -222,12 +223,13 @@
         // --- FETCH USER DETAILS & SYNC IMAGES ---
         async function syncUserData() {
             try {
-                const docRef = doc(db, "users", "luv_5");
+                // UPGRADE: hardcoded string ki jagah variable use kiya taaki real-time data aaye
+                const docRef = doc(db, "users", currentUsername);
                 const docSnap = await getDoc(docRef);
 
                 if (docSnap.exists()) {
                     const userData = docSnap.data();
-                    currentUsername = userData.username || "luv_5";
+                    currentUsername = userData.username || currentUsername;
                     currentProfilePic = userData.profilePic || currentProfilePic;
 
                     document.getElementById("top-nav-avatar").src = currentProfilePic;
@@ -236,14 +238,12 @@
                     document.getElementById("sidebar-avatar").src = currentProfilePic;
                     document.getElementById("sidebar-username").innerText = currentUsername;
 
-                    let finalName = "User";
-                    for (let key in userData) {
-                        if (key !== "username" && key !== "bio" && key !== "profilePic" && key !== "gender") {
-                            finalName = userData[key];
-                            break;
-                        }
-                    }
+                    let finalName = userData.name || "User";
                     document.getElementById("sidebar-fullname").innerText = finalName;
+                } else {
+                    // Agar database me store nahi hai to generic profile update
+                    document.getElementById("sidebar-username").innerText = currentUsername;
+                    document.getElementById("sidebar-fullname").innerText = "Instagram User";
                 }
             } catch(err) {
                 console.log("Error syncing user data: ", err);
@@ -260,7 +260,8 @@
 
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
-                    if (data.userId === "luv_5") {
+                    // UPGRADE: dynamic session user ki storage story access ho rhi hai
+                    if (data.userId === currentUsername) {
                         matchedStories.push(data);
                     }
                 });
@@ -364,7 +365,7 @@
 
         searchInput.addEventListener("input", async (e) => {
             const searchText = e.target.value.trim().toLowerCase();
-            resultsDropdown.innerHTML = ""; // Purane results clean karein
+            resultsDropdown.innerHTML = ""; 
 
             if (searchText === "") {
                 resultsDropdown.style.display = "none";
@@ -372,17 +373,13 @@
             }
 
             try {
-                // Firebase ke 'users' collection se data fetch karna
                 const querySnapshot = await getDocs(collection(db, "users"));
                 let matchCount = 0;
 
                 querySnapshot.forEach((docSnap) => {
                     const userData = docSnap.data();
-                    
-                    // Username nikalna: check field or doc.id
                     const uName = (userData.username || docSnap.id).toLowerCase();
                     
-                    // Name nikalna dynamic keys se
                     let fullName = "";
                     for (let key in userData) {
                         if (key !== "username" && key !== "bio" && key !== "profilePic" && key !== "gender") {
@@ -391,7 +388,6 @@
                         }
                     }
 
-                    // Agar typed text username ya fullname se match kare
                     if (uName.includes(searchText) || fullName.includes(searchText)) {
                         matchCount++;
                         
@@ -405,11 +401,9 @@
                             </div>
                         `;
 
-                        // Hover Effects
                         userRow.addEventListener("mouseenter", () => userRow.style.backgroundColor = "#fafafa");
                         userRow.addEventListener("mouseleave", () => userRow.style.backgroundColor = "transparent");
 
-                        // Redirect Rule on Click
                         userRow.addEventListener("click", () => {
                             const clickedUser = userData.username || docSnap.id;
                             if (clickedUser === currentUsername) {
@@ -435,7 +429,6 @@
             }
         });
 
-        // Dropdown ko band karna agar user side me click kare
         document.addEventListener("click", (e) => {
             if (!document.querySelector(".search-engine-box").contains(e.target)) {
                 resultsDropdown.style.display = "none";
