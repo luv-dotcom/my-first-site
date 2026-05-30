@@ -21,11 +21,11 @@
         .file-label { font-size: 12px; color: var(--link-color); font-weight: 600; cursor: pointer; }
         #profile-pic-input { display: none; }
         .signup-btn { width: 100%; background: var(--link-color); color: white; border: none; padding: 8px; border-radius: 4px; font-weight: 600; cursor: pointer; }
-        .signup-btn:disabled { background: #b2dffc; }
+        .signup-btn:disabled { background: #b2dffc; cursor: not-allowed; }
         .error-message { color: #ed4956; font-size: 13px; text-align: center; margin-top: 10px; display: none; }
         .success-message { color: #2ed573; font-size: 13px; text-align: center; margin-top: 10px; display: none; }
         .login-link-box { width: 100%; max-width: 350px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; text-align: center; margin-top: 10px; font-size: 14px; }
-        .login-link-box a { color: var(--link-color); font-weight: 600; }
+        .login-link-box a { color: var(--link-color); font-weight: 600; text-decoration: none; }
     </style>
 </head>
 <body>
@@ -79,6 +79,9 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+
+        // 🔥 CRITICAL SESSION FIX: Signup page par aate hi pehle se save kisi purane session ko uda do
+        localStorage.removeItem("active_user");
 
         let base64ProfilePic = "";
 
@@ -140,6 +143,8 @@
 
                 successAlert.innerText = "Account created! Redirecting...";
                 successAlert.style.display = "block";
+                
+                // Naya username localStorage me set karo aur aage badho
                 localStorage.setItem("active_user", username);
 
                 setTimeout(() => window.location.href = "home.html", 1500);
