@@ -1,41 +1,85 @@
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram</title>
+    <link href="https://fonts.googleapis.com/css2?family=Grand+Hotel&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ... (Tumhara CSS waisa hi hai, maine bas code saaf rakha hai) ... */
+        :root { --bg-color: #fafafa; --border-color: #dbdbdb; --text-main: #262626; --text-muted: #8e8e8e; --card-bg: #ffffff; --link-color: #0095f6; --story-ring: linear-gradient(45deg, #fbc531, #c23616, #9c88ff); }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding-top: 60px; padding-bottom: 60px; }
+        a { text-decoration: none; color: inherit; }
+        .top-navbar { position: fixed; top: 0; left: 0; width: 100%; height: 60px; background-color: var(--card-bg); border-bottom: 1px solid var(--border-color); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .nav-container { width: 100%; max-width: 975px; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; }
+        .logo-text { font-family: 'Grand Hotel', cursive; font-size: 30px; cursor: pointer; }
+        .nav-icons { display: flex; gap: 22px; align-items: center; }
+        .main-workspace { max-width: 935px; margin: 30px auto 0 auto; display: flex; gap: 28px; padding: 0 20px; }
+        .feed-section { flex: 1; max-width: 614px; display: flex; flex-direction: column; gap: 24px; }
+        .post-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; display: flex; flex-direction: column; }
+        .comment-input-area { border-top: 1px solid var(--border-color); padding: 14px; display: flex; justify-content: space-between; align-items: center; }
+        .comment-input-area input { width: 90%; border: none; outline: none; font-size: 14px; background: transparent; }
+        .comment-post-btn { color: var(--link-color); font-weight: 600; border: none; background: none; cursor: pointer; font-size: 14px; }
+    </style>
+</head>
+<body>
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyBrqMn7FrFW3jslaDNM0ui-VW4w6K_3Nmk",
-    authDomain: "insta-clone-863ae.firebaseapp.com",
-    projectId: "insta-clone-863ae",
-    storageBucket: "insta-clone-863ae.firebasestorage.app",
-    messagingSenderId: "599343109250",
-    appId: "1:599343109250:web:1306ec63908ba21c54509b",
-    measurementId: "G-6SH8CWPWNC"
-  };
+    <nav class="top-navbar">
+        <div class="nav-container">
+            <h1 class="logo-text">Instagram</h1>
+            <div class="nav-icons"><i class="fa-solid fa-house"></i><i class="fa-regular fa-paper-plane"></i></div>
+        </div>
+    </nav>
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+    <main class="main-workspace">
+        <section class="feed-section">
+            <article class="post-card">
+                <div class="post-image-box"><img src="https://picsum.photos/600/600?random=50" alt="Post"></div>
+                <div class="comment-input-area">
+                    <input type="text" class="comment-input" placeholder="Add a comment...">
+                    <button class="comment-post-btn">Post</button>
+                </div>
+            </article>
+            <article class="post-card">
+                <div class="post-image-box"><img src="https://picsum.photos/600/600?random=51" alt="Post"></div>
+                <div class="comment-input-area">
+                    <input type="text" class="comment-input" placeholder="Add a comment...">
+                    <button class="comment-post-btn">Post</button>
+                </div>
+            </article>
+        </section>
+    </main>
 
-  // Saare "Post" buttons ko select kiya
-  const postButtons = document.querySelectorAll(".comment-post-btn");
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
-  postButtons.forEach((btn) => {
-    btn.addEventListener("click", async (e) => {
-      // Us post ke input box ko dhoonda
-      const inputField = e.target.previousElementSibling;
-      const commentText = inputField.value;
+        const firebaseConfig = {
+            apiKey: "AIzaSyBrqMn7FrFW3jslaDNM0ui-VW4w6K_3Nmk",
+            authDomain: "insta-clone-863ae.firebaseapp.com",
+            projectId: "insta-clone-863ae",
+            storageBucket: "insta-clone-863ae.firebasestorage.app",
+            messagingSenderId: "599343109250",
+            appId: "1:599343109250:web:1306ec63908ba21c54509b"
+        };
 
-      if (commentText.trim() === "") return alert("Kuch toh likho!");
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-      try {
-        await addDoc(collection(db, "comments"), {
-          text: commentText,
-          timestamp: new Date().toISOString()
+        // Har post ke button ko active kiya
+        document.querySelectorAll(".comment-post-btn").forEach(btn => {
+            btn.addEventListener("click", async (e) => {
+                const input = e.target.previousElementSibling; // Button ke pehle wala input
+                const text = input.value;
+                if(text) {
+                    await addDoc(collection(db, "comments"), { text: text, date: new Date().toString() });
+                    alert("Saved!");
+                    input.value = "";
+                }
+            });
         });
-        alert("Comment save ho gaya!");
-        inputField.value = ""; // Input box saaf kar diya
-      } catch (error) {
-        alert("Error: " + error.message);
-      }
-    });
-  });
-</script>
+    </script>
+</body>
+</html>
