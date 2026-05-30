@@ -10,83 +10,61 @@
         :root { --bg-color: #fafafa; --border-color: #dbdbdb; --text-main: #262626; --text-muted: #8e8e8e; --card-bg: #ffffff; --link-color: #0095f6; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-main); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-        
-        .signup-container { width: 100%; max-width: 350px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 30px 40px; display: flex; flex-direction: column; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .logo-text { font-family: 'Grand Hotel', cursive; font-size: 50px; margin-bottom: 15px; cursor: pointer; }
-        .subtitle { color: var(--text-muted); font-weight: 600; font-size: 16px; text-align: center; margin-bottom: 20px; line-height: 20px; }
-        
-        .form-group { width: 100%; margin-bottom: 12px; position: relative; }
-        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px 12px; background: #fafafa; border: 1px solid var(--border-color); border-radius: 4px; outline: none; font-size: 14px; color: var(--text-main); }
-        .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: #a8a8a8; }
-        .form-group textarea { resize: none; height: 60px; font-family: inherit; }
-        
-        /* Avatar Upload Styling */
-        .avatar-upload-box { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 15px; width: 100%; }
-        .avatar-preview { width: 80px; height: 80px; border-radius: 50%; border: 1px solid var(--border-color); object-fit: cover; background: #eee; }
-        .file-label { font-size: 13px; color: var(--link-color); font-weight: 600; cursor: pointer; }
-        .file-label:hover { color: #0074cc; }
+        .signup-container { width: 100%; max-width: 350px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px 30px; display: flex; flex-direction: column; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .logo-text { font-family: 'Grand Hotel', cursive; font-size: 50px; margin-bottom: 10px; }
+        .subtitle { color: var(--text-muted); font-weight: 600; font-size: 14px; text-align: center; margin-bottom: 15px; }
+        .form-group { width: 100%; margin-bottom: 10px; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px; background: #fafafa; border: 1px solid var(--border-color); border-radius: 4px; outline: none; font-size: 14px; }
+        .form-group textarea { resize: none; height: 50px; }
+        .avatar-upload-box { display: flex; flex-direction: column; align-items: center; gap: 5px; margin-bottom: 10px; }
+        .avatar-preview { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color); }
+        .file-label { font-size: 12px; color: var(--link-color); font-weight: 600; cursor: pointer; }
         #profile-pic-input { display: none; }
-
-        .signup-btn { width: 100%; background: var(--link-color); color: white; border: none; padding: 8px; border-radius: 4px; font-weight: 600; font-size: 14px; cursor: pointer; margin-top: 8px; transition: background 0.2s; }
-        .signup-btn:disabled { background: #b2dffc; cursor: not-allowed; }
-        
-        .error-message { color: #ed4956; font-size: 13px; text-align: center; margin-top: 10px; font-weight: 500; display: none; width: 100%; }
-        .success-message { color: #2ed573; font-size: 13px; text-align: center; margin-top: 10px; font-weight: 500; display: none; width: 100%; }
-
-        .login-link-box { width: 100%; max-width: 350px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; text-align: center; margin-top: 10px; font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .login-link-box a { color: var(--link-color); font-weight: 600; text-decoration: none; }
+        .signup-btn { width: 100%; background: var(--link-color); color: white; border: none; padding: 8px; border-radius: 4px; font-weight: 600; cursor: pointer; }
+        .signup-btn:disabled { background: #b2dffc; }
+        .error-message { color: #ed4956; font-size: 13px; text-align: center; margin-top: 10px; display: none; }
+        .success-message { color: #2ed573; font-size: 13px; text-align: center; margin-top: 10px; display: none; }
+        .login-link-box { width: 100%; max-width: 350px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; text-align: center; margin-top: 10px; font-size: 14px; }
+        .login-link-box a { color: var(--link-color); font-weight: 600; }
     </style>
 </head>
 <body>
 
-    <div style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+    <div>
         <div class="signup-container">
             <h1 class="logo-text">Instagram</h1>
-            <p class="subtitle">Sign up to see photos and videos from your friends.</p>
+            <p class="subtitle">Sign up to see photos from your friends.</p>
             
             <form id="signup-form" style="width: 100%;">
-                
                 <div class="avatar-upload-box">
-                    <img src="https://picsum.photos/150/150?random=500" alt="Avatar Preview" id="avatar-preview-img" class="avatar-preview">
-                    <label for="profile-pic-input" class="file-label">Add Profile Photo (Optional)</label>
+                    <img src="https://api.dicebear.com/7.x/initials/svg?seed=Insta" alt="Avatar Preview" id="avatar-preview-img" class="avatar-preview">
+                    <label for="profile-pic-input" class="file-label">Choose Photo (Optional)</label>
                     <input type="file" id="profile-pic-input" accept="image/*">
                 </div>
 
-                <div class="form-group">
-                    <input type="text" id="username" placeholder="Username" required autocomplete="off">
-                </div>
-
-                <div class="form-group">
-                    <input type="text" id="fullname" placeholder="Full Name" required autocomplete="off">
-                </div>
-
-                <div class="form-group">
-                    <textarea id="bio" placeholder="Bio (Tell something about yourself...)"></textarea>
-                </div>
-
+                <div class="form-group"><input type="email" id="signup-email" placeholder="Email Address" required></div>
+                <div class="form-group"><input type="password" id="signup-password" placeholder="Password (Min 6 chars)" required minlength="6"></div>
+                <div class="form-group"><input type="text" id="username" placeholder="Username" required></div>
+                <div class="form-group"><input type="text" id="fullname" placeholder="Full Name" required></div>
+                <div class="form-group"><textarea id="bio" placeholder="Bio (Optional)"></textarea></div>
                 <div class="form-group">
                     <select id="gender">
-                        <option value="Not Specified">Select Gender (Optional)</option>
+                        <option value="Not Specified">Select Gender</option>
                         <option value="Male">Male</option>
                         <option value="Female">Female</option>
-                        <option value="Custom">Custom</option>
                     </select>
                 </div>
-
                 <button type="submit" class="signup-btn" id="submit-btn">Sign up</button>
             </form>
-
-            <div class="error-message" id="error-alert">Username already exists!</div>
-            <div class="success-message" id="success-alert">Account created successfully!</div>
+            <div class="error-message" id="error-alert"></div>
+            <div class="success-message" id="success-alert"></div>
         </div>
-
-        <div class="login-link-box">
-            Have an account? <a href="login.html">Log in</a>
-        </div>
+        <div class="login-link-box">Already have an account? <a href="login.html">Log in</a></div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -97,70 +75,59 @@
             messagingSenderId: "599343109250",
             appId: "1:599343109250:web:1306ec63908ba21c54509b"
         };
-        const db = getFirestore(initializeApp(firebaseConfig));
-
-        const signupForm = document.getElementById("signup-form");
-        const usernameInput = document.getElementById("username");
-        const fullnameInput = document.getElementById("fullname");
-        const bioInput = document.getElementById("bio");
-        const genderSelect = document.getElementById("gender");
-        const picInput = document.getElementById("profile-pic-input");
-        const avatarPreviewImg = document.getElementById("avatar-preview-img");
         
-        const errorAlert = document.getElementById("error-alert");
-        const successAlert = document.getElementById("success-alert");
-        const submitBtn = document.getElementById("submit-btn");
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-        let base64ProfilePic = ""; // Pic optional handle karne ke liye array empty rakha hai
+        let base64ProfilePic = "";
 
-        // --- 1. LOCAL IMAGE PREVIEW ENGINE ---
-        picInput.addEventListener("change", (e) => {
+        document.getElementById("profile-pic-input").addEventListener("change", (e) => {
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = function(event) {
-                    avatarPreviewImg.src = event.target.result;
-                    base64ProfilePic = event.target.result; // Pic code ko store kiya
+                reader.onload = (event) => {
+                    document.getElementById("avatar-preview-img").src = event.target.result;
+                    base64ProfilePic = event.target.result;
                 };
                 reader.readAsDataURL(file);
             }
         });
 
-        // --- 2. UNIQUE ACCOUNT REGISTER LOGIC ---
-        signupForm.addEventListener("submit", async (e) => {
+        document.getElementById("signup-form").addEventListener("submit", async (e) => {
             e.preventDefault();
-            
-            // Clean dynamic text
-            const rawUsername = usernameInput.value.trim().toLowerCase().replace(/\s+/g, "_"); // Spaces ko _ bana dega automatically
-            const fullname = fullnameInput.value.trim();
-            const bio = bioInput.value.trim() || "No bio yet.";
-            const gender = genderSelect.value;
-            
-            // Default Profile Pic Rule (Agar user select nahi karta toh placeholder system load hoga)
-            const finalProfilePic = base64ProfilePic || `https://api.dicebear.com/7.x/initials/svg?seed=${rawUsername}`;
+            const email = document.getElementById("signup-email").value.trim();
+            const password = document.getElementById("signup-password").value;
+            const username = document.getElementById("username").value.trim().toLowerCase().replace(/\s+/g, "_");
+            const fullname = document.getElementById("fullname").value.trim();
+            const bio = document.getElementById("bio").value.trim() || "No bio yet.";
+            const gender = document.getElementById("gender").value;
+            const finalProfilePic = base64ProfilePic || `https://api.dicebear.com/7.x/initials/svg?seed=${username}`;
+
+            const errorAlert = document.getElementById("error-alert");
+            const successAlert = document.getElementById("success-alert");
+            const submitBtn = document.getElementById("submit-btn");
 
             errorAlert.style.display = "none";
-            successAlert.style.display = "none";
             submitBtn.disabled = true;
-            submitBtn.innerText = "Checking database...";
+            submitBtn.innerText = "Processing...";
 
             try {
-                // ====== POORE INDIA ME UNIQUE USERNAME CHECK SYSTEM ======
-                const docRef = doc(db, "users", rawUsername);
-                const docSnap = await getDoc(docRef);
-
-                if (docSnap.exists()) {
-                    // Agar Document ID pehle se bni hui hai toh error fenko
-                    errorAlert.innerText = `The username "${rawUsername}" is already taken. Try another one!`;
-                    errorAlert.style.display = "block";
-                    submitBtn.disabled = false;
-                    submitBtn.innerText = "Sign up";
-                    return;
+                // 1. UNIQUE USERNAME CHECK
+                const userDoc = await getDoc(doc(db, "users", username));
+                if (userDoc.exists()) {
+                    throw new Error("Username already taken! Try another one.");
                 }
 
-                // If Unique -> Naya Data Save karo "users" collection me
-                await setDoc(doc(db, "users", rawUsername), {
-                    username: rawUsername,
+                // 2. CREATE AUTH USER IN FIREBASE
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                // 3. SAVE DATA TO FIRESTORE WITH USERNAME AS DOCUMENT ID
+                await setDoc(doc(db, "users", username), {
+                    uid: user.uid,
+                    email: email,
+                    username: username,
                     name: fullname,
                     bio: bio,
                     gender: gender,
@@ -168,21 +135,17 @@
                     createdAt: new Date()
                 });
 
-                // Success triggers
+                // ALSO SAVE A QUICK MAPPER (UID to Username) SO LOGIN CAN FIND IT
+                await setDoc(doc(db, "users_map", user.uid), { username: username });
+
+                successAlert.innerText = "Account created! Redirecting...";
                 successAlert.style.display = "block";
-                submitBtn.innerText = "Redirecting...";
+                localStorage.setItem("active_user", username);
 
-                // Local test session set karein taaki home screen par ye user login dikhe
-                // (Abhi manual testing ke liye hum luv_5 use kar rahe the, isse naya account active hoga)
-                localStorage.setItem("active_user", rawUsername);
-
-                setTimeout(() => {
-                    window.location.href = "home.html";
-                }, 2000);
+                setTimeout(() => window.location.href = "home.html", 1500);
 
             } catch (err) {
-                console.error("Signup validation crashed: ", err);
-                errorAlert.innerText = "Something went wrong. Please try again.";
+                errorAlert.innerText = err.message;
                 errorAlert.style.display = "block";
                 submitBtn.disabled = false;
                 submitBtn.innerText = "Sign up";
