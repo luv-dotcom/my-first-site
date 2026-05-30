@@ -186,7 +186,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-        import { getFirestore, doc, getDoc, collection, addDoc, onSnapshot, query, orderBy, getDocs, where } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, collection, addDoc, onSnapshot, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBrqMn7FrFW3jslaDNM0ui-VW4w6K_3Nmk",
@@ -202,6 +202,7 @@
         let currentProfilePic = "https://picsum.photos/150/150?random=1";
         let latestStoryImg = null;
         let storyTimer = null;
+        let isCheckingStory = true;
 
         // --- FETCH USER DETAILS & SYNC IMAGES ---
         async function syncUserData() {
@@ -214,7 +215,6 @@
                     currentUsername = userData.username || "luv_5";
                     currentProfilePic = userData.profilePic || currentProfilePic;
 
-                    // UI elements refresh
                     document.getElementById("top-nav-avatar").src = currentProfilePic;
                     document.getElementById("bottom-nav-avatar").src = currentProfilePic;
                     document.getElementById("story-avatar").src = currentProfilePic;
@@ -229,39 +229,65 @@
                         }
                     }
                     document.getElementById("sidebar-fullname").innerText = finalName;
-                    
-                    // User data milne ke baad stories check karein
-                    checkUserStories();
                 }
             } catch(err) {
-                console.log("Error syncing user image: ", err);
+                console.log("Error syncing user data: ", err);
+            } finally {
+                // User info fetch hone ke baad ya fail hone ke baad stories pull karenge
+                await checkUserStories();
             }
         }
 
-        // --- CHECK IF USER HAS UPLOADED ANY STORY ---
+        // --- CHECK STORIES WITHOUT ANY QUERY PARAMETERS (PREVENTS FIREBASE INDEX ERRORS) ---
         async function checkUserStories() {
             try {
-                const q = query(collection(db, "stories"), where("userId", "==", "luv_5"), orderBy("timestamp", "desc"));
-                const querySnapshot = await getDocs(q);
+                // Pure collection ko fetch karke local array me user field check karenge
+                const querySnapshot = await getDocs(collection(db, "stories"));
+                let matchedStories = [];
 
-                if (!querySnapshot.empty) {
-                    // Sabse latest story select karein
-                    latestStoryImg = querySnapshot.docs[0].data().storyImg;
-                    // Plus icon ko hata kar story ring active kar do
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    if (data.userId === "luv_5") {
+                        matchedStories.push(data);
+                    }
+                });
+
+                if (matchedStories.length > 0) {
+                    // Manual sorting timestamp ke aadhar par taaki latest story mile
+                    matchedStories.sort((a, b) => {
+                        const timeA = a.timestamp ? a.timestamp.seconds : 0;
+                        const timeB = b.timestamp ? b.timestamp.seconds : 0;
+                        return timeB - timeA; 
+                    });
+
+                    latestStoryImg = matchedStories[0].storyImg;
+                    
+                    // Plus icon chhupa do aur colorful gradient active rakho
                     document.getElementById("story-plus-icon").style.display = "none";
+                    document.querySelector("#my-story-node .story-ring-box").style.background = "linear-gradient(45deg, #fbc531, #c23616, #9c88ff)";
+                    console.log("Story Image found successfully: ", latestStoryImg);
                 } else {
-                    // Agar koi story nahi h toh story ring greyish generic kar do
+                    latestStoryImg = null;
+                    document.getElementById("story-plus-icon").style.display = "flex";
                     document.querySelector("#my-story-node .story-ring-box").style.background = "#dbdbdb";
+                    console.log("No stories uploaded for this user yet.");
                 }
             } catch (err) {
-                console.log("Error finding story: ", err);
+                console.error("Story fetching loop error: ", err);
+            } finally {
+                isCheckingStory = false; // System checking finished!
             }
         }
 
         // --- STORY CLICK MANAGEMENT (VIEW OR CREATE) ---
         document.getElementById("my-story-node").addEventListener("click", () => {
+            if (isCheckingStory) {
+                console.log("Abhi background processing chal rahi hai, 1 second ruko...");
+                return;
+            }
+
             if (latestStoryImg) {
-                // Open full screen story viewer
+                // Open full screen player model immediately
                 const modal = document.getElementById("story-modal");
                 document.getElementById("popup-story-img").src = latestStoryImg;
                 document.getElementById("popup-story-avatar").src = currentProfilePic;
@@ -269,16 +295,22 @@
                 
                 modal.style.display = "flex";
                 
-                // Progress bar animation trigger
+                // Reset and start linear animation link
                 const bar = document.getElementById("story-progress-bar");
-                bar.style.width = "100%";
+                bar.style.transition = "none";
+                bar.style.width = "0%";
+                
+                setTimeout(() => {
+                    bar.style.transition = "width 4s linear";
+                    bar.style.width = "100%";
+                }, 20);
 
-                // 4 seconds ke baad automatic close ho jayegi story
+                // Auto hide window after 4000ms
                 storyTimer = setTimeout(() => {
                     closeStory();
                 }, 4000);
             } else {
-                // Agar koi uploaded story nahi h toh redirect to create page
+                // Fallback redirect to story posting dashboard
                 window.location.href = "create.html?mode=story";
             }
         });
@@ -288,9 +320,6 @@
             modal.style.display = "none";
             document.getElementById("story-progress-bar").style.transition = "none";
             document.getElementById("story-progress-bar").style.width = "0%";
-            setTimeout(() => {
-                document.getElementById("story-progress-bar").style.transition = "width 4s linear";
-            }, 50);
             clearTimeout(storyTimer);
         }
 
@@ -320,7 +349,7 @@
             });
         });
 
-        // Run sync functions on load
+        // Execute functions
         syncUserData();
     </script>
 </body>
