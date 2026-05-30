@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Instagram - Profile</title>
     
-    <!-- Google Fonts & Font Awesome Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Grand+Hotel&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -16,7 +15,7 @@
             --text-main: #262626;
             --text-muted: #8e8e8e;
             --card-bg: #ffffff;
-            --link-color: #0095f6;
+            --btn-grey: #efefef;
         }
 
         * {
@@ -29,19 +28,17 @@
         body {
             background-color: var(--bg-color);
             color: var(--text-main);
+            padding-top: 60px;
             padding-bottom: 60px;
         }
 
         a { text-decoration: none; color: inherit; }
 
-        /* --- NAVBARS (SAME AS HOME/MESSAGES FOR CONSISTENCY) --- */
+        /* --- NAVBAR --- */
         .top-navbar {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 60px;
-            background-color: var(--card-bg);
-            border-bottom: 1px solid var(--border-color);
-            display: flex; justify-content: center; align-items: center;
-            z-index: 1000;
+            position: fixed; top: 0; left: 0; width: 100%; height: 60px;
+            background-color: var(--card-bg); border-bottom: 1px solid var(--border-color);
+            display: flex; justify-content: center; align-items: center; z-index: 1000;
         }
         .nav-container {
             width: 100%; max-width: 975px; padding: 0 20px;
@@ -52,6 +49,7 @@
         .nav-icons i { font-size: 22px; cursor: pointer; }
         .nav-profile-pic { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 1px solid black; }
 
+        /* --- BOTTOM NAVBAR FOR MOBILE --- */
         .bottom-navbar {
             position: fixed; bottom: 0; left: 0; width: 100%; height: 52px;
             background-color: var(--card-bg); border-top: 1px solid var(--border-color);
@@ -59,169 +57,103 @@
         }
         .bottom-navbar i { font-size: 22px; }
 
-        /* --- PROFILE MAIN CONTAINER --- */
+        /* --- MAIN PROFILE HUB WORKSPACE --- */
         .profile-container {
-            max-width: 935px;
-            margin: 90px auto 0 auto;
-            padding: 0 20px;
+            max-width: 935px; margin: 30px auto 0 auto; padding: 0 20px;
         }
 
-        /* Profile Header Section */
+        /* Profile Top Meta Section */
         .profile-header {
-            display: flex;
-            align-items: center;
-            gap: 100px;
-            padding-bottom: 44px;
-            border-bottom: 1px solid var(--border-color);
+            display: flex; gap: 40px; padding-bottom: 44px;
+            border-bottom: 1px solid var(--border-color); align-items: center;
         }
-        .profile-image-container {
-            flex-grow: 1;
-            display: flex;
-            justify-content: center;
-        }
-        .main-profile-avatar {
-            width: 150px; height: 150px;
-            border-radius: 50%; object-fit: cover;
-            border: 1px solid var(--border-color);
-            cursor: pointer;
-        }
+        .avatar-section { flex: 1; display: flex; justify-content: center; }
+        .avatar-section img { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color); }
 
-        .profile-info-container {
-            flex-grow: 2;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        .username-row {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-        .profile-username {
-            font-size: 28px;
-            font-weight: 300;
-        }
+        .info-section { flex: 2; display: flex; flex-direction: column; gap: 18px; }
+        
+        .username-row { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+        .profile-username { font-size: 28px; font-weight: 300; }
         .edit-profile-btn {
-            background-color: transparent;
-            border: 1px solid var(--border-color);
-            padding: 5px 9px;
-            border-radius: 4px;
-            font-weight: 600;
-            font-size: 14px;
-            cursor: pointer;
+            background-color: transparent; border: 1px solid var(--border-color);
+            padding: 5px 9px; border-radius: 4px; font-size: 14px; font-weight: 600; cursor: pointer;
         }
-        .settings-icon { font-size: 20px; cursor: pointer; }
 
-        .stats-row {
-            display: flex;
-            gap: 40px;
-            list-style: none;
-            font-size: 16px;
-        }
-        .stats-row span { font-weight: 600; }
+        .stats-row { display: flex; gap: 40px; font-size: 16px; list-style: none; }
+        .stats-row li span { font-weight: 600; }
 
-        .bio-row .full-name {
-            font-weight: 600;
-            display: block;
-            margin-bottom: 2px;
-        }
-        .bio-row .bio-text { font-size: 14px; line-height: 20px; }
+        .bio-row { font-size: 14px; line-height: 20px; }
+        .full-name { font-weight: 600; display: block; margin-bottom: 2px; }
+        .bio-link { color: #00376b; font-weight: 600; }
 
-        /* --- TABS SYSTEM (POSTS, REELS, SAVED) --- */
+        /* --- PROFILE TABS BAR NAVIGATION --- */
         .profile-tabs {
-            display: flex;
-            justify-content: center;
-            gap: 60px;
-            border-top: 1px solid transparent;
-            margin-top: -1px;
+            display: flex; justify-content: center; gap: 60px;
+            border-top: none; text-transform: uppercase; letter-spacing: 1px; font-size: 12px; font-weight: 600;
         }
         .tab-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            height: 52px;
-            font-size: 12px;
-            font-weight: 600;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            cursor: pointer;
-            color: var(--text-muted);
-            border-top: 1px solid transparent;
+            display: flex; align-items: center; gap: 6px; padding: 18px 0;
+            color: var(--text-muted); cursor: pointer; border-top: 1px solid transparent; margin-top: -1px;
         }
-        .tab-item.active-tab {
-            color: var(--text-main);
-            border-top: 1px solid var(--text-main);
+        .tab-item.active {
+            color: var(--text-main); border-top: 1px solid var(--text-main);
         }
 
-        /* --- POSTS GRID --- */
-        .posts-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 28px;
-            margin-top: 10px;
+        /* --- PHOTO GRID HOVER SHOWROOM --- */
+        .gallery-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin-top: 5px;
         }
         .grid-item {
-            position: relative;
-            aspect-ratio: 1 / 1;
-            background-color: #efefef;
-            cursor: pointer;
-            overflow: hidden;
+            position: relative; aspect-ratio: 1 / 1; background-color: #efefef; overflow: hidden; cursor: pointer;
         }
-        .grid-item img {
-            width: 100%; height: 100%; object-fit: cover;
-            transition: filter 0.3s ease;
-        }
-        /* Hover Overlay Overlay Effect */
+        .grid-item img { width: 100%; height: 100%; object-fit: cover; }
+        
+        /* Premium Hover Overlay Effect */
         .grid-item-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0, 0, 0, 0.3);
-            display: flex; justify-content: center; align-items: center;
-            gap: 30px; color: white; font-weight: 600; font-size: 18px;
+            background-color: rgba(0, 0, 0, 0.4); display: flex; justify-content: center;
+            align-items: center; gap: 30px; color: white; font-size: 18px; font-weight: 600;
             opacity: 0; transition: opacity 0.2s ease;
         }
         .grid-item:hover .grid-item-overlay { opacity: 1; }
-        .grid-item:hover img { filter: brightness(0.8); }
+        .overlay-stat { display: flex; align-items: center; gap: 7px; }
 
-        /* --- 📱 MOBILE ADAPTIVE DESIGN --- */
-        @media (max-width: 735px) {
+        /* --- MOBILE VIEW OPTIMIZATIONS --- */
+        @media (max-width: 768px) {
+            body { padding-top: 50px; }
             .top-navbar .nav-icons { display: none; }
             .bottom-navbar { display: flex; }
+            .profile-container { padding: 0; margin-top: 15px; }
             
-            .profile-container { margin-top: 60px; padding: 0; }
-            .profile-header {
-                padding: 16px; gap: 24px; border-bottom: none;
-            }
-            .main-profile-avatar { width: 77px; height: 77px; }
-            .username-row {
-                flex-direction: column; align-items: flex-start; gap: 10px;
-            }
-            .profile-username { font-size: 20px; }
+            .profile-header { gap: 20px; padding: 10px 16px 24px 16px; border-bottom: none; }
+            .avatar-section img { width: 77px; height: 77px; }
+            .username-row { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .profile-username { font-size: 22px; }
+            .edit-profile-btn { width: 100%; text-align: center; background-color: var(--btn-grey); border: none; }
             
-            /* Mobile Stats Bar Placement */
+            /* Mobile Custom Setup for Stats bar position split */
             .stats-row {
-                display: grid; grid-template-columns: repeat(3, 1fr);
-                text-align: center; padding: 12px 0;
-                border-top: 1px solid var(--border-color);
-                border-bottom: 1px solid var(--border-color);
-                font-size: 14px; color: var(--text-muted);
+                display: grid; grid-template-columns: repeat(3, 1fr); text-align: center;
+                border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);
+                padding: 12px 0; font-size: 14px; gap: 0;
             }
-            .stats-row li { display: flex; flex-direction: column; }
-            .stats-row span { color: var(--text-main); font-size: 16px; }
+            .stats-row li { display: flex; flex-direction: column; color: var(--text-muted); }
+            .stats-row li span { color: var(--text-main); }
 
-            .bio-row { padding: 0 16px 16px 16px; }
-            .profile-tabs { gap: 0; justify-content: space-around; border-top: 1px solid var(--border-color); }
-            .tab-item span { display: none; } /* Hide text on mobile tabs, keep icons */
+            .bio-row { padding: 4px 16px; }
+
+            .profile-tabs { gap: 0; justify-content: space-around; }
+            .profile-tabs span { display: none; } /* Hide text tab in mobile icons view */
             .tab-item i { font-size: 24px; }
-            .tab-item.active-tab { border-top: none; color: var(--link-color); }
-
-            .posts-grid { gap: 3px; margin-top: 0; }
-            .grid-item-overlay { display: none; } /* Disable hover on mobile screens */
+            .tab-item { padding: 14px 0; }
+            
+            .gallery-grid { gap: 3px; }
+            .grid-item-overlay { display: none; } /* Remove hover screen filters on mobile */
         }
     </style>
 </head>
 <body>
 
-    <!-- TOP NAVBAR -->
     <nav class="top-navbar">
         <div class="nav-container">
             <div class="logo">
@@ -238,104 +170,94 @@
         </div>
     </nav>
 
-    <!-- MAIN PROFILE WORKSPACE -->
     <main class="profile-container">
         
-        <!-- Header: Avatar + Meta Stats -->
         <header class="profile-header">
-            <div class="profile-image-container">
-                <img src="https://picsum.photos/150/150?random=1" alt="Profile Picture" class="main-profile-avatar">
+            <div class="avatar-section">
+                <img src="https://picsum.photos/150/150?random=1" alt="My Big Avatar">
             </div>
-            <div class="profile-info-container">
+            
+            <div class="info-section">
                 <div class="username-row">
                     <h2 class="profile-username">my_username</h2>
-                    <a href="settings.html" class="edit-profile-btn">Edit Profile</a>
-                    <a href="settings.html"><i class="fa-solid fa-gear settings-icon"></i></a>
+                    <button class="edit-profile-btn">Edit Profile</button>
+                    <i class="fa-solid fa-gear" style="font-size: 20px; cursor: pointer;"></i>
                 </div>
                 
-                <!-- Desktop Stats Grid -->
                 <ul class="stats-row">
                     <li><span>6</span> posts</li>
-                    <li><span>1.2k</span> followers</li>
-                    <li><span>450</span> following</li>
+                    <li><span>342</span> followers</li>
+                    <li><span>189</span> following</li>
                 </ul>
 
                 <div class="bio-row">
                     <span class="full-name">Your Name</span>
-                    <span class="bio-text">💻 Tech Enthusiast & Designer<br>🚀 Building something awesome with Firebase!<br>📍 India</span>
+                    <p>Developer & Creator 💻🔥<br>Building a premium clone backend with Firebase live system!</p>
+                    <a href="https://github.com" target="_blank" class="bio-link">github.com/your-repo</a>
                 </div>
             </div>
         </header>
 
-        <!-- Profile Sub-Tabs Navigation -->
         <div class="profile-tabs">
-            <div class="tab-item active-tab"><i class="fa-solid fa-grid-3x3"></i> <span>Posts</span></div>
-            <div class="tab-item"><i class="fa-solid fa-clapperboard"></i> <span>Reels</span></div>
-            <div class="tab-item"><i class="fa-regular fa-bookmark"></i> <span>Saved</span></div>
+            <div class="tab-item active"><i class="fa-solid fa-table-cells"></i> <span>Posts</span></div>
+            <div class="tab-item"><i class="fa-regular fa-clapperboard"></i> <span>Reels</span></div>
+            <div class="tab-item"><i class="fa-regular fa-id-card"></i> <span>Tagged</span></div>
         </div>
 
-        <!-- Image Gallery Grid Area -->
-        <section class="posts-grid">
-            <!-- Grid Item 1 -->
+        <section class="gallery-grid">
             <div class="grid-item">
-                <img src="https://picsum.photos/500/500?random=11" alt="Post">
+                <img src="https://picsum.photos/400/400?random=10" alt="post">
                 <div class="grid-item-overlay">
-                    <span><i class="fa-solid fa-heart"></i> 124</span>
-                    <span><i class="fa-solid fa-comment"></i> 12</span>
+                    <div class="overlay-stat"><i class="fa-solid fa-heart"></i> 142</div>
+                    <div class="overlay-stat"><i class="fa-solid fa-comment"></i> 18</div>
                 </div>
             </div>
-            <!-- Grid Item 2 -->
             <div class="grid-item">
-                <img src="https://picsum.photos/500/500?random=12" alt="Post">
+                <img src="https://picsum.photos/400/400?random=11" alt="post">
                 <div class="grid-item-overlay">
-                    <span><i class="fa-solid fa-heart"></i> 89</span>
-                    <span><i class="fa-solid fa-comment"></i> 4</span>
+                    <div class="overlay-stat"><i class="fa-solid fa-heart"></i> 98</div>
+                    <div class="overlay-stat"><i class="fa-solid fa-comment"></i> 4</div>
                 </div>
             </div>
-            <!-- Grid Item 3 -->
             <div class="grid-item">
-                <img src="https://picsum.photos/500/500?random=13" alt="Post">
+                <img src="https://picsum.photos/400/400?random=12" alt="post">
                 <div class="grid-item-overlay">
-                    <span><i class="fa-solid fa-heart"></i> 256</span>
-                    <span><i class="fa-solid fa-comment"></i> 32</span>
+                    <div class="overlay-stat"><i class="fa-solid fa-heart"></i> 256</div>
+                    <div class="overlay-stat"><i class="fa-solid fa-comment"></i> 32</div>
                 </div>
             </div>
-            <!-- Grid Item 4 -->
             <div class="grid-item">
-                <img src="https://picsum.photos/500/500?random=14" alt="Post">
+                <img src="https://picsum.photos/400/400?random=13" alt="post">
                 <div class="grid-item-overlay">
-                    <span><i class="fa-solid fa-heart"></i> 412</span>
-                    <span><i class="fa-solid fa-comment"></i> 18</span>
+                    <div class="overlay-stat"><i class="fa-solid fa-heart"></i> 512</div>
+                    <div class="overlay-stat"><i class="fa-solid fa-comment"></i> 45</div>
                 </div>
             </div>
-            <!-- Grid Item 5 -->
             <div class="grid-item">
-                <img src="https://picsum.photos/500/500?random=15" alt="Post">
+                <img src="https://picsum.photos/400/400?random=14" alt="post">
                 <div class="grid-item-overlay">
-                    <span><i class="fa-solid fa-heart"></i> 175</span>
-                    <span><i class="fa-solid fa-comment"></i> 9</span>
+                    <div class="overlay-stat"><i class="fa-solid fa-heart"></i> 310</div>
+                    <div class="overlay-stat"><i class="fa-solid fa-comment"></i> 12</div>
                 </div>
             </div>
-            <!-- Grid Item 6 -->
             <div class="grid-item">
-                <img src="https://picsum.photos/500/500?random=16" alt="Post">
+                <img src="https://picsum.photos/400/400?random=15" alt="post">
                 <div class="grid-item-overlay">
-                    <span><i class="fa-solid fa-heart"></i> 310</span>
-                    <span><i class="fa-solid fa-comment"></i> 22</span>
+                    <div class="overlay-stat"><i class="fa-solid fa-heart"></i> 190</div>
+                    <div class="overlay-stat"><i class="fa-solid fa-comment"></i> 7</div>
                 </div>
             </div>
         </section>
 
     </main>
 
-    <!-- MOBILE BOTTOM NAVBAR -->
-    <div class="bottom-navbar">
+    <nav class="bottom-navbar">
         <a href="home.html"><i class="fa-regular fa-house"></i></a>
         <a href="search.html"><i class="fa-solid fa-magnifying-glass"></i></a>
         <a href="create.html"><i class="fa-regular fa-square-plus"></i></a>
-        <a href="reels.html"><i class="fa-solid fa-clapperboard"></i></a>
+        <a href="reels.html"><i class="fa-regular fa-clapperboard"></i></a>
         <a href="profile.html"><img src="https://picsum.photos/150/150?random=1" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1.5px solid black;"></a>
-    </div>
+    </nav>
 
 </body>
 </html>
