@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instagram - Create Post</title>
+    <title>Instagram - Create Post / Story</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root { --bg-color: #fafafa; --border-color: #dbdbdb; --text-main: #262626; --card-bg: #ffffff; }
@@ -13,16 +13,14 @@
         h2 { font-size: 24px; text-align: center; margin-bottom: 25px; font-weight: 500; }
         .form-group { margin-bottom: 20px; display: flex; flex-direction: column; gap: 6px; }
         label { font-size: 14px; font-weight: 600; color: #555; }
-        input, textarea { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; outline: none; }
+        input, textarea, select { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; outline: none; background: white; }
         textarea { resize: none; height: 100px; }
         
-        /* Choice Divider Styling */
         .divider { display: flex; align-items: center; text-align: center; margin: 15px 0; color: #8e8e8e; font-size: 12px; font-weight: 600; text-transform: uppercase; }
         .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid var(--border-color); }
         .divider:not(:empty)::before { margin-right: .25em; }
         .divider:not(:empty)::after { margin-left: .25em; }
 
-        /* Preview Area */
         .preview-box { width: 100%; max-height: 250px; border: 1px dashed var(--border-color); border-radius: 8px; display: none; justify-content: center; align-items: center; overflow: hidden; margin-bottom: 20px; background: #f0f0f0; }
         .preview-box img { width: 100%; height: 100%; object-fit: contain; }
 
@@ -35,8 +33,16 @@
 <body>
 
     <div class="create-container">
-        <h2>Create New Post</h2>
+        <h2 id="page-title">Create New Post</h2>
         
+        <div class="form-group">
+            <label><i class="fa-solid fa-bullseye"></i> Select Type</label>
+            <select id="upload-type">
+                <option value="post">Feed Post</option>
+                <option value="story">Instagram Story</option>
+            </select>
+        </div>
+
         <div class="form-group">
             <label><i class="fa-solid fa-images"></i> Upload from Phone Gallery</label>
             <input type="file" id="post-file-input" accept="image/*">
@@ -53,12 +59,12 @@
             <img id="image-preview" src="" alt="Preview">
         </div>
 
-        <div class="form-group">
+        <div class="form-group" id="caption-area">
             <label>Caption</label>
             <textarea id="post-caption" placeholder="Write a caption..."></textarea>
         </div>
 
-        <div class="form-group">
+        <div class="form-group" id="likes-area">
             <label>Initial Likes Count</label>
             <input type="number" id="post-likes" value="0" min="0">
         </div>
@@ -70,7 +76,6 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
         import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
-        // STORAGE LIBRARIES ADDED: File upload karne ke liye
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-storage.js";
 
         const firebaseConfig = {
@@ -83,19 +88,50 @@
         };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const storage = getStorage(app); // Storage initialization
+        const storage = getStorage(app);
 
         const uploadBtn = document.getElementById("btn-upload-post");
         const fileInput = document.getElementById("post-file-input");
         const urlInput = document.getElementById("post-img-url");
         const previewContainer = document.getElementById("image-preview-container");
         const previewImg = document.getElementById("image-preview");
+        
+        const uploadType = document.getElementById("upload-type");
+        const captionArea = document.getElementById("caption-area");
+        const likesArea = document.getElementById("likes-area");
+        const pageTitle = document.getElementById("page-title");
 
-        // LIVE PREVIEW: Phone Gallery se photo chunte hi screen par dikhegi
+        // URL query parameter se check karenge agar direct story par bheja gaya h to
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('mode') === 'story') {
+            uploadType.value = 'story';
+            toggleType('story');
+        }
+
+        // Change Fields according to Post / Story selection
+        uploadType.addEventListener("change", (e) => {
+            toggleType(e.target.value);
+        });
+
+        function toggleType(type) {
+            if(type === 'story') {
+                captionArea.style.display = "none";
+                likesArea.style.display = "none";
+                pageTitle.innerText = "Add New Story";
+                uploadBtn.innerText = "Share Story";
+            } else {
+                captionArea.style.display = "flex";
+                likesArea.style.display = "flex";
+                pageTitle.innerText = "Create New Post";
+                uploadBtn.innerText = "Share Post";
+            }
+        }
+
+        // Preview Gallery Input
         fileInput.addEventListener("change", (e) => {
             const file = e.target.files[0];
             if (file) {
-                urlInput.value = ""; // link box clear kar do taaki confusion na ho
+                urlInput.value = "";
                 const reader = new FileReader();
                 reader.onload = function(event) {
                     previewImg.src = event.target.result;
@@ -105,10 +141,10 @@
             }
         });
 
-        // LIVE PREVIEW: URL text paste karte hi screen par dikhegi
+        // Preview Link Input
         urlInput.addEventListener("input", () => {
             if(urlInput.value.trim() !== "") {
-                fileInput.value = ""; // file input clear kar do
+                fileInput.value = "";
                 previewImg.src = urlInput.value.trim();
                 previewContainer.style.display = "flex";
             } else {
@@ -116,57 +152,63 @@
             }
         });
 
-        // MAIN SUBMIT LOGIC
+        // Upload Submit Logic
         uploadBtn.addEventListener("click", async () => {
             const file = fileInput.files[0];
             const imgUrl = urlInput.value.trim();
             const caption = document.getElementById("post-caption").value.trim();
             const likes = document.getElementById("post-likes").value;
+            const currentType = uploadType.value;
 
-            // Agar dono me se kuch bhi select nahi kiya:
             if (!file && !imgUrl) {
-                alert("Bhai pehle gallery se photo select karo ya link paste karo!");
+                alert("Bhai photo select karo pehle!");
                 return;
             }
 
-            uploadBtn.innerText = "Posting...";
+            uploadBtn.innerText = "Processing...";
             uploadBtn.disabled = true;
 
             let finalImageUrl = "";
 
             try {
-                // CASE 1: Agar user ne phone gallery se file chuni hai
                 if (file) {
                     uploadBtn.innerText = "Uploading Image...";
-                    // Firebase Storage mein unique naam ke saath image file save hogi
-                    const storageRef = ref(storage, 'post_images/' + Date.now() + '_' + file.name);
+                    const folder = currentType === 'story' ? 'story_images/' : 'post_images/';
+                    const storageRef = ref(storage, folder + Date.now() + '_' + file.name);
                     const snapshot = await uploadBytes(storageRef, file);
-                    // Upload hone ke baad wahan se public link (URL) nikalega
                     finalImageUrl = await getDownloadURL(snapshot.ref);
-                } 
-                // CASE 2: Agar user ne direct computer se URL daala hai
-                else if (imgUrl) {
+                } else if (imgUrl) {
                     finalImageUrl = imgUrl;
                 }
 
-                uploadBtn.innerText = "Saving Post...";
-                // Final data Firestore database ke "posts" mein daal rahe hain
-                await addDoc(collection(db, "posts"), {
-                    userId: "luv_5",
-                    postImg: finalImageUrl,
-                    caption: caption,
-                    likes: Number(likes),
-                    timestamp: new Date()
-                });
+                uploadBtn.innerText = "Saving to Firebase...";
 
-                alert("Post successfully share ho gayi bhai! 🎉");
-                window.location.href = "profile.html"; 
+                if (currentType === 'story') {
+                    // Story collection mein save hoga
+                    await addDoc(collection(db, "stories"), {
+                        userId: "luv_5",
+                        storyImg: finalImageUrl,
+                        timestamp: new Date()
+                    });
+                    alert("Story successfully add ho gayi bhai! 📸✨");
+                    window.location.href = "home.html"; // Story load karke home feed dikhayega
+                } else {
+                    // Normal Post collection mein save hoga
+                    await addDoc(collection(db, "posts"), {
+                        userId: "luv_5",
+                        postImg: finalImageUrl,
+                        caption: caption,
+                        likes: Number(likes),
+                        timestamp: new Date()
+                    });
+                    alert("Post successfully share ho gayi bhai! 🎉");
+                    window.location.href = "profile.html";
+                }
 
             } catch (error) {
-                console.error("Posting error: ", error);
                 alert("Galti hui bhai: " + error.message);
             } finally {
-                uploadBtn.innerText = "Share Post";
+                uploadBtn.innerText = currentType === 'story' ? "Share Story" : "Share Post";
                 uploadBtn.disabled = false;
             }
         });
