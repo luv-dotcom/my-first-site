@@ -35,12 +35,17 @@
         .profile-tabs { display: flex; justify-content: center; gap: 60px; text-transform: uppercase; letter-spacing: 1px; font-size: 12px; font-weight: 600; }
         .tab-item { display: flex; align-items: center; gap: 6px; padding: 18px 0; color: var(--text-muted); cursor: pointer; border-top: 1px solid transparent; margin-top: -1px; }
         .tab-item.active { color: var(--text-main); border-top: 1px solid var(--text-main); }
+        
+        /* Gallery Grid Dynamic Stlyes */
         .gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin-top: 5px; }
         .grid-item { position: relative; aspect-ratio: 1 / 1; background-color: #efefef; overflow: hidden; cursor: pointer; }
         .grid-item img { width: 100%; height: 100%; object-fit: cover; }
         .grid-item-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.4); display: flex; justify-content: center; align-items: center; gap: 30px; color: white; font-size: 18px; font-weight: 600; opacity: 0; transition: opacity 0.2s ease; }
         .grid-item:hover .grid-item-overlay { opacity: 1; }
         .overlay-stat { display: flex; align-items: center; gap: 7px; }
+        
+        /* No post message style */
+        .no-posts { grid-column: span 3; text-align: center; padding: 50px 0; color: var(--text-muted); font-size: 18px; }
 
         /* --- EDIT PROFILE MODAL STYLES --- */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 2000; }
@@ -85,7 +90,7 @@
                     <a href="settings.html"><i class="fa-solid fa-gear" style="font-size: 20px; cursor: pointer; color: #262626;"></i></a>
                 </div>
                 <ul class="stats-row">
-                    <li><span>6</span> posts</li>
+                    <li><span id="post-count">0</span> posts</li>
                     <li><span>342</span> followers</li>
                     <li><span>189</span> following</li>
                 </ul>
@@ -103,13 +108,8 @@
             <div class="tab-item"><i class="fa-regular fa-id-card"></i> <span>Tagged</span></div>
         </div>
 
-        <section class="gallery-grid">
-            <div class="grid-item"><img src="https://picsum.photos/400/400?random=10" alt="post"><div class="grid-item-overlay"><div class="overlay-stat"><i class="fa-solid fa-heart"></i> 142</div><div class="overlay-stat"><i class="fa-solid fa-comment"></i> 18</div></div></div>
-            <div class="grid-item"><img src="https://picsum.photos/400/400?random=11" alt="post"><div class="grid-item-overlay"><div class="overlay-stat"><i class="fa-solid fa-heart"></i> 98</div><div class="overlay-stat"><i class="fa-solid fa-comment"></i> 4</div></div></div>
-            <div class="grid-item"><img src="https://picsum.photos/400/400?random=12" alt="post"><div class="grid-item-overlay"><div class="overlay-stat"><i class="fa-solid fa-heart"></i> 256</div><div class="overlay-stat"><i class="fa-solid fa-comment"></i> 32</div></div></div>
-            <div class="grid-item"><img src="https://picsum.photos/400/400?random=13" alt="post"><div class="grid-item-overlay"><div class="overlay-stat"><i class="fa-solid fa-heart"></i> 512</div><div class="overlay-stat"><i class="fa-solid fa-comment"></i> 45</div></div></div>
-            <div class="grid-item"><img src="https://picsum.photos/400/400?random=14" alt="post"><div class="grid-item-overlay"><div class="overlay-stat"><i class="fa-solid fa-heart"></i> 310</div><div class="overlay-stat"><i class="fa-solid fa-comment"></i> 12</div></div></div>
-            <div class="grid-item"><img src="https://picsum.photos/400/400?random=15" alt="post"><div class="grid-item-overlay"><div class="overlay-stat"><i class="fa-solid fa-heart"></i> 190</div><div class="overlay-stat"><i class="fa-solid fa-comment"></i> 7</div></div></div>
+        <section class="gallery-grid" id="posts-gallery">
+            <div class="no-posts">Loading posts...</div>
         </section>
     </main>
 
@@ -118,19 +118,19 @@
             <h3>Edit Profile</h3>
             <div class="input-group">
                 <label>Username</label>
-                <input type="text" id="input-username" placeholder="Enter username">
+                <input type="text" id="input-username">
             </div>
             <div class="input-group">
                 <label>Name</label>
-                <input type="text" id="input-name" placeholder="Enter your name">
+                <input type="text" id="input-name">
             </div>
             <div class="input-group">
                 <label>Profile Picture URL</label>
-                <input type="text" id="input-pic" placeholder="Paste image address/link">
+                <input type="text" id="input-pic">
             </div>
             <div class="input-group">
                 <label>Bio</label>
-                <textarea id="input-bio" placeholder="Enter your bio"></textarea>
+                <textarea id="input-bio"></textarea>
             </div>
             <div class="input-group">
                 <label>Gender</label>
@@ -153,12 +153,13 @@
         <a href="search.html"><i class="fa-solid fa-magnifying-glass"></i></a>
         <a href="create.html"><i class="fa-regular fa-square-plus"></i></a>
         <a href="reels.html"><i class="fa-regular fa-clapperboard"></i></a>
-        <a href="profile.html"><img src="https://picsum.photos/150/150?random=1" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1.5px solid black;" id="bottom-avatar"></a>
+        <img src="https://picsum.photos/150/150?random=1" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1.5px solid black;" id="bottom-avatar">
     </nav>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-        import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+        // Added 'collection', 'getDocs', 'query', 'where' for Fetching Posts
+        import { getFirestore, doc, getDoc, updateDoc, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
         
         const firebaseConfig = {
             apiKey: "AIzaSyBrqMn7FrFW3jslaDNM0ui-VW4w6K_3Nmk",
@@ -185,18 +186,14 @@
                     
                     document.getElementById("prof-username").innerText = userData.username || "No Username";
                     document.getElementById("prof-bio").innerText = userData.bio || "No Bio";
-                    
-                    // Gender read data if exists
                     userCurrentGender = userData.gender || "Not Specified";
 
-                    // Profile pic check from firebase
                     if (userData.profilePic) {
                         document.getElementById("main-avatar").src = userData.profilePic;
                         document.getElementById("nav-avatar").src = userData.profilePic;
                         document.getElementById("bottom-avatar").src = userData.profilePic;
                     }
 
-                    // Name key finder loop
                     let finalName = "User"; 
                     for (let key in userData) {
                         if (key !== "username" && key !== "bio" && key !== "profilePic" && key !== "gender") {
@@ -207,15 +204,59 @@
                     }
                     document.getElementById("prof-name").innerText = finalName;
 
-                } else {
-                    console.log("Firebase mein user nahi mila!");
+                    // profile load hote hi iske posts bhi load honge
+                    fetchUserPosts();
+
                 }
             } catch (error) {
-                console.error("Data laane mein dikkat hui: ", error);
+                console.error("Profile load issue: ", error);
             }
         }
 
-        // --- INTERFACE INTERACTIONS ---
+        // --- FETCH DYNAMIC POSTS FROM FIREBASE ---
+        async function fetchUserPosts() {
+            const gallery = document.getElementById("posts-gallery");
+            try {
+                // Sirf 'luv_5' ke posts nikalne ke liye query lagayi h
+                const q = query(collection(db, "posts"), where("userId", "==", "luv_5"));
+                const querySnapshot = await getDocs(q);
+                
+                gallery.innerHTML = ""; // Loader text clear karne ke liye
+                let count = 0;
+
+                if (querySnapshot.empty) {
+                    gallery.innerHTML = `<div class="no-posts"><i class="fa-camera" style="font-size:40px; margin-bottom:10px; display:block;"></i>No Posts Yet</div>`;
+                    document.getElementById("post-count").innerText = "0";
+                    return;
+                }
+
+                querySnapshot.forEach((doc) => {
+                    const postData = doc.data();
+                    count++;
+
+                    // HTML item structured dynamically
+                    const gridItem = document.createElement("div");
+                    gridItem.className = "grid-item";
+                    gridItem.innerHTML = `
+                        <img src="${postData.postImg}" alt="post">
+                        <div class="grid-item-overlay">
+                            <div class="overlay-stat"><i class="fa-solid fa-heart"></i> ${postData.likes || 0}</div>
+                            <div class="overlay-stat"><i class="fa-solid fa-comment"></i> 0</div>
+                        </div>
+                    `;
+                    gallery.appendChild(gridItem);
+                });
+
+                // Total post count updates dynamically
+                document.getElementById("post-count").innerText = count;
+
+            } catch (error) {
+                console.error("Posts fetch error: ", error);
+                gallery.innerHTML = `<div class="no-posts">Error loading posts!</div>`;
+            }
+        }
+
+        // --- EDIT PROFILE MODAL CODE ---
         const modal = document.getElementById("edit-modal");
         const editBtn = document.getElementById("edit-profile-trigger");
         const closeBtn = document.getElementById("btn-close-modal");
@@ -227,7 +268,6 @@
         const inputBio = document.getElementById("input-bio");
         const inputGender = document.getElementById("input-gender");
 
-        // Open Modal & Set current database values
         editBtn.addEventListener("click", () => {
             inputUsername.value = document.getElementById("prof-username").innerText;
             inputName.value = document.getElementById("prof-name").innerText;
@@ -237,22 +277,15 @@
             modal.style.display = "flex";
         });
 
-        // Close Modal
-        closeBtn.addEventListener("click", () => {
-            modal.style.display = "none";
-        });
+        closeBtn.addEventListener("click", () => { modal.style.display = "none"; });
 
-        // Save & Sync with Firebase
         saveBtn.addEventListener("click", async () => {
             saveBtn.innerText = "Updating...";
             saveBtn.disabled = true;
-
             try {
                 const docRef = doc(db, "users", "luv_5");
-                
                 const updatedPicUrl = inputPic.value.trim() || defaultPic;
 
-                // Updating Firebase fields
                 await updateDoc(docRef, {
                     username: inputUsername.value,
                     [databaseNameKey]: inputName.value,
@@ -261,22 +294,18 @@
                     gender: inputGender.value
                 });
 
-                // Instantly updating browser screen UI elements
                 document.getElementById("prof-username").innerText = inputUsername.value;
                 document.getElementById("prof-name").innerText = inputName.value;
                 document.getElementById("prof-bio").innerText = inputBio.value;
                 document.getElementById("main-avatar").src = updatedPicUrl;
                 document.getElementById("nav-avatar").src = updatedPicUrl;
                 document.getElementById("bottom-avatar").src = updatedPicUrl;
-                
-                userCurrentGender = inputGender.value; // variable update
+                userCurrentGender = inputGender.value;
 
                 modal.style.display = "none";
-                alert("Profile complete update ho gayi bhai! 🚀💥");
-
+                alert("Profile Updated Successfully! 🔥");
             } catch (error) {
-                console.error("Update error: ", error);
-                alert("Kucch error aaya bhai updataion mein!");
+                alert("Error updating profile!");
             } finally {
                 saveBtn.innerText = "Save";
                 saveBtn.disabled = false;
