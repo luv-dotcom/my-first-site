@@ -3,41 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instagram - Login</title>
+    <title>Login • Instagram</title>
     <link href="https://fonts.googleapis.com/css2?family=Grand+Hotel&display=swap" rel="stylesheet">
     <style>
-        :root { --bg-color: #fafafa; --border-color: #dbdbdb; --text-main: #262626; --card-bg: #ffffff; --link-color: #0095f6; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-main); display: flex; justify-content: center; align-items: center; min-height: 100vh; flex-direction: column; }
-        .login-container { width: 100%; max-width: 350px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 30px 40px; display: flex; flex-direction: column; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .logo-text { font-family: 'Grand Hotel', cursive; font-size: 50px; margin-bottom: 25px; }
-        .form-group { width: 100%; margin-bottom: 12px; }
-        .form-group input { width: 100%; padding: 10px; background: #fafafa; border: 1px solid var(--border-color); border-radius: 4px; outline: none; font-size: 14px; }
-        .login-btn { width: 100%; background: var(--link-color); color: white; border: none; padding: 8px; border-radius: 4px; font-weight: 600; cursor: pointer; }
-        .login-btn:disabled { background: #b2dffc; cursor: not-allowed; }
-        .error-message { color: #ed4956; font-size: 13px; text-align: center; margin-top: 15px; display: none; }
-        .signup-link-box { width: 100%; max-width: 350px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; text-align: center; margin-top: 10px; font-size: 14px; }
-        .signup-link-box a { color: var(--link-color); font-weight: 600; text-decoration: none; }
+        :root {
+            --bg-color: #121212;
+            --border-color: #262626;
+            --text-main: #ffffff;
+            --text-muted: #a8a8a8;
+            --card-bg: #000000;
+            --link-color: #0095f6;
+            --error-color: #ed4956;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+        .auth-container { width: 100%; max-width: 350px; display: flex; flex-direction: column; gap: 10px; }
+        .auth-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 4px; padding: 40px 30px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+        .logo-text { font-family: 'Grand Hotel', cursive; font-size: 50px; margin-bottom: 30px; }
+        form { width: 100%; display: flex; flex-direction: column; gap: 6px; }
+        .input-box input { width: 100%; padding: 11px 8px; background: #121212; border: 1px solid var(--border-color); border-radius: 4px; font-size: 12px; outline: none; color: white; }
+        .input-box input:focus { border-color: #555; }
+        .auth-btn { background: var(--link-color); color: white; border: none; border-radius: 4px; padding: 7px; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 8px; }
+        .auth-btn:disabled { opacity: 0.6; }
+        .msg-box { margin-top: 15px; font-size: 14px; color: var(--error-color); display: none; }
+        .redirect-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 4px; padding: 20px; text-align: center; font-size: 14px; }
+        .redirect-card a { color: var(--link-color); font-weight: 600; text-decoration: none; }
     </style>
 </head>
 <body>
 
-    <div class="login-container">
-        <h1 class="logo-text">Instagram</h1>
-        <form id="login-form" style="width: 100%;">
-            <div class="form-group"><input type="email" id="login-email" placeholder="Email Address" required></div>
-            <div class="form-group"><input type="password" id="login-password" placeholder="Password" required></div>
-            <button type="submit" class="login-btn" id="login-btn">Log In</button>
-        </form>
-        <div class="error-message" id="error-alert"></div>
-    </div>
+    <div class="auth-container">
+        <div class="auth-card">
+            <h1 class="logo-text">Instagram</h1>
+            <form id="login-form" onsubmit="return false;">
+                <div class="input-box">
+                    <input type="email" id="login-email" placeholder="Email Address" required>
+                </div>
+                <div class="input-box">
+                    <input type="password" id="login-password" placeholder="Password" required>
+                </div>
+                <button type="button" class="auth-btn" id="login-btn">Log In</button>
+            </form>
+            <div id="error-msg" class="msg-box"></div>
+        </div>
 
-    <div class="signup-link-box">Don't have an account? <a href="signup.html">Sign up</a></div>
+        <div class="redirect-card">
+            Don't have an account? <a href="signup.html">Sign up</a>
+        </div>
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+        import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBrqMn7FrFW3jslaDNM0ui-VW4w6K_3Nmk",
@@ -47,47 +64,46 @@
             messagingSenderId: "599343109250",
             appId: "1:599343109250:web:1306ec63908ba21c54509b"
         };
+        const db = getFirestore(initializeApp(firebaseConfig));
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        // 🔥 CRITICAL SESSION FIX: Page par aate hi purana login session saaf karo
-        localStorage.removeItem("active_user");
-
-        document.getElementById("login-form").addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const email = document.getElementById("login-email").value.trim();
-            const password = document.getElementById("login-password").value;
-            const errorAlert = document.getElementById("error-alert");
+        document.getElementById("login-btn").addEventListener("click", async () => {
+            const email = document.getElementById("login-email").value.trim().toLowerCase();
+            const password = document.getElementById("login-password").value.trim();
+            const errorMsg = document.getElementById("error-msg");
             const loginBtn = document.getElementById("login-btn");
 
-            errorAlert.style.display = "none";
+            if(!email || !password) {
+                errorMsg.innerText = "Please fill in all fields.";
+                errorMsg.style.display = "block";
+                return;
+            }
+
             loginBtn.disabled = true;
             loginBtn.innerText = "Logging in...";
+            errorMsg.style.display = "none";
 
             try {
-                // 1. Firebase Auth se Email & Password verify karo
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
+                const usersRef = collection(db, "users");
+                const q = query(usersRef, where("email", "==", email), where("password", "==", password));
+                const querySnapshot = await getDocs(q);
 
-                // 2. Map table (Firestore) se is UID se juda sahi username nikaalo
-                const mapSnap = await getDoc(doc(db, "users_map", user.uid));
-                
-                if (mapSnap.exists()) {
-                    const actualUsername = mapSnap.data().username;
+                if (!querySnapshot.empty) {
+                    // User mil gaya! LocalStorage me session set karo
+                    let userData = querySnapshot.docs[0].data();
+                    localStorage.setItem("active_user", userData.username);
                     
-                    // 3. Sahi user milte hi use LocalStorage me set karo aur redirect karo
-                    localStorage.setItem("active_user", actualUsername);
+                    // Seedhe Feed (home.html) par bhej do
                     window.location.href = "home.html";
                 } else {
-                    throw new Error("User Profile data not found in Database!");
+                    errorMsg.innerText = "❌ Invalid email or password!";
+                    errorMsg.style.display = "block";
+                    loginBtn.disabled = false;
+                    loginBtn.innerText = "Log In";
                 }
-
             } catch (err) {
                 console.error(err);
-                errorAlert.innerText = "Invalid Email/Password or User missing.";
-                errorAlert.style.display = "block";
+                errorMsg.innerText = "Server error. Try again.";
+                errorMsg.style.display = "block";
                 loginBtn.disabled = false;
                 loginBtn.innerText = "Log In";
             }
