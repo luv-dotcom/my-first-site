@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Grand+Hotel&family=Roboto&display=swap" rel="stylesheet">
+
+<style>
+body { margin:0; font-family:Roboto, sans-serif; background:#fafafa; }
+
+.header {
+  display:flex;
+  justify-content:space-between;
+  padding:10px;
+  border-bottom:1px solid #ddd;
+  background:white;
+}
+
+.logo {
+  font-family:'Grand Hotel',cursive;
+  font-size:28px;
+}
+
+.stories {
+  display:flex;
+  overflow-x:auto;
+  padding:10px;
+  background:white;
+}
+
+.story {
+  text-align:center;
+  margin-right:10px;
+}
+
+.story img {
+  width:60px;
+  height:60px;
+  border-radius:50%;
+  border:2px solid red;
+}
+
+.post {
+  margin-top:10px;
+  background:white;
+}
+
+.post img {
+  width:100%;
+  max-width: 500px;
+  display: block;
+  margin: 0 auto;
+}
+
+.logout {
+  position:fixed;
+  top:10px;
+  right:10px;
+  background:red;
+  color:white;
+  padding:5px 10px;
+  cursor:pointer;
+  z-index: 10;
+}
+</style>
+</head>
+
+<body>
+
+<div class="logout" onclick="logout()">Logout</div>
+
+<div class="header">
+  <div class="logo">Instagram</div>
+</div>
+
+<div class="stories">
+  <div class="story">
+    <img src="https://i.pravatar.cc/100?img=1" alt="user">
+    <p>You</p>
+  </div>
+  <div class="story">
+    <img src="https://i.pravatar.cc/100?img=2" alt="user">
+    <p>Rahul</p>
+  </div>
+</div>
+
+<div class="post">
+  <img src="https://picsum.photos/400" alt="post">
+  <p style="text-align:center; padding:10px"><b>user</b> Nice post 😍</p>
+</div>
+
+<script>
+// 🔒 login check
+if(localStorage.getItem("loggedIn") !== "true"){
+  window.location.href = "index.html"; /* Agar user login nahi hai, toh wapas login page par bhejo */
+}
+
+// logout
+function logout(){
+  localStorage.removeItem("loggedIn");
+  window.location.href = "index.html";
+}
+</script>
+
+</body>
+</html>
