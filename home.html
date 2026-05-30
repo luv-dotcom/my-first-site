@@ -1,62 +1,594 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Home</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram Responsive UI (Pro Version)</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* --- GLOBAL RESETS & VARIABLES --- */
+        :root {
+            --bg-color: #fafafa;
+            --border-color: #dbdbdb;
+            --text-main: #262626;
+            --text-muted: #8e8e8e;
+            --link-color: #0095f6;
+            --card-bg: #ffffff;
+        }
 
-<style>
-body{margin:0;font-family:sans-serif;background:#fafafa}
-.header{padding:10px;border-bottom:1px solid #ddd;background:#fff}
-.stories{display:flex;overflow:auto;padding:10px;background:#fff}
-.story img{width:60px;border-radius:50%;margin-right:10px}
-.post{margin-top:10px;background:#fff}
-.post img{width:100%}
-.nav{position:fixed;bottom:0;width:100%;display:flex;justify-content:space-around;background:#fff;border-top:1px solid #ddd;padding:10px}
-.nav div{cursor:pointer}
-.logout{position:fixed;top:10px;right:10px;background:red;color:#fff;padding:5px}
-</style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding-bottom: 60px; /* Space for mobile bottom nav */
+        }
+
+        /* --- DESKTOP TOP NAVBAR --- */
+        .top-navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            width: 100%;
+            max-width: 975px;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo img {
+            height: 29px;
+            margin-top: 7px;
+            cursor: pointer;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-box input {
+            background-color: #efefef;
+            border: none;
+            padding: 7px 15px 7px 35px;
+            border-radius: 8px;
+            font-size: 14px;
+            width: 268px;
+            outline: none;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .nav-icons {
+            display: flex;
+            gap: 22px;
+            align-items: center;
+        }
+
+        .nav-icons i {
+            font-size: 22px;
+            cursor: pointer;
+            color: var(--text-main);
+        }
+
+        .nav-profile-pic {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid var(--border-color);
+        }
+
+        /* --- MOBILE BOTTOM NAVBAR --- */
+        .bottom-navbar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 50px;
+            background-color: var(--card-bg);
+            border-top: 1px solid var(--border-color);
+            display: none; /* Desktop par hidden */
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .bottom-navbar i {
+            font-size: 22px;
+            cursor: pointer;
+            color: var(--text-main);
+        }
+
+        /* --- MAIN CONTENT LAYOUT --- */
+        .main-layout {
+            max-width: 935px;
+            margin: 80px auto 0 auto;
+            display: grid;
+            grid-template-columns: minmax(0, 614px) 320px;
+            gap: 28px;
+            padding: 0 20px;
+        }
+
+        /* --- FEED SECTION (LEFT) --- */
+        .feed-area {
+            width: 100%;
+        }
+
+        /* Stories Wrapper */
+        .stories-wrapper {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            gap: 16px;
+            overflow-x: auto;
+            margin-bottom: 24px;
+        }
+
+        .stories-wrapper::-webkit-scrollbar {
+            display: none; /* Clean look without scrollbar */
+        }
+
+        .story-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 12px;
+            cursor: pointer;
+            min-width: 66px;
+        }
+
+        .story-ring {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            padding: 2px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .story-ring img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--card-bg);
+        }
+
+        .story-item span {
+            max-width: 65px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: var(--text-main);
+        }
+
+        /* Post Card */
+        .post-container {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 16px;
+        }
+
+        .post-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .post-user img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .post-username {
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .post-main-img img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .post-actions-bar {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 16px 6px 16px;
+        }
+
+        .action-left-group {
+            display: flex;
+            gap: 16px;
+        }
+
+        .post-actions-bar i {
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .post-actions-bar i:hover {
+            color: var(--text-muted);
+        }
+
+        .likes-display {
+            font-size: 14px;
+            font-weight: 600;
+            padding: 0 16px;
+            margin-bottom: 6px;
+        }
+
+        .caption-display {
+            font-size: 14px;
+            padding: 0 16px;
+            margin-bottom: 8px;
+            line-height: 18px;
+        }
+
+        .caption-user {
+            font-weight: 600;
+            margin-right: 6px;
+        }
+
+        .view-comments-link {
+            font-size: 14px;
+            color: var(--text-muted);
+            padding: 0 16px;
+            margin-bottom: 6px;
+            cursor: pointer;
+        }
+
+        .post-date {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            padding: 0 16px;
+            margin-bottom: 14px;
+        }
+
+        .comment-section-input {
+            border-top: 1px solid #efefef;
+            display: flex;
+            align-items: center;
+            padding: 14px 16px;
+        }
+
+        .comment-section-input i {
+            font-size: 24px;
+            margin-right: 16px;
+            cursor: pointer;
+        }
+
+        .comment-section-input input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .comment-section-input button {
+            border: none;
+            background: none;
+            color: var(--link-color);
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        /* --- SIDEBAR SECTION (RIGHT) --- */
+        .sidebar-area {
+            display: flex;
+            flex-direction: column;
+            padding-top: 10px;
+        }
+
+        .sidebar-self-profile {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .self-profile-info {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .self-profile-info img {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .self-meta .self-fullname {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .action-link-btn {
+            color: var(--link-color);
+            font-size: 12px;
+            font-weight: 600;
+            border: none;
+            background: none;
+            cursor: pointer;
+        }
+
+        .suggestions-title-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .suggestions-title-bar span {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .suggestions-title-bar a {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-main);
+            text-decoration: none;
+        }
+
+        .suggested-user-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0;
+        }
+
+        .suggested-user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .suggested-user-info img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .suggested-meta span {
+            display: block;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* --- RESPONSIVE MEDIA BREAKPOINTS --- */
+        
+        /* Laptop/Tablet Screens (Sidebar hidden) */
+        @media (max-width: 1000px) {
+            .main-layout {
+                grid-template-columns: 1fr; /* Full width feed */
+                max-width: 600px;
+            }
+            .sidebar-area {
+                display: none; /* Hide sidebar */
+            }
+        }
+
+        /* Mobile Screens (Pure App View) */
+        @media (max-width: 650px) {
+            body {
+                background-color: var(--card-bg); /* App usually has white bg on mobile */
+            }
+            .top-navbar .search-box, 
+            .top-navbar .nav-icons {
+                display: none; /* Hide desktop nav options */
+            }
+            .bottom-navbar {
+                display: flex; /* Show bottom app menu bar */
+            }
+            .main-layout {
+                margin-top: 60px;
+                padding: 0;
+            }
+            .stories-wrapper {
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+                border-top: none;
+            }
+            .post-container {
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+            }
+        }
+    </style>
 </head>
-
 <body>
 
-<div class="logout" onclick="logout()">Logout</div>
+    <nav class="top-navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Instagram_logo.svg/800px-Instagram_logo.svg.png" alt="Instagram">
+            </div>
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" placeholder="Search">
+            </div>
+            <div class="nav-icons">
+                <i class="fa-solid fa-house"></i>
+                <i class="fa-regular fa-paper-plane"></i>
+                <i class="fa-regular fa-square-plus"></i>
+                <i class="fa-regular fa-compass"></i>
+                <i class="fa-regular fa-heart"></i>
+                <img src="https://picsum.photos/150/150?random=1" alt="Profile" class="nav-profile-pic">
+            </div>
+        </div>
+    </nav>
 
-<div class="header"><b>Instagram</b></div>
+    <main class="main-layout">
+        
+        <section class="feed-area">
+            
+            <div class="stories-wrapper">
+                <div class="story-item">
+                    <div class="story-ring">
+                        <img src="https://picsum.photos/150/150?random=2" alt="user">
+                    </div>
+                    <span>rohit_sharma</span>
+                </div>
+                <div class="story-item">
+                    <div class="story-ring">
+                        <img src="https://picsum.photos/150/150?random=3" alt="user">
+                    </div>
+                    <span>ananya_p</span>
+                </div>
+                <div class="story-item">
+                    <div class="story-ring">
+                        <img src="https://picsum.photos/150/150?random=4" alt="user">
+                    </div>
+                    <span>tech_guru</span>
+                </div>
+                <div class="story-item">
+                    <div class="story-ring">
+                        <img src="https://picsum.photos/150/150?random=5" alt="user">
+                    </div>
+                    <span>riya_sen</span>
+                </div>
+                <div class="story-item">
+                    <div class="story-ring">
+                        <img src="https://picsum.photos/150/150?random=6" alt="user">
+                    </div>
+                    <span>travel_vlog</span>
+                </div>
+            </div>
 
-<div class="stories">
-  <div class="story"><img src="https://i.pravatar.cc/100?img=1"></div>
-  <div class="story"><img src="https://i.pravatar.cc/100?img=2"></div>
-</div>
+            <div class="post-container">
+                <div class="post-header">
+                    <div class="post-user">
+                        <img src="https://picsum.photos/150/150?random=3" alt="User profile">
+                        <span class="post-username">ananya_p</span>
+                    </div>
+                    <i class="fa-solid fa-ellipsis"></i>
+                </div>
+                
+                <div class="post-main-img">
+                    <img src="https://picsum.photos/800/600?random=10" alt="Feed Post">
+                </div>
 
-<div class="post">
-  <img src="https://picsum.photos/400">
-  <p style="padding:10px"><b>user</b> Nice post 😍</p>
-</div>
+                <div class="post-actions-bar">
+                    <div class="action-left-group">
+                        <i class="fa-regular fa-heart"></i>
+                        <i class="fa-regular fa-comment"></i>
+                        <i class="fa-regular fa-paper-plane"></i>
+                    </div>
+                    <i class="fa-regular fa-bookmark"></i>
+                </div>
 
-<!-- Bottom Navigation -->
-<div class="nav">
-  <div onclick="goHome()">🏠</div>
-  <div onclick="goReels()">🎬</div>
-</div>
+                <div class="likes-display">3,412 likes</div>
+                <div class="caption-display">
+                    <span class="caption-user">ananya_p</span> Weekend vibes done right! ☕🍂 #aesthetic #morning
+                </div>
+                <div class="view-comments-link">View all 89 comments</div>
+                <div class="post-date">1 Day Ago</div>
 
-<script>
-if(localStorage.getItem("loggedIn")!=="true"){
-  window.location.href="index.html";
-}
+                <div class="comment-section-input">
+                    <i class="fa-regular fa-face-smile"></i>
+                    <input type="text" placeholder="Add a comment...">
+                    <button type="button">Post</button>
+                </div>
+            </div>
 
-function logout(){
-  localStorage.removeItem("loggedIn");
-  window.location.href="index.html";
-}
+        </section>
 
-function goReels(){
-  window.location.href="reels.html";
-}
+        <aside class="sidebar-area">
+            <div class="sidebar-self-profile">
+                <div class="self-profile-info">
+                    <img src="https://picsum.photos/150/150?random=1" alt="My Profile">
+                    <div class="self-meta">
+                        <div class="post-username">my_username</div>
+                        <div class="self-fullname">Your Name</div>
+                    </div>
+                </div>
+                <button class="action-link-btn">Switch</button>
+            </div>
 
-function goHome(){
-  window.location.href="home.html";
-}
-</script>
+            <div class="suggestions-title-bar">
+                <span>Suggestions for you</span>
+                <a href="#">See All</a>
+            </div>
+
+            <div class="suggested-user-row">
+                <div class="suggested-user-info">
+                    <img src="https://picsum.photos/150/150?random=20" alt="Suggestion">
+                    <div class="suggested-meta">
+                        <div class="post-username">kabir_singh</div>
+                        <span>Followed by tech_guru</span>
+                    </div>
+                </div>
+                <button class="action-link-btn">Follow</button>
+            </div>
+
+            <div class="suggested-user-row">
+                <div class="suggested-user-info">
+                    <img src="https://picsum.photos/150/150?random=21" alt="Suggestion">
+                    <div class="suggested-meta">
+                        <div class="post-username">sneha_art</div>
+                        <span>Popular</span>
+                    </div>
+                </div>
+                <button class="action-link-btn">Follow</button>
+            </div>
+        </aside>
+
+    </main>
+
+    <div class="bottom-navbar">
+        <i class="fa-solid fa-house"></i>
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <i class="fa-regular fa-square-plus"></i>
+        <i class="fa-solid fa-clapperboard"></i> <img src="https://picsum.photos/150/150?random=1" alt="Profile" style="width: 24px; height: 24px; border-radius: 50%;">
+    </div>
 
 </body>
 </html>
