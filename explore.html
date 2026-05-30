@@ -1,1 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram - Explore</title>
+    
+    <!-- Google Fonts & Font Awesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Grand+Hotel&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #fafafa;
+            --border-color: #dbdbdb;
+            --text-main: #262626;
+            --text-muted: #8e8e8e;
+            --card-bg: #ffffff;
+            --search-bg: #efefef;
+        }
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding-bottom: 60px;
+        }
+
+        a { text-decoration: none; color: inherit; }
+
+        /* --- NAVBARS --- */
+        .top-navbar {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 60px;
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 1000;
+        }
+        .nav-container {
+            width: 100%; max-width: 975px; padding: 0 20px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .logo-text { font-family: 'Grand Hotel', cursive; font-size: 30px; }
+        
+        /* Desktop Search Bar */
+        .search-box-container {
+            position: relative;
+            width: 268px;
+        }
+        .search-box-container input {
+            width: 100%; padding: 7px 15px 7px 35px;
+            background-color: var(--search-bg); border: none;
+            border-radius: 8px; font-size: 14px; outline: none;
+        }
+        .search-box-container i {
+            position: absolute; left: 12px; top: 50%;
+            transform: translateY(-50%); color: var(--text-muted); font-size: 14px;
+        }
+
+        .nav-icons { display: flex; gap: 22px; align-items: center; }
+        .nav-icons i { font-size: 22px; cursor: pointer; }
+        .nav-profile-pic { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 1px solid black; }
+
+        .bottom-navbar {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 52px;
+            background-color: var(--card-bg); border-top: 1px solid var(--border-color);
+            display: none; justify-content: space-around; align-items: center; z-index: 1000;
+        }
+        .bottom-navbar i { font-size: 22px; }
+
+        /* --- EXPLORE MAIN CONTENT --- */
+        .explore-container {
+            max-width: 975px;
+            margin: 90px auto 0 auto;
+            padding: 0 20px;
+        }
+
+        /* --- 🧩 BAFLE ADVANCED INSTAGRAM LAYOUT GRID --- */
+        .explore-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-auto-rows: minmax(100px, auto);
+            gap: 28px;
+        }
+
+        .explore-item {
+            position: relative;
+            background-color: #efefef;
+            cursor: pointer;
+            overflow: hidden;
+            aspect-ratio: 1 / 1; /* Standard square box */
+        }
+
+        /* Instagram style feature item (Badi vertical post) */
+        .explore-item.tall-item {
+            grid-row: span 2; /* Yeh item do rows ki jagah gherega */
+            aspect-ratio: auto; /* Height auto taaki double row fit ho */
+            height: 100%;
+        }
+
+        .explore-item img {
+            width: 100%; height: 100%; object-fit: cover;
+            transition: filter 0.3s ease;
+        }
+
+        /* Overlay text for Video icon on reels in explore */
+        .reel-badge {
+            position: absolute; top: 12px; right: 12px;
+            color: white; font-size: 18px;
+            filter: drop-shadow(0px 1px 3px rgba(0,0,0,0.5));
+            z-index: 5;
+        }
+
+        /* Hover Stats Effect */
+        .item-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.3);
+            display: flex; justify-content: center; align-items: center;
+            gap: 25px; color: white; font-weight: 600; font-size: 16px;
+            opacity: 0; transition: opacity 0.2s ease;
+        }
+        .explore-item:hover .item-overlay { opacity: 1; }
+        .explore-item:hover img { filter: brightness(0.8); }
+
+        /* --- 📱 MOBILE ADAPTIVE DESIGN --- */
+        @media (max-width: 768px) {
+            .top-navbar .search-box-container { display: none; } /* Hide desktop bar */
+            .top-navbar .nav-icons { display: none; }
+            .bottom-navbar { display: flex; }
+            
+            /* Mobile Special Top Search Banner */
+            .top-navbar .nav-container { justify-content: center; padding: 0 16px; }
+            .mobile-search-trigger {
+                width: 100%; max-width: 100%; display: block !important;
+            }
+
+            .explore-container { margin-top: 70px; padding: 0 3px; }
+            .explore-grid { gap: 4px; } /* Asli Insta par mobile par gap bohot kam hota hai */
+            .explore-item { aspect-ratio: 1 / 1; }
+            .item-overlay { display: none; } /* Mobile par no hover effect */
+        }
+        
+        .mobile-search-trigger { display: none; }
+    </style>
+</head>
+<body>
+
+    <!-- TOP NAVBAR WITH INTEGRATED SEARCH -->
+    <nav class="top-navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <a href="home.html" class="logo-text">Instagram</a>
+            </div>
+            
+            <!-- Desktop Search Bar layout -->
+            <div class="search-box-container">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" placeholder="Search">
+            </div>
+
+            <!-- Mobile Search Bar (Saves file navigation) -->
+            <div class="search-box-container mobile-search-trigger">
+                <a href="search.html">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" placeholder="Search" disabled style="cursor: pointer;">
+                </a>
+            </div>
+
+            <div class="nav-icons">
+                <a href="home.html"><i class="fa-regular fa-house"></i></a>
+                <a href="messages.html"><i class="fa-regular fa-paper-plane"></i></a>
+                <a href="create.html"><i class="fa-regular fa-square-plus"></i></a>
+                <a href="explore.html"><i class="fa-solid fa-compass"></i></a>
+                <a href="notifications.html"><i class="fa-regular fa-heart"></i></a>
+                <a href="profile.html"><img src="https://picsum.photos/150/150?random=1" alt="Profile" class="nav-profile-pic"></a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- EXPLORE PATTERN TILES SECTION -->
+    <main class="explore-container">
+        <section class="explore-grid">
+            
+            <!-- Item 1 (Square) -->
+            <div class="explore-item">
+                <img src="https://picsum.photos/500/500?random=21" alt="Explore Post">
+                <div class="item-overlay">
+                    <span><i class="fa-solid fa-heart"></i> 10k</span>
+                    <span><i class="fa-solid fa-comment"></i> 450</span>
+                </div>
+            </div>
+
+            <!-- Item 2 (Square) -->
+            <div class="explore-item">
+                <img src="https://picsum.photos/500/500?random=22" alt="Explore Post">
+                <div class="item-overlay">
+                    <span><i class="fa-solid fa-heart"></i> 5.4k</span>
+                    <span><i class="fa-solid fa-comment"></i> 120</span>
+                </div>
+            </div>
+
+            <!-- Item 3 (Tall Vertical Item - Like a Reel card) -->
+            <div class="explore-item tall-item">
+                <i class="fa-solid fa-clapperboard reel-badge"></i>
+                <img src="https://picsum.photos/500/800?random=23" alt="Explore Reel">
+                <div class="item-overlay">
+                    <span><i class="fa-solid fa-heart"></i> 89k</span>
+                    <span><i class="fa-solid fa-comment"></i> 2.1k</span>
+                </div>
+            </div>
+
+            <!-- Item 4 (Square) -->
+            <div class="explore-item">
+                <img src="https://picsum.photos/500/500?random=24" alt="Explore Post">
+                <div class="item-overlay">
+                    <span><i class="fa-solid fa-heart"></i> 12k</span>
+                    <span><i class="fa-solid fa-comment"></i> 300</span>
+                </div>
+            </div>
+
+            <!-- Item 5 (Square) -->
+            <div class="explore-item">
+                <img src="https://picsum.photos/500/500?random=25" alt="Explore Post">
+                <div class="item-overlay">
+                    <span><i class="fa-solid fa-heart"></i> 7k</span>
+                    <span><i class="fa-solid fa-comment"></i> 95</span>
+                </div>
+            </div>
+
+            <!-- Item 6 (Square) -->
+            <div class="explore-item">
+                <img src="https://picsum.photos/500/500?random=26" alt="Explore Post">
+                <div class="item-overlay">
+                    <span><i class="fa-solid fa-heart"></i> 18k</span>
+                    <span><i class="fa-solid fa-comment"></i> 640</span>
+                </div>
+            </div>
+
+            <!-- Item 7 (Square) -->
+            <div class="explore-item">
+                <img src="https://picsum.photos/500/500?random=27" alt="Explore Post">
+                <div class="item-overlay">
+                    <span><i class="fa-solid fa-heart"></i> 3.2k</span>
+                    <span><i class="fa-solid fa-comment"></i> 40</span>
+                </div>
+            </div>
+
+            <!-- Item 8 (Tall Vertical Item - On the opposite side for balance) -->
+            <div class="explore-item tall-item">
+                <i class="fa-solid fa-clapperboard reel-badge"></i>
+                <img src="https://picsum.photos/500/800?random=28" alt="Explore Reel">
+                <div class="item-overlay">
+                    <span><i class="fa-solid fa-heart"></i> 150k</span>
+                    <span><i class="fa-solid fa-comment"></i> 4.5k</span>
+                </div>
+            </div>
+
+            <!-- Item 9 (Square) -->
+            <div class="explore-item">
+                <img src="https://picsum.photos/500/500?random=29" alt="Explore Post">
+                <div class="item-overlay">
+                    <span><i class="fa-solid fa-heart"></i> 22k</span>
+                    <span><i class="fa-solid fa-comment"></i> 810</span>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- MOBILE BOTTOM NAVBAR -->
+    <nav class="bottom-navbar">
+        <a href="home.html"><i class="fa-regular fa-house"></i></a>
+        <a href="search.html"><i class="fa-solid fa-magnifying-glass"></i></a>
+        <a href="create.html"><i class="fa-regular fa-square-plus"></i></a>
+        <a href="reels.html"><i class="fa-regular fa-clapperboard"></i></a>
+        <a href="profile.html"><img src="https://picsum.photos/150/150?random=1" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1.5px solid black;"></a>
+    </nav>
+
+</body>
+</html>
