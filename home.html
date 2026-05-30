@@ -23,8 +23,12 @@
         .feed-section { flex: 1; max-width: 614px; display: flex; flex-direction: column; gap: 24px; }
         .stories-wrapper { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; display: flex; gap: 16px; overflow-x: auto; scrollbar-width: none; }
         .stories-wrapper::-webkit-scrollbar { display: none; }
-        .story-node { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 12px; cursor: pointer; min-width: 66px; }
+        .story-node { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 12px; cursor: pointer; min-width: 66px; position: relative; }
         .story-ring-box { width: 66px; height: 66px; border-radius: 50%; background: var(--story-ring); padding: 2px; display: flex; justify-content: center; align-items: center; }
+        
+        /* Plus icon for adding story */
+        .add-story-plus { position: absolute; bottom: 22px; right: 2px; background: #0095f6; color: white; border-radius: 50%; width: 18px; height: 18px; display: flex; justify-content: center; align-items: center; font-size: 10px; border: 2px solid var(--card-bg); }
+        
         .story-node img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid var(--card-bg); }
         .story-username { width: 100%; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-main); }
         .post-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; display: flex; flex-direction: column; }
@@ -66,6 +70,17 @@
         .s-username { font-size: 14px; font-weight: 600; }
         .s-reason { font-size: 12px; color: var(--text-muted); }
         .follow-link { color: var(--link-color); font-size: 12px; font-weight: 600; cursor: pointer; }
+
+        /* --- INSTAGRAM FULLSCREEN STORY MODAL --- */
+        .story-viewer-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a1a; display: none; justify-content: center; align-items: center; z-index: 3000; }
+        .story-content-box { position: relative; width: 100%; max-width: 450px; height: 100vh; background: black; display: flex; justify-content: center; align-items: center; }
+        .story-content-box img { width: 100%; height: 100%; object-fit: contain; }
+        .story-top-bars { position: absolute; top: 15px; left: 10px; right: 10px; display: flex; gap: 4px; height: 2px; background: rgba(255,255,255,0.3); border-radius: 2px; }
+        .story-progress { height: 100%; background: white; width: 0%; transition: width 4s linear; }
+        .story-viewer-header { position: absolute; top: 25px; left: 15px; display: flex; align-items: center; gap: 10px; color: white; font-size: 14px; font-weight: 600; }
+        .story-viewer-header img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid white; }
+        .story-close-btn { position: absolute; top: 25px; right: 15px; color: white; font-size: 22px; cursor: pointer; background: none; border: none; }
+
         @media (max-width: 1000px) { .desktop-suggestions { display: none; } .main-workspace { justify-content: center; } }
         @media (max-width: 768px) { .top-navbar .nav-icons { display: none; } .bottom-navbar { display: flex; } .main-workspace { margin-top: 60px; padding: 0; } .stories-wrapper { border: none; border-bottom: 1px solid var(--border-color); border-radius: 0; } .post-card { border-left: none; border-right: none; border-radius: 0; } }
     </style>
@@ -74,14 +89,14 @@
 
     <nav class="top-navbar">
         <div class="nav-container">
-            <div class="logo"><h1 class="logo-text">Instagram</h1></div>
+            <div class="logo"><h1 class="logo-text" onclick="window.location.reload()">Instagram</h1></div>
             <div class="nav-icons">
                 <a href="home.html"><i class="fa-solid fa-house"></i></a>
                 <a href="messages.html"><i class="fa-regular fa-paper-plane"></i></a>
                 <a href="create.html"><i class="fa-regular fa-square-plus"></i></a>
                 <a href="explore.html"><i class="fa-regular fa-compass"></i></a>
                 <a href="notifications.html"><i class="fa-regular fa-heart"></i></a>
-                <a href="profile.html"><img src="https://picsum.photos/150/150?random=1" alt="Profile" class="nav-profile-pic"></a>
+                <a href="profile.html"><img src="https://picsum.photos/150/150?random=1" alt="Profile" class="nav-profile-pic" id="top-nav-avatar"></a>
             </div>
         </div>
     </nav>
@@ -89,11 +104,18 @@
     <main class="main-workspace">
         <section class="feed-section">
             <div class="stories-wrapper">
-                <a href="story-view.html" class="story-node"><div class="story-ring-box"><img src="https://picsum.photos/100/100?random=1" alt="My Story"></div><span class="story-username">Your Story</span></a>
-                <a href="story-view.html" class="story-node"><div class="story-ring-box"><img src="https://picsum.photos/100/100?random=5" alt="user"></div><span class="story-username">rohit_sharma</span></a>
-                <a href="story-view.html" class="story-node"><div class="story-ring-box"><img src="https://picsum.photos/100/100?random=6" alt="user"></div><span class="story-username">virat.kohli</span></a>
-                <a href="story-view.html" class="story-node"><div class="story-ring-box"><img src="https://picsum.photos/100/100?random=7" alt="user"></div><span class="story-username">tech_insider</span></a>
-                <a href="story-view.html" class="story-node"><div class="story-ring-box"><img src="https://picsum.photos/100/100?random=8" alt="user"></div><span class="story-username">travel_geek</span></a>
+                <div class="story-node" id="my-story-node">
+                    <div class="story-ring-box">
+                        <img src="https://picsum.photos/100/100?random=1" alt="My Story" id="story-avatar">
+                    </div>
+                    <div class="add-story-plus" id="story-plus-icon"><i class="fa-solid fa-plus"></i></div>
+                    <span class="story-username">Your Story</span>
+                </div>
+                
+                <div class="story-node"><div class="story-ring-box"><img src="https://picsum.photos/100/100?random=5" alt="user"></div><span class="story-username">rohit_sharma</span></div>
+                <div class="story-node"><div class="story-ring-box"><img src="https://picsum.photos/100/100?random=6" alt="user"></div><span class="story-username">virat.kohli</span></div>
+                <div class="story-node"><div class="story-ring-box"><img src="https://picsum.photos/100/100?random=7" alt="user"></div><span class="story-username">tech_insider</span></div>
+                <div class="story-node"><div class="story-ring-box"><img src="https://picsum.photos/100/100?random=8" alt="user"></div><span class="story-username">travel_geek</span></div>
             </div>
 
             <article class="post-card">
@@ -132,7 +154,7 @@
         </section>
 
         <aside class="desktop-suggestions">
-            <div class="self-profile-row"><div class="self-meta"><a href="profile.html"><img src="https://picsum.photos/150/150?random=1" alt="My Profile"></a><div class="s-text-box"><a href="profile.html" class="s-username">my_username</a><span class="s-reason" style="font-size: 14px;">Your Name</span></div></div><span class="switch-link">Switch</span></div>
+            <div class="self-profile-row"><div class="self-meta"><a href="profile.html"><img src="https://picsum.photos/150/150?random=1" alt="My Profile" id="sidebar-avatar"></a><div class="s-text-box"><a href="profile.html" class="s-username" id="sidebar-username">my_username</a><span class="s-reason" style="font-size: 14px;" id="sidebar-fullname">Your Name</span></div></div><span class="switch-link">Switch</span></div>
             <div class="suggestions-header"><span>Suggestions for you</span><span class="see-all-btn">See All</span></div>
             <div class="suggestion-list">
                 <div class="suggested-user-row"><div class="s-user-meta"><img src="https://picsum.photos/100/100?random=80" alt="user"><div class="s-text-box"><span class="s-username">ms_dhoni_fan</span></div></div><span class="follow-link">Follow</span></div>
@@ -140,17 +162,31 @@
         </aside>
     </main>
 
+    <div class="story-viewer-modal" id="story-modal">
+        <div class="story-content-box">
+            <div class="story-top-bars">
+                <div class="story-progress" id="story-progress-bar"></div>
+            </div>
+            <div class="story-viewer-header">
+                <img src="" alt="" id="popup-story-avatar">
+                <span id="popup-story-username">username</span>
+            </div>
+            <button class="story-close-btn" id="close-story-btn"><i class="fa-solid fa-xmark"></i></button>
+            <img src="" alt="Story Image" id="popup-story-img">
+        </div>
+    </div>
+
     <nav class="bottom-navbar">
         <a href="home.html"><i class="fa-solid fa-house"></i></a>
         <a href="search.html"><i class="fa-solid fa-magnifying-glass"></i></a>
         <a href="create.html"><i class="fa-regular fa-square-plus"></i></a>
         <a href="reels.html"><i class="fa-solid fa-clapperboard"></i></a>
-        <a href="profile.html"><img src="https://picsum.photos/150/150?random=1" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1.5px solid black;"></a>
+        <a href="profile.html"><img src="https://picsum.photos/150/150?random=1" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1.5px solid black;" id="bottom-nav-avatar"></a>
     </nav>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, collection, addDoc, onSnapshot, query, orderBy, getDocs, where } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBrqMn7FrFW3jslaDNM0ui-VW4w6K_3Nmk",
@@ -162,7 +198,105 @@
         };
         const db = getFirestore(initializeApp(firebaseConfig));
 
-        // Real-time fetching
+        let currentUsername = "luv_5";
+        let currentProfilePic = "https://picsum.photos/150/150?random=1";
+        let latestStoryImg = null;
+        let storyTimer = null;
+
+        // --- FETCH USER DETAILS & SYNC IMAGES ---
+        async function syncUserData() {
+            try {
+                const docRef = doc(db, "users", "luv_5");
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const userData = docSnap.data();
+                    currentUsername = userData.username || "luv_5";
+                    currentProfilePic = userData.profilePic || currentProfilePic;
+
+                    // UI elements refresh
+                    document.getElementById("top-nav-avatar").src = currentProfilePic;
+                    document.getElementById("bottom-nav-avatar").src = currentProfilePic;
+                    document.getElementById("story-avatar").src = currentProfilePic;
+                    document.getElementById("sidebar-avatar").src = currentProfilePic;
+                    document.getElementById("sidebar-username").innerText = currentUsername;
+
+                    let finalName = "User";
+                    for (let key in userData) {
+                        if (key !== "username" && key !== "bio" && key !== "profilePic" && key !== "gender") {
+                            finalName = userData[key];
+                            break;
+                        }
+                    }
+                    document.getElementById("sidebar-fullname").innerText = finalName;
+                    
+                    // User data milne ke baad stories check karein
+                    checkUserStories();
+                }
+            } catch(err) {
+                console.log("Error syncing user image: ", err);
+            }
+        }
+
+        // --- CHECK IF USER HAS UPLOADED ANY STORY ---
+        async function checkUserStories() {
+            try {
+                const q = query(collection(db, "stories"), where("userId", "==", "luv_5"), orderBy("timestamp", "desc"));
+                const querySnapshot = await getDocs(q);
+
+                if (!querySnapshot.empty) {
+                    // Sabse latest story select karein
+                    latestStoryImg = querySnapshot.docs[0].data().storyImg;
+                    // Plus icon ko hata kar story ring active kar do
+                    document.getElementById("story-plus-icon").style.display = "none";
+                } else {
+                    // Agar koi story nahi h toh story ring greyish generic kar do
+                    document.querySelector("#my-story-node .story-ring-box").style.background = "#dbdbdb";
+                }
+            } catch (err) {
+                console.log("Error finding story: ", err);
+            }
+        }
+
+        // --- STORY CLICK MANAGEMENT (VIEW OR CREATE) ---
+        document.getElementById("my-story-node").addEventListener("click", () => {
+            if (latestStoryImg) {
+                // Open full screen story viewer
+                const modal = document.getElementById("story-modal");
+                document.getElementById("popup-story-img").src = latestStoryImg;
+                document.getElementById("popup-story-avatar").src = currentProfilePic;
+                document.getElementById("popup-story-username").innerText = currentUsername;
+                
+                modal.style.display = "flex";
+                
+                // Progress bar animation trigger
+                const bar = document.getElementById("story-progress-bar");
+                bar.style.width = "100%";
+
+                // 4 seconds ke baad automatic close ho jayegi story
+                storyTimer = setTimeout(() => {
+                    closeStory();
+                }, 4000);
+            } else {
+                // Agar koi uploaded story nahi h toh redirect to create page
+                window.location.href = "create.html?mode=story";
+            }
+        });
+
+        function closeStory() {
+            const modal = document.getElementById("story-modal");
+            modal.style.display = "none";
+            document.getElementById("story-progress-bar").style.transition = "none";
+            document.getElementById("story-progress-bar").style.width = "0%";
+            setTimeout(() => {
+                document.getElementById("story-progress-bar").style.transition = "width 4s linear";
+            }, 50);
+            clearTimeout(storyTimer);
+        }
+
+        document.getElementById("close-story-btn").addEventListener("click", closeStory);
+
+        // --- COMMENTS ENGINE REAL-TIME ---
         const containers = document.querySelectorAll(".comments-container");
         onSnapshot(query(collection(db, "comments"), orderBy("timestamp", "asc")), (snapshot) => {
             containers.forEach(container => container.innerHTML = ""); 
@@ -185,6 +319,9 @@
                 }
             });
         });
+
+        // Run sync functions on load
+        syncUserData();
     </script>
 </body>
 </html>
