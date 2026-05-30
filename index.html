@@ -3,143 +3,68 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Instagram UI Clone - Advanced</title>
+<title>Login</title>
 
-<!-- Instagram-like font -->
-<link href="https://fonts.googleapis.com/css2?family=Grand+Hotel&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Grand+Hotel&family=Roboto&display=swap" rel="stylesheet">
 
 <style>
-  * { box-sizing: border-box; }
+body {
+  margin:0;
+  font-family:'Roboto',sans-serif;
+  background:#fafafa;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
 
-  body {
-    margin: 0;
-    font-family: 'Roboto', sans-serif;
-    background: #fafafa;
-  }
+.box {
+  background:white;
+  border:1px solid #dbdbdb;
+  padding:30px;
+  width:300px;
+  text-align:center;
+}
 
-  .container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    padding: 10px;
-  }
+.logo {
+  font-family:'Grand Hotel',cursive;
+  font-size:40px;
+  margin-bottom:20px;
+}
 
-  .login-box {
-    background: white;
-    border: 1px solid #dbdbdb;
-    padding: 30px 20px;
-    width: 100%;
-    max-width: 350px;
-    text-align: center;
-  }
+input {
+  width:100%;
+  padding:10px;
+  margin:6px 0;
+  box-sizing: border-box;
+}
 
-  /* Instagram logo font */
-  .logo {
-    font-family: 'Grand Hotel', cursive;
-    font-size: 42px;
-    margin-bottom: 20px;
-  }
-
-  input {
-    width: 100%;
-    padding: 12px;
-    margin: 6px 0;
-    border: 1px solid #dbdbdb;
-    border-radius: 4px;
-    background: #fafafa;
-    font-size: 14px;
-  }
-
-  button {
-    width: 100%;
-    padding: 12px;
-    margin-top: 10px;
-    background: #0095f6;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-weight: 500;
-    cursor: pointer;
-    font-size: 14px;
-  }
-
-  button:hover { background: #007cd1; }
-
-  .divider {
-    margin: 15px 0;
-    color: #999;
-    font-size: 12px;
-  }
-
-  /* Facebook login */
-  .fb-login {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-    color: #385185;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    margin-top: 10px;
-  }
-
-  .footer {
-    margin-top: 15px;
-    font-size: 12px;
-    color: #00376b;
-    cursor: pointer;
-  }
-
-  /* Icons (SVG) */
-  .icon {
-    width: 18px;
-    height: 18px;
-  }
-
-  /* Mobile */
-  @media (max-width: 480px) {
-    .login-box {
-      border: none;
-      padding: 20px 15px;
-    }
-
-    .logo { font-size: 34px; }
-  }
-
+button {
+  width:100%;
+  padding:10px;
+  background:#0095f6;
+  color:white;
+  border:none;
+  cursor: pointer;
+}
 </style>
 </head>
+
 <body>
 
-<div class="container">
-  <div class="login-box">
+<div class="box">
+  <div class="logo">Instagram</div>
 
-    <div class="logo">Instagram</div>
+  <input type="text" placeholder="Username">
+  <input type="password" placeholder="Password">
 
-    <input type="text" placeholder="Phone number, username, or email">
-    <input type="password" placeholder="Password">
-
-    <button onclick="fakeLogin()">Log In</button>
-
-    <div class="divider">OR</div>
-
-    <div class="fb-login">
-      <!-- Facebook Icon -->
-      <svg class="icon" viewBox="0 0 24 24" fill="#385185">
-        <path d="M22 12a10 10 0 1 0-11.6 9.9v-7H8v-3h2.4V9.5c0-2.4 1.4-3.7 3.6-3.7 1 0 2 .2 2 .2v2.2h-1.1c-1.1 0-1.5.7-1.5 1.4V12H16l-.4 3h-2.1v7A10 10 0 0 0 22 12z"/>
-      </svg>
-      Log in with Facebook
-    </div>
-
-    <div class="footer">Forgot password?</div>
-
-  </div>
+  <button onclick="login()">Log In</button>
 </div>
 
 <script>
-function fakeLogin() {
-  alert("This is an advanced Instagram UI clone. No real login happens.");
+function login(){
+  localStorage.setItem("loggedIn","true");
+  window.location.href = "home.html"; /* Yeh user ko home.html page par bhej dega */
 }
 </script>
 
