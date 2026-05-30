@@ -25,10 +25,7 @@
         .stories-wrapper::-webkit-scrollbar { display: none; }
         .story-node { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 12px; cursor: pointer; min-width: 66px; position: relative; }
         .story-ring-box { width: 66px; height: 66px; border-radius: 50%; background: var(--story-ring); padding: 2px; display: flex; justify-content: center; align-items: center; }
-        
-        /* Plus icon for adding story */
         .add-story-plus { position: absolute; bottom: 22px; right: 2px; background: #0095f6; color: white; border-radius: 50%; width: 18px; height: 18px; display: flex; justify-content: center; align-items: center; font-size: 10px; border: 2px solid var(--card-bg); }
-        
         .story-node img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid var(--card-bg); }
         .story-username { width: 100%; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-main); }
         .post-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; display: flex; flex-direction: column; }
@@ -59,7 +56,7 @@
         .self-profile-row { display: flex; align-items: center; justify-content: space-between; }
         .self-meta { display: flex; align-items: center; gap: 16px; }
         .self-meta img { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; }
-        .switch-link { color: var(--link-color); font-size: 12px; font-weight: 600; cursor: pointer; }
+        .logout-link { color: var(--link-color); font-size: 12px; font-weight: 600; cursor: pointer; }
         .suggestions-header { display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; color: var(--text-muted); margin-top: 10px; }
         .see-all-btn { color: var(--text-main); cursor: pointer; font-size: 12px; }
         .suggestion-list { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }
@@ -71,7 +68,6 @@
         .s-reason { font-size: 12px; color: var(--text-muted); }
         .follow-link { color: var(--link-color); font-size: 12px; font-weight: 600; cursor: pointer; }
 
-        /* --- INSTAGRAM FULLSCREEN STORY MODAL --- */
         .story-viewer-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a1a; display: none; justify-content: center; align-items: center; z-index: 3000; }
         .story-content-box { position: relative; width: 100%; max-width: 450px; height: 100vh; background: black; display: flex; justify-content: center; align-items: center; }
         .story-content-box img { width: 100%; height: 100%; object-fit: contain; }
@@ -88,7 +84,7 @@
             .main-workspace { margin-top: 60px; padding: 0; } 
             .stories-wrapper { border: none; border-bottom: 1px solid var(--border-color); border-radius: 0; } 
             .post-card { border-left: none; border-right: none; border-radius: 0; } 
-            .search-engine-box { width: 160px !important; } /* Mobile responsive width */
+            .search-engine-box { width: 160px !important; }
         }
     </style>
 </head>
@@ -169,7 +165,16 @@
         </section>
 
         <aside class="desktop-suggestions">
-            <div class="self-profile-row"><div class="self-meta"><a href="profile.html"><img src="https://picsum.photos/150/150?random=1" alt="My Profile" id="sidebar-avatar"></a><div class="s-text-box"><a href="profile.html" class="s-username" id="sidebar-username">my_username</a><span class="s-reason" style="font-size: 14px;" id="sidebar-fullname">Your Name</span></div></div><span class="switch-link">Switch</span></div>
+            <div class="self-profile-row">
+                <div class="self-meta">
+                    <a href="profile.html"><img src="https://picsum.photos/150/150?random=1" alt="My Profile" id="sidebar-avatar"></a>
+                    <div class="s-text-box">
+                        <a href="profile.html" class="s-username" id="sidebar-username">Loading...</a>
+                        <span class="s-reason" style="font-size: 14px;" id="sidebar-fullname">Loading Name...</span>
+                    </div>
+                </div>
+                <span class="logout-link" id="logout-trigger-btn">Logout</span>
+            </div>
             <div class="suggestions-header"><span>Suggestions for you</span><span class="see-all-btn">See All</span></div>
             <div class="suggestion-list">
                 <div class="suggested-user-row"><div class="s-user-meta"><img src="https://picsum.photos/100/100?random=80" alt="user"><div class="s-text-box"><span class="s-username">ms_dhoni_fan</span></div></div><span class="follow-link">Follow</span></div>
@@ -213,17 +218,27 @@
         };
         const db = getFirestore(initializeApp(firebaseConfig));
 
-        // UPGRADE: LocalStorage se logged-in user dynamically uthayega, agar nahi mila to fallback "luv_5" chalega
-        let currentUsername = localStorage.getItem("active_user") || "luv_5";
+        // 🔥 CRITICAL FIX 1: Pehle check karo session me koi active_user hai bhi ya nahi!
+        let currentUsername = localStorage.getItem("active_user");
+        if (!currentUsername) {
+            // Agar bina login koi direct yahan aayega toh seedhe login.html par phenk do
+            window.location.href = "login.html";
+        }
+
         let currentProfilePic = "https://picsum.photos/150/150?random=1";
         let latestStoryImg = null;
         let storyTimer = null;
         let isCheckingStory = true;
 
+        // 🔥 CRITICAL FIX 2: LOGOUT ENGINE FUNCTIONALITY
+        document.getElementById("logout-trigger-btn").addEventListener("click", () => {
+            localStorage.removeItem("active_user");
+            window.location.href = "login.html";
+        });
+
         // --- FETCH USER DETAILS & SYNC IMAGES ---
         async function syncUserData() {
             try {
-                // UPGRADE: hardcoded string ki jagah variable use kiya taaki real-time data aaye
                 const docRef = doc(db, "users", currentUsername);
                 const docSnap = await getDoc(docRef);
 
@@ -241,7 +256,6 @@
                     let finalName = userData.name || "User";
                     document.getElementById("sidebar-fullname").innerText = finalName;
                 } else {
-                    // Agar database me store nahi hai to generic profile update
                     document.getElementById("sidebar-username").innerText = currentUsername;
                     document.getElementById("sidebar-fullname").innerText = "Instagram User";
                 }
@@ -252,7 +266,7 @@
             }
         }
 
-        // --- CHECK STORIES WITHOUT ANY QUERY PARAMETERS (PREVENTS FIREBASE INDEX ERRORS) ---
+        // --- CHECK STORIES ---
         async function checkUserStories() {
             try {
                 const querySnapshot = await getDocs(collection(db, "stories"));
@@ -260,7 +274,6 @@
 
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
-                    // UPGRADE: dynamic session user ki storage story access ho rhi hai
                     if (data.userId === currentUsername) {
                         matchedStories.push(data);
                     }
@@ -291,7 +304,7 @@
             }
         }
 
-        // --- STORY CLICK MANAGEMENT (VIEW OR CREATE) ---
+        // --- STORY CLICK MANAGEMENT ---
         document.getElementById("my-story-node").addEventListener("click", () => {
             if (isCheckingStory) {
                 console.log("Abhi background processing chal rahi hai, 1 second ruko...");
@@ -357,9 +370,7 @@
             });
         });
 
-        // ==========================================
-        //    REAL-TIME GLOBAL USER SEARCH LOGIC
-        // ==========================================
+        // --- REAL-TIME GLOBAL USER SEARCH LOGIC ---
         const searchInput = document.getElementById("global-search-input");
         const resultsDropdown = document.getElementById("search-results-dropdown");
 
