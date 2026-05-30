@@ -129,20 +129,21 @@
                 if (docSnap.exists()) {
                     const userData = docSnap.data();
                     
-                    // Humne console mein pura data print karwa diya taaki hum spelling dekh sakein
-                    console.log("Firebase ka asli data ye hai:", userData);
-
                     document.getElementById("prof-username").innerText = userData.username || "No Username";
                     document.getElementById("prof-bio").innerText = userData.bio || "No Bio";
 
-                    // POSSIBILITIES CHECK: Har tarah ki common spelling check karega
-                    const userAsliName = userData.fullName || userData.name || userData.fullname || userData.Name;
+                    // ULTIMATE AUTOMATIC CHECK: Yeh loop poore data ko scan karke name field dhoond nikalega!
+                    let finalName = "User"; 
                     
-                    if (userAsliName) {
-                        document.getElementById("prof-name").innerText = userAsliName;
-                    } else {
-                        document.getElementById("prof-name").innerText = "Spelling Galat Hai Bhai!";
+                    for (let key in userData) {
+                        // Agar field ka naam 'username' ya 'bio' nahi hai, toh wahi hamara 'name' hai!
+                        if (key !== "username" && key !== "bio") {
+                            finalName = userData[key];
+                            break;
+                        }
                     }
+                    
+                    document.getElementById("prof-name").innerText = finalName;
 
                 } else {
                     console.log("Firebase mein aisa koi user nahi mila!");
