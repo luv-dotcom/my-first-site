@@ -1,1 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram - Search</title>
+    
+    <!-- Google Fonts & Font Awesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Grand+Hotel&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #fafafa;
+            --border-color: #dbdbdb;
+            --text-main: #262626;
+            --text-muted: #8e8e8e;
+            --card-bg: #ffffff;
+            --search-bg: #efefef;
+            --link-color: #0095f6;
+        }
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding-top: 60px;
+            padding-bottom: 60px;
+        }
+
+        a { text-decoration: none; color: inherit; }
+
+        /* --- 📌 TOP NAVIGATION BAR --- */
+        .top-navbar {
+            position: fixed; top: 0; left: 0; width: 100%; height: 60px;
+            background-color: var(--card-bg); border-bottom: 1px solid var(--border-color);
+            display: flex; justify-content: center; align-items: center; z-index: 1000;
+        }
+        .nav-container {
+            width: 100%; max-width: 975px; padding: 0 20px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .logo-text { font-family: 'Grand Hotel', cursive; font-size: 30px; }
+        .nav-icons { display: flex; gap: 22px; align-items: center; }
+        .nav-icons i { font-size: 22px; cursor: pointer; }
+        .nav-profile-pic { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 1px solid black; }
+
+        /* --- 📱 BOTTOM NAVBAR FOR MOBILE --- */
+        .bottom-navbar {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 52px;
+            background-color: var(--card-bg); border-top: 1px solid var(--border-color);
+            display: none; justify-content: space-around; align-items: center; z-index: 1000;
+        }
+        .bottom-navbar i { font-size: 22px; }
+
+        /* --- 🔍 SEARCH MAIN WORKSPACE --- */
+        .search-container {
+            max-width: 600px;
+            margin: 30px auto 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Full Search Input Wrapper Box */
+        .search-input-wrapper {
+            position: relative;
+            width: 100%;
+            margin-bottom: 24px;
+        }
+        .search-input-wrapper input {
+            width: 100%; padding: 12px 16px 12px 44px;
+            background-color: var(--search-bg); border: none;
+            border-radius: 8px; font-size: 16px; outline: none;
+            color: var(--text-main);
+        }
+        .search-input-wrapper i {
+            position: absolute; left: 16px; top: 50%;
+            transform: translateY(-50%); color: var(--text-muted); font-size: 16px;
+        }
+
+        /* Recent Search History Card Panel */
+        .recent-section {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+        }
+        .recent-header {
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 16px; font-weight: 600; margin-bottom: 16px;
+        }
+        .clear-all-btn {
+            color: var(--link-color); font-size: 14px; cursor: pointer; font-weight: 600;
+        }
+
+        /* User List Nodes Loop Container */
+        .search-results-list {
+            display: flex; flex-direction: column; gap: 16px;
+        }
+        .searched-user-item {
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .user-profile-meta {
+            display: flex; align-items: center; gap: 14px;
+        }
+        .user-profile-meta img {
+            width: 44px; height: 44px; border-radius: 50%; object-fit: cover;
+        }
+        .user-name-box {
+            display: flex; flex-direction: column; gap: 2px;
+        }
+        .u-username { font-size: 14px; font-weight: 600; }
+        .u-fullname { font-size: 14px; color: var(--text-muted); }
+        
+        .remove-search-btn {
+            color: var(--text-muted); cursor: pointer; font-size: 16px; padding: 5px;
+        }
+        .remove-search-btn:hover { color: var(--text-main); }
+
+        /* --- 📱 MOBILE SCREEN OPTIMIZATIONS --- */
+        @media (max-width: 768px) {
+            .top-navbar .nav-icons { display: none; }
+            .bottom-navbar { display: flex; }
+            
+            .search-container { margin-top: 20px; padding: 0 16px; }
+            .recent-section { border: none; background: transparent; padding: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TOP NAVIGATION BAR -->
+    <nav class="top-navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <a href="home.html" class="logo-text">Instagram</a>
+            </div>
+            <div class="nav-icons">
+                <a href="home.html"><i class="fa-regular fa-house"></i></a>
+                <a href="messages.html"><i class="fa-regular fa-paper-plane"></i></a>
+                <a href="create.html"><i class="fa-regular fa-square-plus"></i></a>
+                <a href="explore.html"><i class="fa-regular fa-compass"></i></a>
+                <a href="notifications.html"><i class="fa-regular fa-heart"></i></a>
+                <a href="profile.html"><img src="https://picsum.photos/150/150?random=1" alt="Profile" class="nav-profile-pic"></a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- SEARCH BODY HUBS -->
+    <main class="search-container">
+        
+        <!-- Interactive Input Field Group -->
+        <div class="search-input-wrapper">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" placeholder="Search accounts, topics...">
+        </div>
+
+        <!-- History Content Shell -->
+        <section class="recent-section">
+            <div class="recent-header">
+                <span>Recent</span>
+                <span class="clear-all-btn">Clear all</span>
+            </div>
+
+            <div class="search-results-list">
+                <!-- User Item 1 -->
+                <div class="searched-user-item">
+                    <a href="user-profile.html" class="user-profile-meta">
+                        <img src="https://picsum.photos/100/100?random=5" alt="user avatar">
+                        <div class="user-name-box">
+                            <span class="u-username">rohit_sharma</span>
+                            <span class="u-fullname">Rohit Sharma</span>
+                        </div>
+                    </a>
+                    <i class="fa-solid fa-xmark remove-search-btn"></i>
+                </div>
+
+                <!-- User Item 2 -->
+                <div class="searched-user-item">
+                    <a href="user-profile.html" class="user-profile-meta">
+                        <img src="https://picsum.photos/100/100?random=6" alt="user avatar">
+                        <div class="user-name-box">
+                            <span class="u-username">virat.kohli</span>
+                            <span class="u-fullname">Virat Kohli</span>
+                        </div>
+                    </a>
+                    <i class="fa-solid fa-xmark remove-search-btn"></i>
+                </div>
+
+                <!-- User Item 3 -->
+                <div class="searched-user-item">
+                    <a href="user-profile.html" class="user-profile-meta">
+                        <img src="https://picsum.photos/100/100?random=12" alt="user avatar">
+                        <div class="user-name-box">
+                            <span class="u-username">ananya_p</span>
+                            <span class="u-fullname">Ananya Panday</span>
+                        </div>
+                    </a>
+                    <i class="fa-solid fa-xmark remove-search-btn"></i>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MOBILE BOTTOM NAVIGATION BANNER -->
+    <nav class="bottom-navbar">
+        <a href="home.html"><i class="fa-regular fa-house"></i></a>
+        <a href="search.html"><i class="fa-solid fa-magnifying-glass"></i></a>
+        <a href="create.html"><i class="fa-regular fa-square-plus"></i></a>
+        <a href="reels.html"><i class="fa-regular fa-clapperboard"></i></a>
+        <a href="profile.html"><img src="https://picsum.photos/150/150?random=1" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1.5px solid black;"></a>
+    </nav>
+
+</body>
+</html>
