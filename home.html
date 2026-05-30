@@ -82,7 +82,14 @@
         .story-close-btn { position: absolute; top: 25px; right: 15px; color: white; font-size: 22px; cursor: pointer; background: none; border: none; }
 
         @media (max-width: 1000px) { .desktop-suggestions { display: none; } .main-workspace { justify-content: center; } }
-        @media (max-width: 768px) { .top-navbar .nav-icons { display: none; } .bottom-navbar { display: flex; } .main-workspace { margin-top: 60px; padding: 0; } .stories-wrapper { border: none; border-bottom: 1px solid var(--border-color); border-radius: 0; } .post-card { border-left: none; border-right: none; border-radius: 0; } }
+        @media (max-width: 768px) { 
+            .top-navbar .nav-icons { display: none; } 
+            .bottom-navbar { display: flex; } 
+            .main-workspace { margin-top: 60px; padding: 0; } 
+            .stories-wrapper { border: none; border-bottom: 1px solid var(--border-color); border-radius: 0; } 
+            .post-card { border-left: none; border-right: none; border-radius: 0; } 
+            .search-engine-box { width: 160px !important; } /* Mobile responsive width */
+        }
     </style>
 </head>
 <body>
@@ -90,6 +97,14 @@
     <nav class="top-navbar">
         <div class="nav-container">
             <div class="logo"><h1 class="logo-text" onclick="window.location.reload()">Instagram</h1></div>
+            
+            <div class="search-engine-box" style="position: relative; width: 240px; max-width: 100%;">
+                <input type="text" id="global-search-input" placeholder="Search users..." style="width: 100%; padding: 6px 12px 6px 32px; border: 1px solid var(--border-color); border-radius: 8px; background: #efefef; outline: none; font-size: 14px;">
+                <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 12px; color: var(--text-muted);"></i>
+                
+                <div id="search-results-dropdown" style="position: absolute; top: 40px; left: 0; width: 100%; background: white; border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: none; max-height: 250px; overflow-y: auto; z-index: 2000; padding: 6px 0;">
+                </div>
+            </div>
             <div class="nav-icons">
                 <a href="home.html"><i class="fa-solid fa-house"></i></a>
                 <a href="messages.html"><i class="fa-regular fa-paper-plane"></i></a>
@@ -233,7 +248,6 @@
             } catch(err) {
                 console.log("Error syncing user data: ", err);
             } finally {
-                // User info fetch hone ke baad ya fail hone ke baad stories pull karenge
                 await checkUserStories();
             }
         }
@@ -241,7 +255,6 @@
         // --- CHECK STORIES WITHOUT ANY QUERY PARAMETERS (PREVENTS FIREBASE INDEX ERRORS) ---
         async function checkUserStories() {
             try {
-                // Pure collection ko fetch karke local array me user field check karenge
                 const querySnapshot = await getDocs(collection(db, "stories"));
                 let matchedStories = [];
 
@@ -253,7 +266,6 @@
                 });
 
                 if (matchedStories.length > 0) {
-                    // Manual sorting timestamp ke aadhar par taaki latest story mile
                     matchedStories.sort((a, b) => {
                         const timeA = a.timestamp ? a.timestamp.seconds : 0;
                         const timeB = b.timestamp ? b.timestamp.seconds : 0;
@@ -262,7 +274,6 @@
 
                     latestStoryImg = matchedStories[0].storyImg;
                     
-                    // Plus icon chhupa do aur colorful gradient active rakho
                     document.getElementById("story-plus-icon").style.display = "none";
                     document.querySelector("#my-story-node .story-ring-box").style.background = "linear-gradient(45deg, #fbc531, #c23616, #9c88ff)";
                     console.log("Story Image found successfully: ", latestStoryImg);
@@ -275,7 +286,7 @@
             } catch (err) {
                 console.error("Story fetching loop error: ", err);
             } finally {
-                isCheckingStory = false; // System checking finished!
+                isCheckingStory = false;
             }
         }
 
@@ -287,7 +298,6 @@
             }
 
             if (latestStoryImg) {
-                // Open full screen player model immediately
                 const modal = document.getElementById("story-modal");
                 document.getElementById("popup-story-img").src = latestStoryImg;
                 document.getElementById("popup-story-avatar").src = currentProfilePic;
@@ -295,7 +305,6 @@
                 
                 modal.style.display = "flex";
                 
-                // Reset and start linear animation link
                 const bar = document.getElementById("story-progress-bar");
                 bar.style.transition = "none";
                 bar.style.width = "0%";
@@ -305,12 +314,10 @@
                     bar.style.width = "100%";
                 }, 20);
 
-                // Auto hide window after 4000ms
                 storyTimer = setTimeout(() => {
                     closeStory();
                 }, 4000);
             } else {
-                // Fallback redirect to story posting dashboard
                 window.location.href = "create.html?mode=story";
             }
         });
@@ -347,6 +354,92 @@
                     input.value = "";
                 }
             });
+        });
+
+        // ==========================================
+        //    REAL-TIME GLOBAL USER SEARCH LOGIC
+        // ==========================================
+        const searchInput = document.getElementById("global-search-input");
+        const resultsDropdown = document.getElementById("search-results-dropdown");
+
+        searchInput.addEventListener("input", async (e) => {
+            const searchText = e.target.value.trim().toLowerCase();
+            resultsDropdown.innerHTML = ""; // Purane results clean karein
+
+            if (searchText === "") {
+                resultsDropdown.style.display = "none";
+                return;
+            }
+
+            try {
+                // Firebase ke 'users' collection se data fetch karna
+                const querySnapshot = await getDocs(collection(db, "users"));
+                let matchCount = 0;
+
+                querySnapshot.forEach((docSnap) => {
+                    const userData = docSnap.data();
+                    
+                    // Username nikalna: check field or doc.id
+                    const uName = (userData.username || docSnap.id).toLowerCase();
+                    
+                    // Name nikalna dynamic keys se
+                    let fullName = "";
+                    for (let key in userData) {
+                        if (key !== "username" && key !== "bio" && key !== "profilePic" && key !== "gender") {
+                            fullName = userData[key].toLowerCase();
+                            break;
+                        }
+                    }
+
+                    // Agar typed text username ya fullname se match kare
+                    if (uName.includes(searchText) || fullName.includes(searchText)) {
+                        matchCount++;
+                        
+                        const userRow = document.createElement("div");
+                        userRow.style.cssText = "display: flex; align-items: center; gap: 10px; padding: 10px 14px; cursor: pointer; transition: background 0.2s;";
+                        userRow.innerHTML = `
+                            <img src="${userData.profilePic || 'https://picsum.photos/150/150?random=99'}" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover;">
+                            <div style="display: flex; flex-direction: column;">
+                                <span style="font-size: 14px; font-weight: 600; color: #262626;">${userData.username || docSnap.id}</span>
+                                <span style="font-size: 12px; color: #8e8e8e;">${userData.name || userData.fullname || ''}</span>
+                            </div>
+                        `;
+
+                        // Hover Effects
+                        userRow.addEventListener("mouseenter", () => userRow.style.backgroundColor = "#fafafa");
+                        userRow.addEventListener("mouseleave", () => userRow.style.backgroundColor = "transparent");
+
+                        // Redirect Rule on Click
+                        userRow.addEventListener("click", () => {
+                            const clickedUser = userData.username || docSnap.id;
+                            if (clickedUser === currentUsername) {
+                                window.location.href = "profile.html";
+                            } else {
+                                window.location.href = `user-profile.html?id=${clickedUser}`;
+                            }
+                        });
+
+                        resultsDropdown.appendChild(userRow);
+                    }
+                });
+
+                if (matchCount > 0) {
+                    resultsDropdown.style.display = "block";
+                } else {
+                    resultsDropdown.innerHTML = `<div style="padding: 12px; text-align: center; color: #8e8e8e; font-size: 14px;">No users found</div>`;
+                    resultsDropdown.style.display = "block";
+                }
+
+            } catch (err) {
+                console.error("Error searching users: ", err);
+            }
+        });
+
+        // Dropdown ko band karna agar user side me click kare
+        document.addEventListener("click", (e) => {
+            if (!document.querySelector(".search-engine-box").contains(e.target)) {
+                resultsDropdown.style.display = "none";
+            }
         });
 
         // Execute functions
