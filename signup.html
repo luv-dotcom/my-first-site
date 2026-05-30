@@ -3,69 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instagram - Signup</title>
+    <title>Sign Up • Instagram</title>
     <link href="https://fonts.googleapis.com/css2?family=Grand+Hotel&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --bg-color: #fafafa; --border-color: #dbdbdb; --text-main: #262626; --text-muted: #8e8e8e; --card-bg: #ffffff; --link-color: #0095f6; }
+        :root {
+            --bg-color: #fafafa;
+            --border-color: #dbdbdb;
+            --text-main: #262626;
+            --text-muted: #8e8e8e;
+            --card-bg: #ffffff;
+            --link-color: #0095f6;
+            --error-color: #ed4956;
+            --success-color: #2ed573;
+        }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-main); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-        .signup-container { width: 100%; max-width: 350px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px 30px; display: flex; flex-direction: column; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .logo-text { font-family: 'Grand Hotel', cursive; font-size: 50px; margin-bottom: 10px; }
-        .subtitle { color: var(--text-muted); font-weight: 600; font-size: 14px; text-align: center; margin-bottom: 15px; }
-        .form-group { width: 100%; margin-bottom: 10px; }
-        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px; background: #fafafa; border: 1px solid var(--border-color); border-radius: 4px; outline: none; font-size: 14px; }
-        .form-group textarea { resize: none; height: 50px; }
-        .avatar-upload-box { display: flex; flex-direction: column; align-items: center; gap: 5px; margin-bottom: 10px; }
-        .avatar-preview { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color); }
-        .file-label { font-size: 12px; color: var(--link-color); font-weight: 600; cursor: pointer; }
-        #profile-pic-input { display: none; }
-        .signup-btn { width: 100%; background: var(--link-color); color: white; border: none; padding: 8px; border-radius: 4px; font-weight: 600; cursor: pointer; }
-        .signup-btn:disabled { background: #b2dffc; cursor: not-allowed; }
-        .error-message { color: #ed4956; font-size: 13px; text-align: center; margin-top: 10px; display: none; }
-        .success-message { color: #2ed573; font-size: 13px; text-align: center; margin-top: 10px; display: none; }
-        .login-link-box { width: 100%; max-width: 350px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; text-align: center; margin-top: 10px; font-size: 14px; }
-        .login-link-box a { color: var(--link-color); font-weight: 600; text-decoration: none; }
+        body { background-color: var(--bg-color); color: var(--text-main); display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+        
+        .auth-container { width: 100%; max-width: 350px; display: flex; flex-direction: column; gap: 10px; }
+        .auth-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 4px; padding: 40px 30px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+        
+        .logo-text { font-family: 'Grand Hotel', cursive; font-size: 50px; margin-bottom: 20px; cursor: pointer; }
+        .subtitle { color: var(--text-muted); font-size: 17px; font-weight: 600; line-height: 20px; margin-bottom: 20px; }
+        
+        form { width: 100%; display: flex; flex-direction: column; gap: 6px; }
+        .input-box { width: 100%; position: relative; }
+        .input-box input { width: 100%; padding: 10px 8px; background: #fafafa; border: 1px solid var(--border-color); border-radius: 4px; font-size: 12px; outline: none; color: var(--text-main); }
+        .input-box input:focus { border-color: #a8a8a8; }
+        
+        /* Profile Details Section (Initially Hidden) */
+        .profile-details-section { display: none; flex-direction: column; gap: 6px; margin-top: 10px; border-top: 1px dashed var(--border-color); padding-top: 15px; animation: slideDown 0.3s ease-in-out; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .section-title { font-size: 13px; color: var(--text-muted); font-weight: 600; text-align: left; margin-bottom: 4px; }
+
+        .auth-btn { background: var(--link-color); color: white; border: none; border-radius: 4px; padding: 7px; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 8px; width: 100%; }
+        .auth-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+        
+        .msg-box { margin-top: 15px; font-size: 14px; display: none; font-weight: 500; width: 100%; }
+        .error-msg { color: var(--error-color); }
+        .success-msg { color: var(--success-color); }
+
+        .redirect-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 4px; padding: 20px; text-align: center; font-size: 14px; }
+        .redirect-card a { color: var(--link-color); font-weight: 600; text-decoration: none; }
     </style>
 </head>
 <body>
 
-    <div>
-        <div class="signup-container">
+    <div class="auth-container">
+        <div class="auth-card">
             <h1 class="logo-text">Instagram</h1>
-            <p class="subtitle">Sign up to see photos from your friends.</p>
+            <p class="subtitle" id="form-subtitle">Sign up to see photos and videos from your friends.</p>
             
-            <form id="signup-form" style="width: 100%;">
-                <div class="avatar-upload-box">
-                    <img src="https://api.dicebear.com/7.x/initials/svg?seed=Insta" alt="Avatar Preview" id="avatar-preview-img" class="avatar-preview">
-                    <label for="profile-pic-input" class="file-label">Choose Photo (Optional)</label>
-                    <input type="file" id="profile-pic-input" accept="image/*">
+            <form id="signup-form" onsubmit="return false;">
+                <div class="input-box">
+                    <input type="email" id="email-input" placeholder="Email Address" required>
+                </div>
+                <div class="input-box">
+                    <input type="password" id="password-input" placeholder="Password" required>
                 </div>
 
-                <div class="form-group"><input type="email" id="signup-email" placeholder="Email Address" required></div>
-                <div class="form-group"><input type="password" id="signup-password" placeholder="Password (Min 6 chars)" required minlength="6"></div>
-                <div class="form-group"><input type="text" id="username" placeholder="Username" required></div>
-                <div class="form-group"><input type="text" id="fullname" placeholder="Full Name" required></div>
-                <div class="form-group"><textarea id="bio" placeholder="Bio (Optional)"></textarea></div>
-                <div class="form-group">
-                    <select id="gender">
-                        <option value="Not Specified">Select Gender</option>
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                    </select>
+                <div class="profile-details-section" id="profile-details">
+                    <p class="section-title"><i class="fa-solid fa-user-gear"></i> Complete Your Profile</p>
+                    <div class="input-box">
+                        <input type="text" id="username-input" placeholder="Username (Unique handle)">
+                    </div>
+                    <div class="input-box">
+                        <input type="text" id="fullname-input" placeholder="Full Name">
+                    </div>
+                    <div class="input-box">
+                        <input type="text" id="bio-input" placeholder="Bio">
+                    </div>
+                    <div class="input-box">
+                        <input type="url" id="pic-input" placeholder="Profile Pic URL (Optional)">
+                    </div>
                 </div>
-                <button type="submit" class="signup-btn" id="submit-btn">Sign up</button>
+
+                <button type="button" class="auth-btn" id="action-btn">Check Email Availability</button>
             </form>
-            <div class="error-message" id="error-alert"></div>
-            <div class="success-message" id="success-alert"></div>
+
+            <div id="status-msg" class="msg-box"></div>
         </div>
-        <div class="login-link-box">Already have an account? <a href="login.html">Log in</a></div>
+
+        <div class="redirect-card">
+            Have an account? <a href="login.html">Log in</a>
+        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBrqMn7FrFW3jslaDNM0ui-VW4w6K_3Nmk",
@@ -75,87 +102,164 @@
             messagingSenderId: "599343109250",
             appId: "1:599343109250:web:1306ec63908ba21c54509b"
         };
+        const db = getFirestore(initializeApp(firebaseConfig));
+
+        const emailInput = document.getElementById("email-input");
+        const passwordInput = document.getElementById("password-input");
+        const usernameInput = document.getElementById("username-input");
+        const fullnameInput = document.getElementById("fullname-input");
+        const bioInput = document.getElementById("bio-input");
+        const picInput = document.getElementById("pic-input");
         
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+        const profileSection = document.getElementById("profile-details");
+        const actionBtn = document.getElementById("action-btn");
+        const statusMsg = document.getElementById("status-msg");
+        const formSubtitle = document.getElementById("form-subtitle");
 
-        // 🔥 CRITICAL SESSION FIX: Signup page par aate hi pehle se save kisi purane session ko uda do
-        localStorage.removeItem("active_user");
+        let isEmailVerified = false;
 
-        let base64ProfilePic = "";
-
-        document.getElementById("profile-pic-input").addEventListener("change", (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    document.getElementById("avatar-preview-img").src = event.target.result;
-                    base64ProfilePic = event.target.result;
-                };
-                reader.readAsDataURL(file);
+        // Reset fields if user edits email field after verification
+        emailInput.addEventListener("input", () => {
+            if (isEmailVerified) {
+                isEmailVerified = false;
+                profileSection.style.display = "none";
+                actionBtn.innerText = "Check Email Availability";
+                actionBtn.style.background = "#0095f6";
+                statusMsg.style.display = "none";
+                formSubtitle.innerText = "Sign up to see photos and videos from your friends.";
+                
+                usernameInput.removeAttribute("required");
+                fullnameInput.removeAttribute("required");
+                bioInput.removeAttribute("required");
             }
         });
 
-        document.getElementById("signup-form").addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const email = document.getElementById("signup-email").value.trim();
-            const password = document.getElementById("signup-password").value;
-            const username = document.getElementById("username").value.trim().toLowerCase().replace(/\s+/g, "_");
-            const fullname = document.getElementById("fullname").value.trim();
-            const bio = document.getElementById("bio").value.trim() || "No bio yet.";
-            const gender = document.getElementById("gender").value;
-            const finalProfilePic = base64ProfilePic || `https://api.dicebear.com/7.x/initials/svg?seed=${username}`;
+        actionBtn.addEventListener("click", async () => {
+            // Email parsing safely standard clean formatting
+            const email = emailInput.value.trim().toLowerCase();
+            const password = passwordInput.value.trim();
 
-            const errorAlert = document.getElementById("error-alert");
-            const successAlert = document.getElementById("success-alert");
-            const submitBtn = document.getElementById("submit-btn");
+            if (!email || !password) {
+                showStatus("⚠️ Please fill in both Email and Password fields!", "error");
+                return;
+            }
 
-            errorAlert.style.display = "none";
-            submitBtn.disabled = true;
-            submitBtn.innerText = "Processing...";
+            // Simple basic Regex validation structure check for email format
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showStatus("❌ Please enter a valid email address!", "error");
+                return;
+            }
 
-            try {
-                // 1. UNIQUE USERNAME CHECK
-                const userDoc = await getDoc(doc(db, "users", username));
-                if (userDoc.exists()) {
-                    throw new Error("Username already taken! Try another one.");
+            // --- STEP 1: DYNAMIC EMAIL AVAILABILITY GUARD ---
+            if (!isEmailVerified) {
+                actionBtn.disabled = true;
+                actionBtn.innerText = "Verifying email...";
+                
+                try {
+                    // Firebase users collection query check tracking for existing email matches
+                    const usersRef = collection(db, "users");
+                    const q = query(usersRef, where("email", "==", email));
+                    const querySnapshot = await getDocs(q);
+
+                    if (!querySnapshot.empty) {
+                        // User exists with this email -> TRIGGER ERROR
+                        showStatus("❌ This email is already registered! Please log in instead.", "error");
+                        actionBtn.innerText = "Check Email Availability";
+                    } else {
+                        // Safe fresh dynamic state route -> UNLOCK NEXT SUB-STEPS FOR REGISTRATION
+                        isEmailVerified = true;
+                        showStatus("✨ Email available! Now create your unique user identifier handle.", "success");
+                        
+                        formSubtitle.innerText = "Complete your identity profile configuration parameters.";
+                        profileSection.style.display = "flex";
+                        
+                        usernameInput.setAttribute("required", "true");
+                        fullnameInput.setAttribute("required", "true");
+                        bioInput.setAttribute("required", "true");
+                        
+                        actionBtn.innerText = "Finalize Sign Up";
+                        actionBtn.style.background = "#2ed573";
+                    }
+                } catch (err) {
+                    console.error("Firestore security query crash trace: ", err);
+                    showStatus("Database check pipeline dropped. Try again.", "error");
+                    actionBtn.innerText = "Check Email Availability";
+                } finally {
+                    actionBtn.disabled = false;
+                }
+            } 
+            // --- STEP 2: FINALIZE PIPELINE & CREATE PAYLOAD ---
+            else {
+                const username = usernameInput.value.trim().toLowerCase();
+                const name = fullnameInput.value.trim();
+                const bio = bioInput.value.trim();
+                let profilePic = picInput.value.trim();
+
+                // Validation checkpoint for profiles parameters setup
+                if (!username || !name || !bio) {
+                    showStatus("⚠️ Username, Name, and Bio are mandatory fields!", "error");
+                    return;
                 }
 
-                // 2. CREATE AUTH USER IN FIREBASE
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
+                // Spaces checking validation in user handle
+                if (username.includes(" ")) {
+                    showStatus("❌ Username handle cannot contain spaces!", "error");
+                    return;
+                }
 
-                // 3. SAVE DATA TO FIRESTORE WITH USERNAME AS DOCUMENT ID
-                await setDoc(doc(db, "users", username), {
-                    uid: user.uid,
-                    email: email,
-                    username: username,
-                    name: fullname,
-                    bio: bio,
-                    gender: gender,
-                    profilePic: finalProfilePic,
-                    createdAt: new Date()
-                });
+                actionBtn.disabled = true;
+                actionBtn.innerText = "Creating secure profile data record...";
 
-                // ALSO SAVE A QUICK MAPPER (UID to Username) SO LOGIN CAN FIND IT
-                await setDoc(doc(db, "users_map", user.uid), { username: username });
+                try {
+                    // Pre-check verification step: Make sure username document ID key path is unique
+                    const userDocRef = doc(db, "users", username);
+                    const userDocSnap = await getDoc(userDocRef);
 
-                successAlert.innerText = "Account created! Redirecting...";
-                successAlert.style.display = "block";
-                
-                // Naya username localStorage me set karo aur aage badho
-                localStorage.setItem("active_user", username);
+                    if (userDocSnap.exists()) {
+                        showStatus("❌ This username handle is taken. Try another nickname context!", "error");
+                        actionBtn.disabled = false;
+                        actionBtn.innerText = "Finalize Sign Up";
+                        return;
+                    }
 
-                setTimeout(() => window.location.href = "home.html", 1500);
+                    if (!profilePic) {
+                        profilePic = `https://picsum.photos/150/150?random=${Math.floor(Math.random() * 120)}`;
+                    }
 
-            } catch (err) {
-                errorAlert.innerText = err.message;
-                errorAlert.style.display = "block";
-                submitBtn.disabled = false;
-                submitBtn.innerText = "Sign up";
+                    // Set payload document record base
+                    await setDoc(doc(db, "users", username), {
+                        username: username,
+                        email: email,
+                        password: password, 
+                        name: name,
+                        bio: bio,
+                        profilePic: profilePic
+                    });
+
+                    showStatus("🎉 Account created smoothly! Dispatching entry parameters...", "success");
+                    
+                    // Session allocation state logic
+                    localStorage.setItem("active_user", username);
+                    
+                    setTimeout(() => {
+                        window.location.href = "home.html";
+                    }, 1800);
+
+                } catch (err) {
+                    console.error("Error committing record profile data document payload: ", err);
+                    showStatus("Failed processing record structure configuration.", "error");
+                    actionBtn.disabled = false;
+                    actionBtn.innerText = "Finalize Sign Up";
+                }
             }
         });
+
+        function showStatus(text, type) {
+            statusMsg.innerText = text;
+            statusMsg.className = "msg-box " + (type === "error" ? "error-msg" : "success-msg");
+            statusMsg.style.display = "block";
+        }
     </script>
 </body>
 </html>
