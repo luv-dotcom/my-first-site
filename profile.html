@@ -44,12 +44,12 @@
 
         /* --- EDIT PROFILE MODAL STYLES --- */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 2000; }
-        .modal-box { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 400px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .modal-box { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 420px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; }
         .modal-box h3 { margin-bottom: 20px; font-size: 20px; text-align: center; }
         .input-group { margin-bottom: 15px; display: flex; flex-direction: column; gap: 5px; }
         .input-group label { font-size: 13px; font-weight: 600; color: var(--text-muted); }
-        .input-group input, .input-group textarea { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 14px; outline: none; }
-        .input-group textarea { resize: none; height: 80px; }
+        .input-group input, .input-group textarea, .input-group select { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 14px; outline: none; background: white; }
+        .input-group textarea { resize: none; height: 60px; }
         .modal-buttons { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
         .modal-btn { padding: 8px 16px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; }
         .btn-cancel { background: #efefef; color: #262626; }
@@ -70,14 +70,14 @@
                 <a href="create.html"><i class="fa-regular fa-square-plus"></i></a>
                 <a href="explore.html"><i class="fa-regular fa-compass"></i></a>
                 <a href="notifications.html"><i class="fa-regular fa-heart"></i></a>
-                <a href="profile.html"><img src="https://picsum.photos/150/150?random=1" alt="Profile" class="nav-profile-pic"></a>
+                <a href="profile.html"><img src="https://picsum.photos/150/150?random=1" alt="Profile" class="nav-profile-pic" id="nav-avatar"></a>
             </div>
         </div>
     </nav>
 
     <main class="profile-container">
         <header class="profile-header">
-            <div class="avatar-section"><img src="https://picsum.photos/150/150?random=1" alt="My Big Avatar"></div>
+            <div class="avatar-section"><img src="https://picsum.photos/150/150?random=1" alt="My Big Avatar" id="main-avatar"></div>
             <div class="info-section">
                 <div class="username-row">
                     <h2 class="profile-username" id="prof-username">Loading...</h2>
@@ -117,12 +117,29 @@
         <div class="modal-box">
             <h3>Edit Profile</h3>
             <div class="input-group">
+                <label>Username</label>
+                <input type="text" id="input-username" placeholder="Enter username">
+            </div>
+            <div class="input-group">
                 <label>Name</label>
                 <input type="text" id="input-name" placeholder="Enter your name">
             </div>
             <div class="input-group">
+                <label>Profile Picture URL</label>
+                <input type="text" id="input-pic" placeholder="Paste image address/link">
+            </div>
+            <div class="input-group">
                 <label>Bio</label>
                 <textarea id="input-bio" placeholder="Enter your bio"></textarea>
+            </div>
+            <div class="input-group">
+                <label>Gender</label>
+                <select id="input-gender">
+                    <option value="Not Specified">Prefer not to say</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Custom">Custom</option>
+                </select>
             </div>
             <div class="modal-buttons">
                 <button class="modal-btn btn-cancel" id="btn-close-modal">Cancel</button>
@@ -136,12 +153,11 @@
         <a href="search.html"><i class="fa-solid fa-magnifying-glass"></i></a>
         <a href="create.html"><i class="fa-regular fa-square-plus"></i></a>
         <a href="reels.html"><i class="fa-regular fa-clapperboard"></i></a>
-        <a href="profile.html"><img src="https://picsum.photos/150/150?random=1" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1.5px solid black;"></a>
+        <a href="profile.html"><img src="https://picsum.photos/150/150?random=1" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1.5px solid black;" id="bottom-avatar"></a>
     </nav>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-        // ADDED 'updateDoc' HERE FOR UPDATING FIREBASE DATA
         import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
         
         const firebaseConfig = {
@@ -155,8 +171,9 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         
-        // Ek global variable bana lete hain jo naam ki exact key save rakhega
         let databaseNameKey = "fullName"; 
+        let defaultPic = "https://picsum.photos/150/150?random=1";
+        let userCurrentGender = "Not Specified";
 
         async function fetchProfileData() {
             try {
@@ -168,72 +185,98 @@
                     
                     document.getElementById("prof-username").innerText = userData.username || "No Username";
                     document.getElementById("prof-bio").innerText = userData.bio || "No Bio";
+                    
+                    // Gender read data if exists
+                    userCurrentGender = userData.gender || "Not Specified";
 
-                    // Yeh loop jo pichli baar humne banaya tha naam dhoondhne ke liye
+                    // Profile pic check from firebase
+                    if (userData.profilePic) {
+                        document.getElementById("main-avatar").src = userData.profilePic;
+                        document.getElementById("nav-avatar").src = userData.profilePic;
+                        document.getElementById("bottom-avatar").src = userData.profilePic;
+                    }
+
+                    // Name key finder loop
                     let finalName = "User"; 
                     for (let key in userData) {
-                        if (key !== "username" && key !== "bio") {
+                        if (key !== "username" && key !== "bio" && key !== "profilePic" && key !== "gender") {
                             finalName = userData[key];
-                            databaseNameKey = key; // Yahan hume pata chal gaya ki name field ki spelling kya hai
+                            databaseNameKey = key;
                             break;
                         }
                     }
                     document.getElementById("prof-name").innerText = finalName;
 
                 } else {
-                    console.log("Firebase mein aisa koi user nahi mila!");
+                    console.log("Firebase mein user nahi mila!");
                 }
             } catch (error) {
                 console.error("Data laane mein dikkat hui: ", error);
             }
         }
 
-        // --- EDIT PROFILE FUNCTIONALITY ---
+        // --- INTERFACE INTERACTIONS ---
         const modal = document.getElementById("edit-modal");
         const editBtn = document.getElementById("edit-profile-trigger");
         const closeBtn = document.getElementById("btn-close-modal");
         const saveBtn = document.getElementById("btn-save-profile");
 
+        const inputUsername = document.getElementById("input-username");
         const inputName = document.getElementById("input-name");
+        const inputPic = document.getElementById("input-pic");
         const inputBio = document.getElementById("input-bio");
+        const inputGender = document.getElementById("input-gender");
 
-        // 1. Edit Profile click karne par modal open hoga aur purana data dikhayega
+        // Open Modal & Set current database values
         editBtn.addEventListener("click", () => {
+            inputUsername.value = document.getElementById("prof-username").innerText;
             inputName.value = document.getElementById("prof-name").innerText;
+            inputPic.value = document.getElementById("main-avatar").src === defaultPic ? "" : document.getElementById("main-avatar").src;
             inputBio.value = document.getElementById("prof-bio").innerText;
+            inputGender.value = userCurrentGender;
             modal.style.display = "flex";
         });
 
-        // 2. Cancel dabane par modal close hoga
+        // Close Modal
         closeBtn.addEventListener("click", () => {
             modal.style.display = "none";
         });
 
-        // 3. Save dabane par data Firebase mein save hoga
+        // Save & Sync with Firebase
         saveBtn.addEventListener("click", async () => {
-            saveBtn.innerText = "Saving...";
+            saveBtn.innerText = "Updating...";
             saveBtn.disabled = true;
 
             try {
                 const docRef = doc(db, "users", "luv_5");
                 
-                // Firebase mein dynamically update karega usi spelling par jo pehle se thi
+                const updatedPicUrl = inputPic.value.trim() || defaultPic;
+
+                // Updating Firebase fields
                 await updateDoc(docRef, {
+                    username: inputUsername.value,
                     [databaseNameKey]: inputName.value,
-                    bio: inputBio.value
+                    bio: inputBio.value,
+                    profilePic: updatedPicUrl,
+                    gender: inputGender.value
                 });
 
-                // Screen par data turant bina refresh kiye change ho jaye uske liye:
+                // Instantly updating browser screen UI elements
+                document.getElementById("prof-username").innerText = inputUsername.value;
                 document.getElementById("prof-name").innerText = inputName.value;
                 document.getElementById("prof-bio").innerText = inputBio.value;
+                document.getElementById("main-avatar").src = updatedPicUrl;
+                document.getElementById("nav-avatar").src = updatedPicUrl;
+                document.getElementById("bottom-avatar").src = updatedPicUrl;
+                
+                userCurrentGender = inputGender.value; // variable update
 
-                // Modal close kar do
                 modal.style.display = "none";
-                alert("Profile successfully update ho gayi bhai! 🔥");
+                alert("Profile complete update ho gayi bhai! 🚀💥");
 
             } catch (error) {
-                console.error("Error updating profile: ", error);
-                alert("Update karne mein kuch dikkat aayi bhai!");
+                console.error("Update error: ", error);
+                alert("Kucch error aaya bhai updataion mein!");
             } finally {
                 saveBtn.innerText = "Save";
                 saveBtn.disabled = false;
