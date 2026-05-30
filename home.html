@@ -1,358 +1,41 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instagram</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Grand+Hotel&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <style>
-        :root {
-            --bg-color: #fafafa;
-            --border-color: #dbdbdb;
-            --text-main: #262626;
-            --text-muted: #8e8e8e;
-            --card-bg: #ffffff;
-            --link-color: #0095f6;
-            --story-ring: linear-gradient(45deg, #fbc531, #c23616, #9c88ff);
-        }
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
+  const firebaseConfig = {
+    apiKey: "AIzaSyBrqMn7FrFW3jslaDNM0ui-VW4w6K_3Nmk",
+    authDomain: "insta-clone-863ae.firebaseapp.com",
+    projectId: "insta-clone-863ae",
+    storageBucket: "insta-clone-863ae.firebasestorage.app",
+    messagingSenderId: "599343109250",
+    appId: "1:599343109250:web:1306ec63908ba21c54509b",
+    measurementId: "G-6SH8CWPWNC"
+  };
 
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            padding-top: 60px;
-            padding-bottom: 60px;
-        }
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
 
-        a { text-decoration: none; color: inherit; }
+  // Saare "Post" buttons ko select kiya
+  const postButtons = document.querySelectorAll(".comment-post-btn");
 
-        /* --- 📌 TOP NAVIGATION BAR --- */
-        .top-navbar {
-            position: fixed; top: 0; left: 0; width: 100%; height: 60px;
-            background-color: var(--card-bg); border-bottom: 1px solid var(--border-color);
-            display: flex; justify-content: center; align-items: center; z-index: 1000;
-        }
-        .nav-container {
-            width: 100%; max-width: 975px; padding: 0 20px;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .logo-text { font-family: 'Grand Hotel', cursive; font-size: 30px; cursor: pointer; }
-        .nav-icons { display: flex; gap: 22px; align-items: center; }
-        .nav-icons i { font-size: 22px; cursor: pointer; }
-        .nav-profile-pic { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 1px solid black; }
+  postButtons.forEach((btn) => {
+    btn.addEventListener("click", async (e) => {
+      // Us post ke input box ko dhoonda
+      const inputField = e.target.previousElementSibling;
+      const commentText = inputField.value;
 
-        /* --- 📱 BOTTOM NAVBAR FOR MOBILE --- */
-        .bottom-navbar {
-            position: fixed; bottom: 0; left: 0; width: 100%; height: 52px;
-            background-color: var(--card-bg); border-top: 1px solid var(--border-color);
-            display: none; justify-content: space-around; align-items: center; z-index: 1000;
-        }
-        .bottom-navbar i { font-size: 22px; }
+      if (commentText.trim() === "") return alert("Kuch toh likho!");
 
-        /* --- 🏢 MAIN MULTI-COLUMN WORKSPACE --- */
-        .main-workspace {
-            max-width: 935px; margin: 30px auto 0 auto;
-            display: flex; gap: 28px; padding: 0 20px;
-        }
-
-        /* Left Side: Feed and Stories */
-        .feed-section {
-            flex: 1; max-width: 614px;
-            display: flex; flex-direction: column; gap: 24px;
-        }
-
-        /* --- ⭕ STORIES SCROLL BAR LAYOUT --- */
-        .stories-wrapper {
-            background-color: var(--card-bg); border: 1px solid var(--border-color);
-            border-radius: 8px; padding: 16px; display: flex; gap: 16px;
-            overflow-x: auto; scrollbar-width: none;
-        }
-        .stories-wrapper::-webkit-scrollbar { display: none; }
-        
-        .story-node {
-            display: flex; flex-direction: column; align-items: center;
-            gap: 6px; font-size: 12px; cursor: pointer; min-width: 66px;
-        }
-        .story-ring-box {
-            width: 66px; height: 66px; border-radius: 50%;
-            background: var(--story-ring); padding: 2px;
-            display: flex; justify-content: center; align-items: center;
-        }
-        .story-node img {
-            width: 100%; height: 100%; border-radius: 50%;
-            object-fit: cover; border: 2px solid var(--card-bg);
-        }
-        .story-username {
-            width: 100%; text-align: center; overflow: hidden;
-            text-overflow: ellipsis; white-space: nowrap; color: var(--text-main);
-        }
-
-        /* --- 📰 INSTAGRAM FEED POST CARD --- */
-        .post-card {
-            background-color: var(--card-bg); border: 1px solid var(--border-color);
-            border-radius: 8px; display: flex; flex-direction: column;
-        }
-        
-        /* Post Header */
-        .post-header {
-            padding: 14px; display: flex; justify-content: space-between; align-items: center;
-        }
-        .post-user-meta { display: flex; align-items: center; gap: 12px; }
-        .post-user-meta img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
-        .post-user-details { display: flex; flex-direction: column; }
-        .post-username { font-size: 14px; font-weight: 600; cursor: pointer; }
-        .post-location { font-size: 12px; color: var(--text-muted); }
-        .post-options-btn { cursor: pointer; font-size: 14px; }
-
-        /* Post Main Image Box */
-        .post-image-box { width: 100%; aspect-ratio: 1 / 1; background-color: #efefef; overflow: hidden; }
-        .post-image-box img { width: 100%; height: 100%; object-fit: cover; }
-
-        /* Post Interactive Controls */
-        .post-controls { padding: 14px 14px 0 14px; display: flex; justify-content: space-between; align-items: center; }
-        .left-controls { display: flex; gap: 16px; }
-        .post-controls i { font-size: 24px; cursor: pointer; transition: transform 0.1s ease; }
-        .post-controls i:hover { transform: scale(1.1); }
-        .fa-heart:hover { color: #ed4956; }
-
-        /* Post Data Content (Likes, Captions, Comments) */
-        .post-body-content { padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; font-size: 14px; }
-        .likes-count { font-weight: 600; }
-        .caption-line .bold-user { font-weight: 600; margin-right: 6px; cursor: pointer; }
-        .view-comments-link { color: var(--text-muted); cursor: pointer; margin-top: 4px; display: inline-block; }
-        .post-time-stamp { font-size: 10px; color: var(--text-muted); text-transform: uppercase; margin-top: 4px; }
-
-        /* --- 📝 POST INTEGRATED COMMENT BOX --- */
-        .comment-input-area {
-            border-top: 1px solid var(--border-color); padding: 14px;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .comment-input-area input {
-            width: 90%; border: none; outline: none; font-size: 14px; background: transparent;
-        }
-        .comment-post-btn {
-            color: var(--link-color); font-weight: 600; border: none; background: none; cursor: pointer; font-size: 14px;
-        }
-
-        /* --- 👥 DESKTOP SIDEBAR SUGGESTIONS PANEL --- */
-        .desktop-suggestions {
-            flex: 0.4; max-width: 293px; display: flex; flex-direction: column; gap: 16px; padding-top: 10px;
-        }
-        .self-profile-row { display: flex; align-items: center; justify-content: space-between; }
-        .self-meta { display: flex; align-items: center; gap: 16px; }
-        .self-meta img { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; }
-        .switch-link { color: var(--link-color); font-size: 12px; font-weight: 600; cursor: pointer; }
-
-        .suggestions-header { display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; color: var(--text-muted); margin-top: 10px; }
-        .see-all-btn { color: var(--text-main); cursor: pointer; font-size: 12px; }
-
-        /* Suggestion User Rows Loop */
-        .suggestion-list { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }
-        .suggested-user-row { display: flex; align-items: center; justify-content: space-between; }
-        .s-user-meta { display: flex; align-items: center; gap: 12px; }
-        .s-user-meta img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
-        .s-text-box { display: flex; flex-direction: column; }
-        .s-username { font-size: 14px; font-weight: 600; }
-        .s-reason { font-size: 12px; color: var(--text-muted); }
-        .follow-link { color: var(--link-color); font-size: 12px; font-weight: 600; cursor: pointer; }
-
-        /* --- 📱 MOBILE SCREEN OPTIMIZATIONS --- */
-        @media (max-width: 1000px) {
-            .desktop-suggestions { display: none; } /* Suggestions hide on tablets/mobiles */
-            .main-workspace { justify-content: center; }
-        }
-
-        @media (max-width: 768px) {
-            .top-navbar .nav-icons { display: none; }
-            .bottom-navbar { display: flex; }
-            .main-workspace { margin-top: 60px; padding: 0; }
-            .stories-wrapper { border: none; border-bottom: 1px solid var(--border-color); border-radius: 0; }
-            .post-card { border-left: none; border-right: none; border-radius: 0; }
-        }
-    </style>
-</head>
-<body>
-
-    <nav class="top-navbar">
-        <div class="nav-container">
-            <div class="logo">
-                <h1 class="logo-text">Instagram</h1>
-            </div>
-            <div class="nav-icons">
-                <a href="home.html"><i class="fa-solid fa-house"></i></a>
-                <a href="messages.html"><i class="fa-regular fa-paper-plane"></i></a>
-                <a href="create.html"><i class="fa-regular fa-square-plus"></i></a>
-                <a href="explore.html"><i class="fa-regular fa-compass"></i></a>
-                <a href="notifications.html"><i class="fa-regular fa-heart"></i></a>
-                <a href="profile.html"><img src="https://picsum.photos/150/150?random=1" alt="Profile" class="nav-profile-pic"></a>
-            </div>
-        </div>
-    </nav>
-
-    <main class="main-workspace">
-        
-        <section class="feed-section">
-            
-            <div class="stories-wrapper">
-                <a href="story-view.html" class="story-node">
-                    <div class="story-ring-box"><img src="https://picsum.photos/100/100?random=1" alt="My Story"></div>
-                    <span class="story-username">Your Story</span>
-                </a>
-                <a href="story-view.html" class="story-node">
-                    <div class="story-ring-box"><img src="https://picsum.photos/100/100?random=5" alt="user"></div>
-                    <span class="story-username">rohit_sharma</span>
-                </a>
-                <a href="story-view.html" class="story-node">
-                    <div class="story-ring-box"><img src="https://picsum.photos/100/100?random=6" alt="user"></div>
-                    <span class="story-username">virat.kohli</span>
-                </a>
-                <a href="story-view.html" class="story-node">
-                    <div class="story-ring-box"><img src="https://picsum.photos/100/100?random=7" alt="user"></div>
-                    <span class="story-username">tech_insider</span>
-                </a>
-                <a href="story-view.html" class="story-node">
-                    <div class="story-ring-box"><img src="https://picsum.photos/100/100?random=8" alt="user"></div>
-                    <span class="story-username">travel_geek</span>
-                </a>
-            </div>
-
-            <article class="post-card">
-                <div class="post-header">
-                    <div class="post-user-meta">
-                        <a href="user-profile.html"><img src="https://picsum.photos/100/100?random=6" alt="user"></a>
-                        <div class="post-user-details">
-                            <a href="user-profile.html" class="post-username">virat.kohli</a>
-                            <span class="post-location">Mumbai, India</span>
-                        </div>
-                    </div>
-                    <i class="fa-solid fa-ellipsis post-options-btn"></i>
-                </div>
-                
-                <div class="post-image-box">
-                    <img src="https://picsum.photos/600/600?random=50" alt="Post Graphic">
-                </div>
-
-                <div class="post-controls">
-                    <div class="left-controls">
-                        <i class="fa-regular fa-heart"></i>
-                        <a href="comments.html"><i class="fa-regular fa-comment"></i></a>
-                        <i class="fa-regular fa-paper-plane"></i>
-                    </div>
-                    <i class="fa-regular fa-bookmark"></i>
-                </div>
-
-                <div class="post-body-content">
-                    <span class="likes-count">1,245,612 likes</span>
-                    <p class="caption-line"><span class="bold-user">virat.kohli</span>Great win tonight! Proud of the boys. On to the next one! 🏏🏆</p>
-                    <a href="comments.html" class="view-comments-link">View all 4,810 comments</a>
-                    <span class="post-time-stamp">2 hours ago</span>
-                </div>
-
-                <div class="comment-input-area">
-                    <input type="text" placeholder="Add a comment...">
-                    <button class="comment-post-btn">Post</button>
-                </div>
-            </article>
-
-            <article class="post-card">
-                <div class="post-header">
-                    <div class="post-user-meta">
-                        <a href="user-profile.html"><img src="https://picsum.photos/100/100?random=15" alt="user"></a>
-                        <div class="post-user-details">
-                            <a href="user-profile.html" class="post-username">nature_clicks</a>
-                            <span class="post-location">Manali, Himachal Pradesh</span>
-                        </div>
-                    </div>
-                    <i class="fa-solid fa-ellipsis post-options-btn"></i>
-                </div>
-                
-                <div class="post-image-box">
-                    <img src="https://picsum.photos/600/600?random=51" alt="Post Graphic">
-                </div>
-
-                <div class="post-controls">
-                    <div class="left-controls">
-                        <i class="fa-regular fa-heart"></i>
-                        <a href="comments.html"><i class="fa-regular fa-comment"></i></a>
-                        <i class="fa-regular fa-paper-plane"></i>
-                    </div>
-                    <i class="fa-regular fa-bookmark"></i>
-                </div>
-
-                <div class="post-body-content">
-                    <span class="likes-count">4,310 likes</span>
-                    <p class="caption-line"><span class="bold-user">nature_clicks</span>Winter morning bliss. The mountains are calling! 🏔️❄️</p>
-                    <a href="comments.html" class="view-comments-link">View all 86 comments</a>
-                    <span class="post-time-stamp">5 hours ago</span>
-                </div>
-
-                <div class="comment-input-area">
-                    <input type="text" placeholder="Add a comment...">
-                    <button class="comment-post-btn">Post</button>
-                </div>
-            </article>
-
-        </section>
-
-        <aside class="desktop-suggestions">
-            <div class="self-profile-row">
-                <div class="self-meta">
-                    <a href="profile.html"><img src="https://picsum.photos/150/150?random=1" alt="My Profile"></a>
-                    <div class="s-text-box">
-                        <a href="profile.html" class="s-username">my_username</a>
-                        <span class="s-reason" style="font-size: 14px;">Your Name</span>
-                    </div>
-                </div>
-                <span class="switch-link">Switch</span>
-            </div>
-
-            <div class="suggestions-header">
-                <span>Suggestions for you</span>
-                <span class="see-all-btn">See All</span>
-            </div>
-
-            <div class="suggestion-list">
-                <div class="suggested-user-row">
-                    <div class="s-user-meta">
-                        <img src="https://picsum.photos/100/100?random=80" alt="user">
-                        <div class="s-text-box">
-                            <span class="s-username">ms_dhoni_fan</span>
-                            <span class="s-reason">Followed by virat.kohli + 3 more</span>
-                        </div>
-                    </div>
-                    <span class="follow-link">Follow</span>
-                </div>
-                <div class="suggested-user-row">
-                    <div class="s-user-meta">
-                        <img src="https://picsum.photos/100/100?random=81" alt="user">
-                        <div class="s-text-box">
-                            <span class="s-username">web_coder_hub</span>
-                            <span class="s-reason">New to Instagram</span>
-                        </div>
-                    </div>
-                    <span class="follow-link">Follow</span>
-                </div>
-            </div>
-        </aside>
-
-    </main>
-
-    <nav class="bottom-navbar">
-        <a href="home.html"><i class="fa-solid fa-house"></i></a>
-        <a href="search.html"><i class="fa-solid fa-magnifying-glass"></i></a>
-        <a href="create.html"><i class="fa-regular fa-square-plus"></i></a>
-        <a href="reels.html"><i class="fa-solid fa-clapperboard"></i></a>
-        <a href="profile.html"><img src="https://picsum.photos/150/150?random=1" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1.5px solid black;"></a>
-    </nav>
-
-</body>
-</html>
+      try {
+        await addDoc(collection(db, "comments"), {
+          text: commentText,
+          timestamp: new Date().toISOString()
+        });
+        alert("Comment save ho gaya!");
+        inputField.value = ""; // Input box saaf kar diya
+      } catch (error) {
+        alert("Error: " + error.message);
+      }
+    });
+  });
+</script>
