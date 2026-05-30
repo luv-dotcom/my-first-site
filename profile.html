@@ -123,16 +123,24 @@
         
         async function fetchProfileData() {
             try {
-                // Yahan humne ab luv_5 set kar diya hai
                 const docRef = doc(db, "users", "luv_5");
                 const docSnap = await getDoc(docRef);
 
                 if (docSnap.exists()) {
                     const userData = docSnap.data();
                     
-                    document.getElementById("prof-username").innerText = userData.username;
-                    document.getElementById("prof-name").innerText = userData.fullName;
-                    document.getElementById("prof-bio").innerText = userData.bio;
+                    document.getElementById("prof-username").innerText = userData.username || "No Username";
+                    document.getElementById("prof-bio").innerText = userData.bio || "No Bio";
+
+                    // SMART CHECK FOR NAME: Agar fullName field hai toh wo dikhaye, nahi toh name field dikhaye
+                    if (userData.fullName) {
+                        document.getElementById("prof-name").innerText = userData.fullName;
+                    } else if (userData.name) {
+                        document.getElementById("prof-name").innerText = userData.name;
+                    } else {
+                        document.getElementById("prof-name").innerText = "Your Name";
+                    }
+
                 } else {
                     console.log("Firebase mein aisa koi user nahi mila!");
                 }
