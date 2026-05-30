@@ -1,1 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings • Instagram</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Grand+Hotel&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #fafafa;
+            --border-color: #dbdbdb;
+            --text-main: #262626;
+            --text-muted: #8e8e8e;
+            --card-bg: #ffffff;
+            --btn-blue: #0095f6;
+            --danger-red: #ed4956;
+        }
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding-top: 60px;
+            padding-bottom: 60px;
+        }
+
+        a { text-decoration: none; color: inherit; }
+
+        /* --- 📌 TOP NAVIGATION BAR --- */
+        .top-navbar {
+            position: fixed; top: 0; left: 0; width: 100%; height: 60px;
+            background-color: var(--card-bg); border-bottom: 1px solid var(--border-color);
+            display: flex; justify-content: center; align-items: center; z-index: 1000;
+        }
+        .nav-container {
+            width: 100%; max-width: 975px; padding: 0 20px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .logo-text { font-family: 'Grand Hotel', cursive; font-size: 30px; }
+        .nav-icons { display: flex; gap: 22px; align-items: center; }
+        .nav-icons i { font-size: 22px; cursor: pointer; }
+        .nav-profile-pic { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 1px solid black; }
+
+        /* --- 📱 BOTTOM NAVBAR FOR MOBILE --- */
+        .bottom-navbar {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 52px;
+            background-color: var(--card-bg); border-top: 1px solid var(--border-color);
+            display: none; justify-content: space-around; align-items: center; z-index: 1000;
+        }
+        .bottom-navbar i { font-size: 22px; }
+
+        /* --- ⚙️ SETTINGS MAIN DUAL PANEL --- */
+        .settings-container {
+            max-width: 935px;
+            margin: 30px auto 0 auto;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            display: flex;
+            min-height: 70vh;
+        }
+
+        /* Left Menu Sidebar */
+        .settings-sidebar {
+            flex: 1;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            list-style: none;
+        }
+        .menu-item {
+            padding: 16px 24px;
+            font-size: 16px;
+            cursor: pointer;
+            border-left: 2px solid transparent;
+        }
+        .menu-item:hover {
+            background-color: #fafafa;
+        }
+        .menu-item.active {
+            font-weight: 600;
+            border-left: 2px solid var(--text-main);
+        }
+        .menu-item.logout {
+            color: var(--danger-red);
+            font-weight: 600;
+            border-top: 1px solid var(--border-color);
+            margin-top: auto; /* Push to bottom of sidebar */
+        }
+
+        /* Right Content Container Form Workspace */
+        .settings-content {
+            flex: 2.5;
+            padding: 40px 60px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* User Picture Edit Meta Row */
+        .edit-pic-row {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            margin-bottom: 10px;
+        }
+        .edit-pic-row img {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-left: auto; /* Push label alignment exactly */
+        }
+        .user-meta-info {
+            flex: 3;
+            display: flex;
+            flex-direction: column;
+        }
+        .meta-username { font-size: 20px; font-weight: 600; }
+        .change-pic-btn { color: var(--btn-blue); font-size: 14px; font-weight: 600; cursor: pointer; }
+
+        /* Standard Input Forms Rows */
+        .form-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 30px;
+            width: 100%;
+        }
+        .form-row label {
+            flex: 1;
+            text-align: right;
+            font-weight: 600;
+            font-size: 16px;
+            padding-top: 6px;
+        }
+        .input-field-block {
+            flex: 3;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .input-field-block input, .input-field-block textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 16px;
+            outline: none;
+        }
+        .input-field-block textarea {
+            height: 80px;
+            resize: none;
+        }
+        .field-subtext {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 16px;
+        }
+
+        .submit-settings-btn {
+            background-color: var(--btn-blue);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            width: fit-content;
+            margin-left: calc(25% + 8px); /* Line up right under input nodes */
+        }
+
+        /* --- 📱 MOBILE VIEW OPTIMIZATIONS --- */
+        @media (max-width: 768px) {
+            .top-navbar .nav-icons { display: none; }
+            .bottom-navbar { display: flex; }
+            
+            .settings-container { border: none; flex-direction: column; margin-top: 10px; }
+            .settings-sidebar { display: grid; grid-template-columns: repeat(3, 1fr); border-bottom: 1px solid var(--border-color); border-right: none; }
+            .menu-item { padding: 12px; text-align: center; font-size: 14px; border-left: none; border-bottom: 2px solid transparent; }
+            .menu-item.active { border-left: none; border-bottom: 2px solid var(--text-main); }
+            .menu-item.logout { margin-top: 0; border-top: none; }
+            
+            .settings-content { padding: 30px 16px; }
+            .form-row { flex-direction: column; gap: 8px; }
+            .form-row label { text-align: left; }
+            .submit-settings-btn { margin-left: 0; width: 100%; text-align: center; padding: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="top-navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <a href="home.html" class="logo-text">Instagram</a>
+            </div>
+            <div class="nav-icons">
+                <a href="home.html"><i class="fa-regular fa-house"></i></a>
+                <a href="messages.html"><i class="fa-regular fa-paper-plane"></i></a>
+                <a href="create.html"><i class="fa-regular fa-square-plus"></i></a>
+                <a href="explore.html"><i class="fa-regular fa-compass"></i></a>
+                <a href="notifications.html"><i class="fa-regular fa-heart"></i></a>
+                <a href="profile.html"><img src="https://picsum.photos/150/150?random=1" alt="Profile" class="nav-profile-pic"></a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="settings-container">
+        
+        <ul class="settings-sidebar">
+            <li class="menu-item active">Edit Profile</li>
+            <li class="menu-item">Change Password</li>
+            <li class="menu-item">Privacy and Security</li>
+            <li class="menu-item logout" onclick="window.location.href='index.html'">Log Out</li>
+        </ul>
+
+        <section class="settings-content">
+            
+            <div class="edit-pic-row">
+                <img src="https://picsum.photos/150/150?random=1" alt="avatar">
+                <div class="user-meta-info">
+                    <span class="meta-username">my_username</span>
+                    <span class="change-pic-btn">Change Profile Photo</span>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label>Name</label>
+                <div class="input-field-block">
+                    <input type="text" value="Your Name">
+                    <p class="field-subtext">Help people discover your account by using the name you're known by: either your full name, nickname, or business name.</p>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label>Username</label>
+                <div class="input-field-block">
+                    <input type="text" value="my_username">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label>Website</label>
+                <div class="input-field-block">
+                    <input type="text" value="https://github.com">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label>Bio</label>
+                <div class="input-field-block">
+                    <textarea>Developer & Creator 💻🔥 Build premium responsive nodes!</textarea>
+                </div>
+            </div>
+
+            <button class="submit-settings-btn" onclick="alert('Profile Updated Successfully!')">Submit</button>
+
+        </section>
+
+    </main>
+
+    <nav class="bottom-navbar">
+        <a href="home.html"><i class="fa-regular fa-house"></i></a>
+        <a href="search.html"><i class="fa-regular fa-magnifying-glass"></i></a>
+        <a href="create.html"><i class="fa-regular fa-square-plus"></i></a>
+        <a href="explore.html"><i class="fa-regular fa-compass"></i></a>
+        <a href="profile.html"><img src="https://picsum.photos/150/150?random=1" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1.5px solid black;"></a>
+    </nav>
+
+</body>
+</html>
