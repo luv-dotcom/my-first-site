@@ -14,6 +14,7 @@
         .form-group { width: 100%; margin-bottom: 12px; }
         .form-group input { width: 100%; padding: 10px; background: #fafafa; border: 1px solid var(--border-color); border-radius: 4px; outline: none; font-size: 14px; }
         .login-btn { width: 100%; background: var(--link-color); color: white; border: none; padding: 8px; border-radius: 4px; font-weight: 600; cursor: pointer; }
+        .login-btn:disabled { background: #b2dffc; cursor: not-allowed; }
         .error-message { color: #ed4956; font-size: 13px; text-align: center; margin-top: 15px; display: none; }
         .signup-link-box { width: 100%; max-width: 350px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; text-align: center; margin-top: 10px; font-size: 14px; }
         .signup-link-box a { color: var(--link-color); font-weight: 600; text-decoration: none; }
@@ -51,6 +52,9 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        // 🔥 CRITICAL SESSION FIX: Page par aate hi purana login session saaf karo
+        localStorage.removeItem("active_user");
+
         document.getElementById("login-form").addEventListener("submit", async (e) => {
             e.preventDefault();
             const email = document.getElementById("login-email").value.trim();
@@ -63,23 +67,25 @@
             loginBtn.innerText = "Logging in...";
 
             try {
-                // 1. Firebase Auth se Sign In karo
+                // 1. Firebase Auth se Email & Password verify karo
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
-                // 2. Map table se check karo ki is UID ka username kya hai
+                // 2. Map table (Firestore) se is UID se juda sahi username nikaalo
                 const mapSnap = await getDoc(doc(db, "users_map", user.uid));
                 
                 if (mapSnap.exists()) {
                     const actualUsername = mapSnap.data().username;
-                    // Sahi user milte hi use LocalStorage me set karo
+                    
+                    // 3. Sahi user milte hi use LocalStorage me set karo aur redirect karo
                     localStorage.setItem("active_user", actualUsername);
                     window.location.href = "home.html";
                 } else {
-                    throw new Error("User Profile data not found!");
+                    throw new Error("User Profile data not found in Database!");
                 }
 
             } catch (err) {
+                console.error(err);
                 errorAlert.innerText = "Invalid Email/Password or User missing.";
                 errorAlert.style.display = "block";
                 loginBtn.disabled = false;
