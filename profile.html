@@ -41,6 +41,21 @@
         .grid-item-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.4); display: flex; justify-content: center; align-items: center; gap: 30px; color: white; font-size: 18px; font-weight: 600; opacity: 0; transition: opacity 0.2s ease; }
         .grid-item:hover .grid-item-overlay { opacity: 1; }
         .overlay-stat { display: flex; align-items: center; gap: 7px; }
+
+        /* --- EDIT PROFILE MODAL STYLES --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 2000; }
+        .modal-box { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 400px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .modal-box h3 { margin-bottom: 20px; font-size: 20px; text-align: center; }
+        .input-group { margin-bottom: 15px; display: flex; flex-direction: column; gap: 5px; }
+        .input-group label { font-size: 13px; font-weight: 600; color: var(--text-muted); }
+        .input-group input, .input-group textarea { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 14px; outline: none; }
+        .input-group textarea { resize: none; height: 80px; }
+        .modal-buttons { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+        .modal-btn { padding: 8px 16px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; }
+        .btn-cancel { background: #efefef; color: #262626; }
+        .btn-save { background: #0095f6; color: white; }
+        .btn-save:disabled { background: #b2dffc; cursor: not-allowed; }
+
         @media (max-width: 768px) { body { padding-top: 50px; } .top-navbar .nav-icons { display: none; } .bottom-navbar { display: flex; } .profile-container { padding: 0; margin-top: 15px; } .profile-header { gap: 20px; padding: 10px 16px 24px 16px; border-bottom: none; } .avatar-section img { width: 77px; height: 77px; } .username-row { flex-direction: column; align-items: flex-start; gap: 10px; } .profile-username { font-size: 22px; } .edit-profile-btn { width: 100%; text-align: center; background-color: var(--btn-grey); border: none; } .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); padding: 12px 0; font-size: 14px; gap: 0; } .stats-row li { display: flex; flex-direction: column; color: var(--text-muted); } .stats-row li span { color: var(--text-main); } .bio-row { padding: 4px 16px; } .profile-tabs { gap: 0; justify-content: space-around; } .profile-tabs span { display: none; } .tab-item i { font-size: 24px; } .tab-item { padding: 14px 0; } .gallery-grid { gap: 3px; } .grid-item-overlay { display: none; } }
     </style>
 </head>
@@ -66,7 +81,7 @@
             <div class="info-section">
                 <div class="username-row">
                     <h2 class="profile-username" id="prof-username">Loading...</h2>
-                    <button class="edit-profile-btn">Edit Profile</button>
+                    <button class="edit-profile-btn" id="edit-profile-trigger">Edit Profile</button>
                     <a href="settings.html"><i class="fa-solid fa-gear" style="font-size: 20px; cursor: pointer; color: #262626;"></i></a>
                 </div>
                 <ul class="stats-row">
@@ -98,6 +113,24 @@
         </section>
     </main>
 
+    <div class="modal-overlay" id="edit-modal">
+        <div class="modal-box">
+            <h3>Edit Profile</h3>
+            <div class="input-group">
+                <label>Name</label>
+                <input type="text" id="input-name" placeholder="Enter your name">
+            </div>
+            <div class="input-group">
+                <label>Bio</label>
+                <textarea id="input-bio" placeholder="Enter your bio"></textarea>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn btn-cancel" id="btn-close-modal">Cancel</button>
+                <button class="modal-btn btn-save" id="btn-save-profile">Save</button>
+            </div>
+        </div>
+    </div>
+
     <nav class="bottom-navbar">
         <a href="home.html"><i class="fa-regular fa-house"></i></a>
         <a href="search.html"><i class="fa-solid fa-magnifying-glass"></i></a>
@@ -108,7 +141,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+        // ADDED 'updateDoc' HERE FOR UPDATING FIREBASE DATA
+        import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
         
         const firebaseConfig = {
             apiKey: "AIzaSyBrqMn7FrFW3jslaDNM0ui-VW4w6K_3Nmk",
@@ -121,6 +155,9 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         
+        // Ek global variable bana lete hain jo naam ki exact key save rakhega
+        let databaseNameKey = "fullName"; 
+
         async function fetchProfileData() {
             try {
                 const docRef = doc(db, "users", "luv_5");
@@ -132,17 +169,15 @@
                     document.getElementById("prof-username").innerText = userData.username || "No Username";
                     document.getElementById("prof-bio").innerText = userData.bio || "No Bio";
 
-                    // ULTIMATE AUTOMATIC CHECK: Yeh loop poore data ko scan karke name field dhoond nikalega!
+                    // Yeh loop jo pichli baar humne banaya tha naam dhoondhne ke liye
                     let finalName = "User"; 
-                    
                     for (let key in userData) {
-                        // Agar field ka naam 'username' ya 'bio' nahi hai, toh wahi hamara 'name' hai!
                         if (key !== "username" && key !== "bio") {
                             finalName = userData[key];
+                            databaseNameKey = key; // Yahan hume pata chal gaya ki name field ki spelling kya hai
                             break;
                         }
                     }
-                    
                     document.getElementById("prof-name").innerText = finalName;
 
                 } else {
@@ -152,6 +187,58 @@
                 console.error("Data laane mein dikkat hui: ", error);
             }
         }
+
+        // --- EDIT PROFILE FUNCTIONALITY ---
+        const modal = document.getElementById("edit-modal");
+        const editBtn = document.getElementById("edit-profile-trigger");
+        const closeBtn = document.getElementById("btn-close-modal");
+        const saveBtn = document.getElementById("btn-save-profile");
+
+        const inputName = document.getElementById("input-name");
+        const inputBio = document.getElementById("input-bio");
+
+        // 1. Edit Profile click karne par modal open hoga aur purana data dikhayega
+        editBtn.addEventListener("click", () => {
+            inputName.value = document.getElementById("prof-name").innerText;
+            inputBio.value = document.getElementById("prof-bio").innerText;
+            modal.style.display = "flex";
+        });
+
+        // 2. Cancel dabane par modal close hoga
+        closeBtn.addEventListener("click", () => {
+            modal.style.display = "none";
+        });
+
+        // 3. Save dabane par data Firebase mein save hoga
+        saveBtn.addEventListener("click", async () => {
+            saveBtn.innerText = "Saving...";
+            saveBtn.disabled = true;
+
+            try {
+                const docRef = doc(db, "users", "luv_5");
+                
+                // Firebase mein dynamically update karega usi spelling par jo pehle se thi
+                await updateDoc(docRef, {
+                    [databaseNameKey]: inputName.value,
+                    bio: inputBio.value
+                });
+
+                // Screen par data turant bina refresh kiye change ho jaye uske liye:
+                document.getElementById("prof-name").innerText = inputName.value;
+                document.getElementById("prof-bio").innerText = inputBio.value;
+
+                // Modal close kar do
+                modal.style.display = "none";
+                alert("Profile successfully update ho gayi bhai! 🔥");
+
+            } catch (error) {
+                console.error("Error updating profile: ", error);
+                alert("Update karne mein kuch dikkat aayi bhai!");
+            } finally {
+                saveBtn.innerText = "Save";
+                saveBtn.disabled = false;
+            }
+        });
 
         fetchProfileData();
     </script>
