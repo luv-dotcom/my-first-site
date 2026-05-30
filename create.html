@@ -15,6 +15,17 @@
         label { font-size: 14px; font-weight: 600; color: #555; }
         input, textarea { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; outline: none; }
         textarea { resize: none; height: 100px; }
+        
+        /* Choice Divider Styling */
+        .divider { display: flex; align-items: center; text-align: center; margin: 15px 0; color: #8e8e8e; font-size: 12px; font-weight: 600; text-transform: uppercase; }
+        .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid var(--border-color); }
+        .divider:not(:empty)::before { margin-right: .25em; }
+        .divider:not(:empty)::after { margin-left: .25em; }
+
+        /* Preview Area */
+        .preview-box { width: 100%; max-height: 250px; border: 1px dashed var(--border-color); border-radius: 8px; display: none; justify-content: center; align-items: center; overflow: hidden; margin-bottom: 20px; background: #f0f0f0; }
+        .preview-box img { width: 100%; height: 100%; object-fit: contain; }
+
         .btn-post { width: 100%; background: #0095f6; color: white; padding: 12px; font-size: 15px; font-weight: 600; border: none; border-radius: 8px; cursor: pointer; margin-top: 10px; transition: background 0.2s; }
         .btn-post:hover { background: #1877f2; }
         .btn-post:disabled { background: #b2dffc; cursor: not-allowed; }
@@ -27,10 +38,21 @@
         <h2>Create New Post</h2>
         
         <div class="form-group">
-            <label>Image URL</label>
+            <label><i class="fa-solid fa-images"></i> Upload from Phone Gallery</label>
+            <input type="file" id="post-file-input" accept="image/*">
+        </div>
+
+        <div class="divider">OR</div>
+
+        <div class="form-group">
+            <label><i class="fa-solid fa-link"></i> Paste Image URL</label>
             <input type="text" id="post-img-url" placeholder="Paste image link here...">
         </div>
         
+        <div class="preview-box" id="image-preview-container">
+            <img id="image-preview" src="" alt="Preview">
+        </div>
+
         <div class="form-group">
             <label>Caption</label>
             <textarea id="post-caption" placeholder="Write a caption..."></textarea>
@@ -47,8 +69,9 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-        // 'addDoc' aur 'collection' chahiye naya post create karne ke liye
         import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+        // STORAGE LIBRARIES ADDED: File upload karne ke liye
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-storage.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBrqMn7FrFW3jslaDNM0ui-VW4w6K_3Nmk",
@@ -60,38 +83,88 @@
         };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const storage = getStorage(app); // Storage initialization
 
         const uploadBtn = document.getElementById("btn-upload-post");
+        const fileInput = document.getElementById("post-file-input");
+        const urlInput = document.getElementById("post-img-url");
+        const previewContainer = document.getElementById("image-preview-container");
+        const previewImg = document.getElementById("image-preview");
 
+        // LIVE PREVIEW: Phone Gallery se photo chunte hi screen par dikhegi
+        fileInput.addEventListener("change", (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                urlInput.value = ""; // link box clear kar do taaki confusion na ho
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    previewImg.src = event.target.result;
+                    previewContainer.style.display = "flex";
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // LIVE PREVIEW: URL text paste karte hi screen par dikhegi
+        urlInput.addEventListener("input", () => {
+            if(urlInput.value.trim() !== "") {
+                fileInput.value = ""; // file input clear kar do
+                previewImg.src = urlInput.value.trim();
+                previewContainer.style.display = "flex";
+            } else {
+                previewContainer.style.display = "none";
+            }
+        });
+
+        // MAIN SUBMIT LOGIC
         uploadBtn.addEventListener("click", async () => {
-            const imgUrl = document.getElementById("post-img-url").value.trim();
+            const file = fileInput.files[0];
+            const imgUrl = urlInput.value.trim();
             const caption = document.getElementById("post-caption").value.trim();
             const likes = document.getElementById("post-likes").value;
 
-            if(!imgUrl) {
-                alert("Bhai image ka link daalna zaroori hai!");
+            // Agar dono me se kuch bhi select nahi kiya:
+            if (!file && !imgUrl) {
+                alert("Bhai pehle gallery se photo select karo ya link paste karo!");
                 return;
             }
 
             uploadBtn.innerText = "Posting...";
             uploadBtn.disabled = true;
 
+            let finalImageUrl = "";
+
             try {
-                // Firebase ke andar 'posts' collection mein entry generate hogi
+                // CASE 1: Agar user ne phone gallery se file chuni hai
+                if (file) {
+                    uploadBtn.innerText = "Uploading Image...";
+                    // Firebase Storage mein unique naam ke saath image file save hogi
+                    const storageRef = ref(storage, 'post_images/' + Date.now() + '_' + file.name);
+                    const snapshot = await uploadBytes(storageRef, file);
+                    // Upload hone ke baad wahan se public link (URL) nikalega
+                    finalImageUrl = await getDownloadURL(snapshot.ref);
+                } 
+                // CASE 2: Agar user ne direct computer se URL daala hai
+                else if (imgUrl) {
+                    finalImageUrl = imgUrl;
+                }
+
+                uploadBtn.innerText = "Saving Post...";
+                // Final data Firestore database ke "posts" mein daal rahe hain
                 await addDoc(collection(db, "posts"), {
-                    userId: "luv_5", // Taaki sirf tumhare profile par dikhe
-                    postImg: imgUrl,
+                    userId: "luv_5",
+                    postImg: finalImageUrl,
                     caption: caption,
                     likes: Number(likes),
                     timestamp: new Date()
                 });
 
                 alert("Post successfully share ho gayi bhai! 🎉");
-                window.location.href = "profile.html"; // Post hote hi automatic profile page par bhej dega
+                window.location.href = "profile.html"; 
 
             } catch (error) {
                 console.error("Posting error: ", error);
-                alert("Post share karne mein gadbad ho gayi!");
+                alert("Galti hui bhai: " + error.message);
             } finally {
                 uploadBtn.innerText = "Share Post";
                 uploadBtn.disabled = false;
