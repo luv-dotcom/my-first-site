@@ -204,9 +204,8 @@
         const currentUserId = localStorage.getItem("active_user");
         const defaultPic = "https://picsum.photos/150/150?random=1";
         
-        let allUsers = []; // Local memory me users store karne ke liye array
+        let allUsers = []; 
 
-        // Current user ki mini profile pic navbar me lagane ke liye
         async function fetchNavbarAvatar() {
             if (currentUserId) {
                 try {
@@ -221,7 +220,6 @@
             }
         }
 
-        // Cache Users initially (Sirf 1 baar call hoga jab page khulega)
         async function cacheAllUsers() {
             try {
                 const usersRef = collection(db, "users");
@@ -239,7 +237,6 @@
                     });
                 });
 
-                // Jab data load ho jaye tab input field ko enable karo
                 searchInput.disabled = false;
                 showInitialMessage();
             } catch (error) {
@@ -257,11 +254,9 @@
                 </div>`;
         }
 
-        // --- PAGE INITIALIZATION ---
         fetchNavbarAvatar();
         cacheAllUsers();
 
-        // INSTANT LOCAL SEARCH LOGIC
         searchInput.addEventListener("input", (e) => {
             const searchText = e.target.value.trim().toLowerCase();
 
@@ -272,7 +267,6 @@
 
             listTitle.innerText = "Search Results";
             
-            // Filter array locally (Super Fast ⚡)
             const matches = allUsers.filter(user => 
                 user.id.toLowerCase().includes(searchText) || 
                 user.username.includes(searchText) || 
@@ -284,7 +278,6 @@
                 return;
             }
 
-            // Fragment ka use karke DOM structure render karna efficient hota hai
             const fragment = document.createDocumentFragment();
             
             matches.forEach((user) => {
@@ -300,8 +293,9 @@
                     </div>
                 `;
 
+                // CRITICAL FIX: URL parameter matching exactly what profile.html needs (?username=)
                 userItem.querySelector('.user-profile-meta').addEventListener('click', () => {
-                    window.location.href = `profile.html?user=${user.id}`;
+                    window.location.href = `profile.html?username=${user.id}`;
                 });
 
                 fragment.appendChild(userItem);
