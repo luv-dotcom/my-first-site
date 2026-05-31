@@ -41,6 +41,11 @@
         .edit-profile-btn { background-color: transparent; border: 1px solid var(--border-color); padding: 5px 12px; border-radius: 4px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
         .edit-profile-btn:hover { background-color: var(--btn-grey); }
         
+        /* Dynamic Action Button Styling */
+        .btn-follow { background-color: var(--insta-blue); color: white; border: none; }
+        .btn-follow:hover { background-color: #1877f2; }
+        .btn-unfollow { background-color: var(--btn-grey); color: black; border: 1px solid var(--border-color); }
+
         /* Stats Row with click pointers */
         .stats-row { display: flex; gap: 40px; font-size: 16px; list-style: none; }
         .stats-row li { cursor: pointer; }
@@ -183,8 +188,7 @@
                 <h3 id="modal-title">Users</h3>
                 <i class="fa-solid fa-xmark" id="close-list-modal"></i>
             </div>
-            <div class="list-users-container" id="modal-users-list">
-                </div>
+            <div class="list-users-container" id="modal-users-list"></div>
         </div>
     </div>
 
@@ -228,12 +232,12 @@
         <a href="search.html"><i class="fa-solid fa-magnifying-glass"></i></a>
         <a href="create.html"><i class="fa-regular fa-square-plus"></i></a>
         <a href="reels.html"><i class="fa-regular fa-clapperboard"></i></a>
-        <img src="https://picsum.photos/150/150?random=1" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--border-color);" id="bottom-avatar">
+        <a href="profile.html"><img src="https://picsum.photos/150/150?random=1" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--border-color);" id="bottom-avatar"></a>
     </nav>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-        import { getFirestore, doc, onSnapshot, updateDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, collection, query, where, getDocs, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
         
         const firebaseConfig = {
             apiKey: "AIzaSyBrqMn7FrFW3jslaDNM0ui-VW4w6K_3Nmk",
@@ -250,15 +254,43 @@
         let defaultPic = "https://picsum.photos/150/150?random=1";
         let userCurrentGender = "Not Specified";
         
-        const targetUserId = localStorage.getItem("active_user");
-
-        if (!targetUserId) {
+        // --- Dynamic target user engine ---
+        const loggedInUserId = localStorage.getItem("active_user");
+        if (!loggedInUserId) {
             window.location.href = "index.html";
+        }
+
+        // URL parameter se read karega agar kisi aur ki profile dekh rahe hain toh
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetUserId = urlParams.get("user") || loggedInUserId;
+
+        const isOwnProfile = (targetUserId === loggedInUserId);
+
+        // UI Adjustments for own vs others profile
+        if (!isOwnProfile) {
+            document.getElementById("logout-btn").style.display = "none";
+            const actionBtn = document.getElementById("edit-profile-trigger");
+            actionBtn.innerText = "Loading...";
+            actionBtn.classList.add("btn-follow");
         }
 
         function removeSkeletons() {
             document.querySelectorAll('.skeleton').forEach(el => el.classList.remove('skeleton'));
         }
+
+        // Active User standard Header mini pics update
+        async function loadActiveUserNavbar() {
+            if (loggedInUserId) {
+                onSnapshot(doc(db, "users", loggedInUserId), (docSnap) => {
+                    if (docSnap.exists()) {
+                        const myPic = docSnap.data().profilePic || defaultPic;
+                        document.getElementById("nav-avatar").src = myPic;
+                        document.getElementById("bottom-avatar").src = myPic;
+                    }
+                });
+            }
+        }
+        loadActiveUserNavbar();
 
         // --- REALTIME PROFILE DATA SYNC ---
         function listenToProfileData() {
@@ -272,14 +304,12 @@
                     const profBio = document.getElementById("prof-bio");
                     const profName = document.getElementById("prof-name");
                     
-                    profUsername.innerText = userData.username || "no_username";
+                    profUsername.innerText = userData.username || targetUserId;
                     profBio.innerText = userData.bio || "No bio yet.";
                     userCurrentGender = userData.gender || "Not Specified";
 
                     const currentPic = userData.profilePic || defaultPic;
                     document.getElementById("main-avatar").src = currentPic;
-                    document.getElementById("nav-avatar").src = currentPic;
-                    document.getElementById("bottom-avatar").src = currentPic;
 
                     let finalName = "Instagram User"; 
                     if(userData.fullName) {
@@ -299,6 +329,9 @@
                     }
                     profName.innerText = finalName;
                     removeSkeletons();
+                } else {
+                    document.getElementById("prof-username").innerText = "User Not Found";
+                    removeSkeletons();
                 }
             }, (error) => {
                 console.error("Live profile listen sync failed: ", error);
@@ -315,6 +348,25 @@
             onSnapshot(followingQuery, (snapshot) => {
                 document.getElementById("following-count").innerText = snapshot.size;
             });
+
+            // If not own profile, monitor follow status realtime
+            if (!isOwnProfile) {
+                const followCheckQuery = query(
+                    collection(db, "follows"), 
+                    where("follower", "==", loggedInUserId), 
+                    where("following", "==", targetUserId)
+                );
+                onSnapshot(followCheckQuery, (snapshot) => {
+                    const actionBtn = document.getElementById("edit-profile-trigger");
+                    if (!snapshot.empty) {
+                        actionBtn.innerText = "Unfollow";
+                        actionBtn.className = "edit-profile-btn btn-unfollow";
+                    } else {
+                        actionBtn.innerText = "Follow";
+                        actionBtn.className = "edit-profile-btn btn-follow";
+                    }
+                });
+            }
         }
 
         // --- REALTIME POSTS SYNC GALLERY ---
@@ -355,16 +407,84 @@
             });
         }
 
+        // --- FOLLOW / UNFOLLOW SYSTEM OR EDIT MODAL TRIGGER ---
+        const modal = document.getElementById("edit-modal");
+        const actionBtn = document.getElementById("edit-profile-trigger");
+
+        actionBtn.addEventListener("click", async () => {
+            if (isOwnProfile) {
+                // Open Edit Modal
+                document.getElementById("input-username").value = document.getElementById("prof-username").innerText;
+                document.getElementById("input-name").value = document.getElementById("prof-name").innerText;
+                const mainAvatarSrc = document.getElementById("main-avatar").src;
+                document.getElementById("input-pic").value = mainAvatarSrc.includes("random=") ? "" : mainAvatarSrc;
+                document.getElementById("input-bio").value = document.getElementById("prof-bio").innerText === "No bio yet." ? "" : document.getElementById("prof-bio").innerText;
+                document.getElementById("input-gender").value = userCurrentGender;
+                
+                modal.style.display = "flex";
+                setTimeout(() => modal.classList.add("show"), 10);
+            } else {
+                // Follow / Unfollow Logic Execution
+                actionBtn.disabled = true;
+                const q = query(collection(db, "follows"), where("follower", "==", loggedInUserId), where("following", "==", targetUserId));
+                const snapshot = await getDocs(q);
+
+                if (!snapshot.empty) {
+                    // Unfollow karo
+                    snapshot.forEach(async (docSnap) => {
+                        await deleteDoc(doc(db, "follows", docSnap.id));
+                    });
+                } else {
+                    // Follow karo
+                    await addDoc(collection(db, "follows"), {
+                        follower: loggedInUserId,
+                        following: targetUserId
+                    });
+                }
+                actionBtn.disabled = false;
+            }
+        });
+
+        const closeModalFn = () => {
+            modal.classList.remove("show");
+            setTimeout(() => modal.style.display = "none", 300);
+        };
+        document.getElementById("btn-close-modal").addEventListener("click", closeModalFn);
+
+        // Save Profile fields
+        document.getElementById("btn-save-profile").addEventListener("click", async () => {
+            const saveBtn = document.getElementById("btn-save-profile");
+            saveBtn.innerText = "Updating...";
+            saveBtn.disabled = true;
+            try {
+                const docRef = doc(db, "users", targetUserId);
+                const updatedPicUrl = document.getElementById("input-pic").value.trim() || defaultPic;
+
+                await updateDoc(docRef, {
+                    username: document.getElementById("input-username").value.trim().toLowerCase(),
+                    [databaseNameKey]: document.getElementById("input-name").value.trim(),
+                    bio: document.getElementById("input-bio").value.trim(),
+                    profilePic: updatedPicUrl,
+                    gender: document.getElementById("input-gender").value
+                });
+
+                closeModalFn();
+            } catch (error) {
+                alert("Error saving profile details!");
+                console.error(error);
+            } finally {
+                saveBtn.innerText = "Save";
+                saveBtn.disabled = false;
+            }
+        });
+
         // --- FOLLOWERS / FOLLOWING LIST POPUP SYSTEM ---
         const listModal = document.getElementById("list-modal");
         const modalTitle = document.getElementById("modal-title");
         const modalUsersList = document.getElementById("modal-users-list");
         
-        document.getElementById("close-list-modal").onclick = () => {
-            listModal.style.display = "none";
-        };
+        document.getElementById("close-list-modal").onclick = () => { listModal.style.display = "none"; };
 
-        // Followers Click Trigger
         document.getElementById("follower-btn").onclick = async () => {
             modalTitle.innerText = "Followers";
             modalUsersList.innerHTML = '<div style="text-align:center; padding:10px;"><i class="fa-solid fa-circle-notch fa-spin"></i> Loading...</div>';
@@ -372,20 +492,18 @@
 
             const q = query(collection(db, "follows"), where("following", "==", targetUserId));
             const querySnapshot = await getDocs(q);
-            
             modalUsersList.innerHTML = querySnapshot.empty ? '<div style="text-align:center; color:gray; padding:10px;">No followers yet.</div>' : '';
             
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
-                modalUsersList.innerHTML += `
-                    <div class="user-item">
-                        <i class="fa-solid fa-circle-user"></i>
-                        <span onclick="window.location.href='user-profile.html?username=${data.follower}'">@${data.follower}</span>
-                    </div>`;
+                const item = document.createElement("div");
+                item.className = "user-item";
+                item.innerHTML = `<i class="fa-solid fa-circle-user"></i> <span>@${data.follower}</span>`;
+                item.querySelector('span').onclick = () => { window.location.href = `profile.html?user=${data.follower}`; };
+                modalUsersList.appendChild(item);
             });
         };
 
-        // Following Click Trigger
         document.getElementById("following-btn").onclick = async () => {
             modalTitle.innerText = "Following";
             modalUsersList.innerHTML = '<div style="text-align:center; padding:10px;"><i class="fa-solid fa-circle-notch fa-spin"></i> Loading...</div>';
@@ -393,81 +511,17 @@
 
             const q = query(collection(db, "follows"), where("follower", "==", targetUserId));
             const querySnapshot = await getDocs(q);
-            
             modalUsersList.innerHTML = querySnapshot.empty ? '<div style="text-align:center; color:gray; padding:10px;">Not following anyone.</div>' : '';
             
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
-                modalUsersList.innerHTML += `
-                    <div class="user-item">
-                        <i class="fa-solid fa-circle-user"></i>
-                        <span onclick="window.location.href='user-profile.html?username=${data.following}'">@${data.following}</span>
-                    </div>`;
+                const item = document.createElement("div");
+                item.className = "user-item";
+                item.innerHTML = `<i class="fa-solid fa-circle-user"></i> <span>@${data.following}</span>`;
+                item.querySelector('span').onclick = () => { window.location.href = `profile.html?user=${data.following}`; };
+                modalUsersList.appendChild(item);
             });
         };
-
-
-        // --- EDIT PROFILE MODAL TRIGGER ---
-        const modal = document.getElementById("edit-modal");
-        const editBtn = document.getElementById("edit-profile-trigger");
-        const closeBtn = document.getElementById("btn-close-modal");
-        const saveBtn = document.getElementById("btn-save-profile");
-
-        const inputUsername = document.getElementById("input-username");
-        const inputName = document.getElementById("input-name");
-        const inputPic = document.getElementById("input-pic");
-        const inputBio = document.getElementById("input-bio");
-        const inputGender = document.getElementById("input-gender");
-
-        editBtn.addEventListener("click", () => {
-            inputUsername.value = document.getElementById("prof-username").innerText;
-            inputName.value = document.getElementById("prof-name").innerText;
-            const mainAvatarSrc = document.getElementById("main-avatar").src;
-            inputPic.value = mainAvatarSrc.includes("random=") ? "" : mainAvatarSrc;
-            inputBio.value = document.getElementById("prof-bio").innerText === "No bio yet." ? "" : document.getElementById("prof-bio").innerText;
-            inputGender.value = userCurrentGender;
-            
-            modal.style.display = "flex";
-            setTimeout(() => modal.classList.add("show"), 10);
-        });
-
-        const closeModalFn = () => {
-            modal.classList.remove("show");
-            setTimeout(() => modal.style.display = "none", 300);
-        };
-        closeBtn.addEventListener("click", closeModalFn);
-        modal.addEventListener("click", (e) => { if(e.target === modal) closeModalFn(); });
-
-        saveBtn.addEventListener("click", async () => {
-            saveBtn.innerText = "Updating...";
-            saveBtn.disabled = true;
-            try {
-                const docRef = doc(db, "users", targetUserId);
-                const updatedPicUrl = inputPic.value.trim() || defaultPic;
-
-                await updateDoc(docRef, {
-                    username: inputUsername.value.trim().toLowerCase(),
-                    [databaseNameKey]: inputName.value.trim(),
-                    bio: inputBio.value.trim(),
-                    profilePic: updatedPicUrl,
-                    gender: inputGender.value
-                });
-
-                const currentLocalUser = localStorage.getItem("active_user");
-                const newUsernameVal = inputUsername.value.trim().toLowerCase();
-                if(currentLocalUser !== newUsernameVal){
-                    localStorage.setItem("active_user", newUsernameVal);
-                }
-
-                closeModalFn();
-            } catch (error) {
-                alert("Error saving profiles fields standard details!");
-                console.error(error);
-            } finally {
-                saveBtn.innerText = "Save";
-                saveBtn.disabled = false;
-            }
-        });
 
         // --- TAB SWITCHING LOGIC ---
         document.querySelectorAll('.tab-item').forEach(tab => {
@@ -490,8 +544,7 @@
         const logoutBtn = document.getElementById("logout-btn");
         if (logoutBtn) {
             logoutBtn.addEventListener("click", () => {
-                const checkUserConfirmation = confirm("Kya aap sach me Logout hona chahte hain?");
-                if (checkUserConfirmation) {
+                if (confirm("Kya aap sach me Logout hona chahte hain?")) {
                     localStorage.removeItem("active_user");
                     window.location.href = "index.html";
                 }
