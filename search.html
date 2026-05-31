@@ -154,7 +154,7 @@
         
         <div class="search-input-wrapper">
             <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" id="search-input" placeholder="Search accounts, topics...">
+            <input type="text" id="search-input" placeholder="Search accounts, topics..." disabled>
         </div>
 
         <section class="recent-section">
@@ -164,8 +164,8 @@
             </div>
 
             <div class="search-results-list" id="search-results">
-                <div style="text-align: center; color: var(--text-muted); padding: 20px;">
-                    Type something to search users...
+                <div id="status-message" style="text-align: center; color: var(--text-muted); padding: 20px;">
+                    <i class="fa-solid fa-circle-notch fa-spin"></i> Loading users...
                 </div>
             </div>
         </section>
@@ -184,7 +184,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
         import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
-        // Firebase Config (Tumhari profile file se copy kiya hua)
         const firebaseConfig = {
             apiKey: "AIzaSyBrqMn7FrFW3jslaDNM0ui-VW4w6K_3Nmk",
             authDomain: "insta-clone-863ae.firebaseapp.com",
@@ -204,87 +203,112 @@
         
         const currentUserId = localStorage.getItem("active_user");
         const defaultPic = "https://picsum.photos/150/150?random=1";
+        
+        let allUsers = []; // Local memory me users store karne ke liye array
 
         // Current user ki mini profile pic navbar me lagane ke liye
         async function fetchNavbarAvatar() {
             if (currentUserId) {
-                const userDoc = await getDoc(doc(db, "users", currentUserId));
-                if (userDoc.exists() && userDoc.data().profilePic) {
-                    document.getElementById("nav-avatar").src = userDoc.data().profilePic;
-                    document.getElementById("bottom-avatar").src = userDoc.data().profilePic;
+                try {
+                    const userDoc = await getDoc(doc(db, "users", currentUserId));
+                    if (userDoc.exists() && userDoc.data().profilePic) {
+                        document.getElementById("nav-avatar").src = userDoc.data().profilePic;
+                        document.getElementById("bottom-avatar").src = userDoc.data().profilePic;
+                    }
+                } catch (e) {
+                    console.error("Error fetching avatar:", e);
                 }
             }
         }
-        fetchNavbarAvatar();
 
-        // REALTIME SEARCH LOGIC
-        searchInput.addEventListener("input", async (e) => {
-            const searchText = e.target.value.trim().toLowerCase();
-
-            if (searchText === "") {
-                listTitle.innerText = "Recent";
-                clearBtn.style.display = "none";
-                searchResultsContainer.innerHTML = `
-                    <div style="text-align: center; color: var(--text-muted); padding: 20px;">
-                        Type something to search users...
-                    </div>`;
-                return;
-            }
-
-            listTitle.innerText = "Search Results";
-            searchResultsContainer.innerHTML = `<div style="text-align:center; padding:20px;"><i class="fa-solid fa-circle-notch fa-spin"></i> Searching...</div>`;
-
+        // Cache Users initially (Sirf 1 baar call hoga jab page khulega)
+        async function cacheAllUsers() {
             try {
                 const usersRef = collection(db, "users");
                 const querySnapshot = await getDocs(usersRef);
                 
-                let matchesFound = false;
-                searchResultsContainer.innerHTML = ""; // Container clear karo
-
                 querySnapshot.forEach((userDoc) => {
                     const userData = userDoc.data();
-                    const docId = userDoc.id.toLowerCase();
-                    const username = (userData.username || "").toLowerCase();
-                    const fullName = (userData.fullName || userData.name || "").toLowerCase();
-
-                    // Agar user query input text se match karegi tabhi render hoga
-                    if (docId.includes(searchText) || username.includes(searchText) || fullName.includes(searchText)) {
-                        matchesFound = true;
-                        
-                        const displayUsername = userData.username || userDoc.id;
-                        const displayFullName = userData.fullName || userData.name || "Instagram User";
-                        const displayPic = userData.profilePic || defaultPic;
-
-                        // Item Element Build-up
-                        const userItem = document.createElement("div");
-                        userItem.className = "searched-user-item";
-                        userItem.innerHTML = `
-                            <div class="user-profile-meta" data-id="${userDoc.id}">
-                                <img src="${displayPic}" alt="avatar">
-                                <div class="user-name-box">
-                                    <span class="u-username">${displayUsername}</span>
-                                    <span class="u-fullname">${displayFullName}</span>
-                                </div>
-                            </div>
-                        `;
-
-                        // Click handle: Click karne par target user ki profile open hogi
-                        userItem.querySelector('.user-profile-meta').addEventListener('click', () => {
-                            window.location.href = `profile.html?user=${userDoc.id}`;
-                        });
-
-                        searchResultsContainer.appendChild(userItem);
-                    }
+                    allUsers.push({
+                        id: userDoc.id,
+                        username: (userData.username || "").toLowerCase(),
+                        fullName: (userData.fullName || userData.name || "").toLowerCase(),
+                        displayUsername: userData.username || userDoc.id,
+                        displayFullName: userData.fullName || userData.name || "Instagram User",
+                        profilePic: userData.profilePic || defaultPic
+                    });
                 });
 
-                if (!matchesFound) {
-                    searchResultsContainer.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 20px;">No users found.</div>`;
-                }
-
+                // Jab data load ho jaye tab input field ko enable karo
+                searchInput.disabled = false;
+                showInitialMessage();
             } catch (error) {
-                console.error("Search error:", error);
-                searchResultsContainer.innerHTML = `<div style="text-align: center; color: red; padding: 20px;">Error fetching users.</div>`;
+                console.error("Error caching users:", error);
+                searchResultsContainer.innerHTML = `<div style="text-align: center; color: red; padding: 20px;">Error loading data. Please refresh.</div>`;
             }
+        }
+
+        function showInitialMessage() {
+            listTitle.innerText = "Recent";
+            clearBtn.style.display = "none";
+            searchResultsContainer.innerHTML = `
+                <div style="text-align: center; color: var(--text-muted); padding: 20px;">
+                    Type something to search users...
+                </div>`;
+        }
+
+        // --- PAGE INITIALIZATION ---
+        fetchNavbarAvatar();
+        cacheAllUsers();
+
+        // INSTANT LOCAL SEARCH LOGIC
+        searchInput.addEventListener("input", (e) => {
+            const searchText = e.target.value.trim().toLowerCase();
+
+            if (searchText === "") {
+                showInitialMessage();
+                return;
+            }
+
+            listTitle.innerText = "Search Results";
+            
+            // Filter array locally (Super Fast ⚡)
+            const matches = allUsers.filter(user => 
+                user.id.toLowerCase().includes(searchText) || 
+                user.username.includes(searchText) || 
+                user.fullName.includes(searchText)
+            );
+
+            if (matches.length === 0) {
+                searchResultsContainer.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 20px;">No users found.</div>`;
+                return;
+            }
+
+            // Fragment ka use karke DOM structure render karna efficient hota hai
+            const fragment = document.createDocumentFragment();
+            
+            matches.forEach((user) => {
+                const userItem = document.createElement("div");
+                userItem.className = "searched-user-item";
+                userItem.innerHTML = `
+                    <div class="user-profile-meta">
+                        <img src="${user.profilePic}" alt="avatar">
+                        <div class="user-name-box">
+                            <span class="u-username">${user.displayUsername}</span>
+                            <span class="u-fullname">${user.displayFullName}</span>
+                        </div>
+                    </div>
+                `;
+
+                userItem.querySelector('.user-profile-meta').addEventListener('click', () => {
+                    window.location.href = `profile.html?user=${user.id}`;
+                });
+
+                fragment.appendChild(userItem);
+            });
+
+            searchResultsContainer.innerHTML = "";
+            searchResultsContainer.appendChild(fragment);
         });
     </script>
 </body>
