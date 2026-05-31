@@ -65,7 +65,6 @@
             padding: 0 20px;
         }
 
-        /* Full Search Input Wrapper Box */
         .search-input-wrapper {
             position: relative;
             width: 100%;
@@ -82,7 +81,6 @@
             transform: translateY(-50%); color: var(--text-muted); font-size: 16px;
         }
 
-        /* Recent Search History Card Panel */
         .recent-section {
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -97,7 +95,6 @@
             color: var(--link-color); font-size: 14px; cursor: pointer; font-weight: 600;
         }
 
-        /* User List Nodes Loop Container */
         .search-results-list {
             display: flex; flex-direction: column; gap: 16px;
         }
@@ -122,7 +119,6 @@
         }
         .remove-search-btn:hover { color: var(--text-main); }
 
-        /* --- 📱 MOBILE SCREEN OPTIMIZATIONS --- */
         @media (max-width: 768px) {
             .top-navbar .nav-icons { display: none; }
             .bottom-navbar { display: flex; }
@@ -151,7 +147,6 @@
     </nav>
 
     <main class="search-container">
-        
         <div class="search-input-wrapper">
             <i class="fa-solid fa-magnifying-glass"></i>
             <input type="text" id="search-input" placeholder="Search accounts, topics..." disabled>
@@ -169,7 +164,6 @@
                 </div>
             </div>
         </section>
-
     </main>
 
     <nav class="bottom-navbar">
@@ -293,9 +287,9 @@
                     </div>
                 `;
 
-                // CRITICAL FIX: URL parameter matching exactly what profile.html needs (?username=)
+                // YAHA CHANGE KIYA HAI: Ab ye sahi file (user-profile.html) par bhejega
                 userItem.querySelector('.user-profile-meta').addEventListener('click', () => {
-                    window.location.href = `profile.html?username=${user.id}`;
+                    window.location.href = `user-profile.html?username=${user.id}`;
                 });
 
                 fragment.appendChild(userItem);
