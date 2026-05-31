@@ -207,8 +207,9 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-        // Added 'onSnapshot' module for real-time live synchronization listeners
         import { getFirestore, doc, onSnapshot, updateDoc, collection, query, where } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+        // Dynamic detection ke liye Firebase Auth module ko import kiya hai
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
         
         const firebaseConfig = {
             apiKey: "AIzaSyBrqMn7FrFW3jslaDNM0ui-VW4w6K_3Nmk",
@@ -220,20 +221,20 @@
         };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const auth = getAuth(app);
         
         let databaseNameKey = "fullName"; 
         let defaultPic = "https://picsum.photos/150/150?random=1";
         let userCurrentGender = "Not Specified";
-        const targetUserId = "luv_5";
+        let targetUserId = null; // Yeh ab dynamic ho gaya hai
 
-        // Remove placeholder skeleton classes once dynamic content attaches
         function removeSkeletons() {
             document.querySelectorAll('.skeleton').forEach(el => el.classList.remove('skeleton'));
         }
 
-        // --- REALTIME PROFILE DATA SYNC (onSnapshot) ---
-        function listenToProfileData() {
-            const docRef = doc(db, "users", targetUserId);
+        // --- REALTIME PROFILE DATA SYNC ---
+        function listenToProfileData(uid) {
+            const docRef = doc(db, "users", uid);
             
             onSnapshot(docRef, (docSnap) => {
                 if (docSnap.exists()) {
@@ -269,9 +270,9 @@
         }
 
         // --- REALTIME POSTS SYNC GALLERY ---
-        function listenToUserPosts() {
+        function listenToUserPosts(uid) {
             const gallery = document.getElementById("posts-gallery");
-            const q = query(collection(db, "posts"), where("userId", "==", targetUserId));
+            const q = query(collection(db, "posts"), where("userId", "==", uid));
             
             onSnapshot(q, (querySnapshot) => {
                 gallery.innerHTML = ""; 
@@ -306,7 +307,19 @@
             });
         }
 
-        // --- MODAL TRIGGER CODE UPDATES ---
+        // --- AUTH CHECK ENGINE (Aane wale login.html ke user ko trace karne ke liye) ---
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                targetUserId = user.uid; // Logged-in user ki actual ID fetch ho gayi
+                listenToProfileData(targetUserId);
+                listenToUserPosts(targetUserId);
+            } else {
+                // Agar koi login nahi hai, toh automatic login page par redirect kar dega
+                window.location.href = "login.html";
+            }
+        });
+
+        // --- MODAL TRIGGER CODE ---
         const modal = document.getElementById("edit-modal");
         const editBtn = document.getElementById("edit-profile-trigger");
         const closeBtn = document.getElementById("btn-close-modal");
@@ -318,8 +331,8 @@
         const inputBio = document.getElementById("input-bio");
         const inputGender = document.getElementById("input-gender");
 
-        // Open Modal smoothly
         editBtn.addEventListener("click", () => {
+            if(!targetUserId) return;
             inputUsername.value = document.getElementById("prof-username").innerText;
             inputName.value = document.getElementById("prof-name").innerText;
             const mainAvatarSrc = document.getElementById("main-avatar").src;
@@ -331,7 +344,6 @@
             setTimeout(() => modal.classList.add("show"), 10);
         });
 
-        // Close Modal handler
         const closeModalFn = () => {
             modal.classList.remove("show");
             setTimeout(() => modal.style.display = "none", 300);
@@ -339,8 +351,8 @@
         closeBtn.addEventListener("click", closeModalFn);
         modal.addEventListener("click", (e) => { if(e.target === modal) closeModalFn(); });
 
-        // Save Profile Action updates
         saveBtn.addEventListener("click", async () => {
+            if(!targetUserId) return;
             saveBtn.innerText = "Updating...";
             saveBtn.disabled = true;
             try {
@@ -365,7 +377,7 @@
             }
         });
 
-        // --- TAB SWITCHING LOGIC INTERACTION ---
+        // --- TAB SWITCHING LOGIC ---
         document.querySelectorAll('.tab-item').forEach(tab => {
             tab.addEventListener('click', function() {
                 document.querySelector('.tab-item.active').classList.remove('active');
@@ -377,14 +389,10 @@
                 if(currentTabType !== 'posts') {
                     gallery.innerHTML = `<div class="no-posts"><i class="fa-regular fa-square-minus" style="font-size:40px; margin-bottom:10px; display:block;"></i>No Dynamic ${this.innerText} Available</div>`;
                 } else {
-                    listenToUserPosts(); // Re-trigger live posts grid sync if true
+                    if(targetUserId) listenToUserPosts(targetUserId);
                 }
             });
         });
-
-        // Main initialization calls
-        listenToProfileData();
-        listenToUserPosts();
     </script>
 </body>
 </html>
