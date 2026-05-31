@@ -173,7 +173,7 @@
                 const actionBtn = document.getElementById("profile-action-btn");
                 const msgBtn = document.getElementById("message-btn");
 
-                // Get Real-time Counters Setup
+                // CRITICAL FIX: Load real-time counters BEFORE targetUsername check so it applies to everyone (including activeUser)
                 const followersQuery = query(collection(db, "follows"), where("following", "==", targetUsername));
                 const followersSnap = await getDocs(followersQuery);
                 let followersCount = followersSnap.size;
