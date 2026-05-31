@@ -14,7 +14,7 @@
             --border-color: #dbdbdb;
             --text-main: #262626;
             --text-muted: #8e8e8e;
-            --msg-blue: linear-gradient(45deg, #0095f6, #a855f7); /* Insta Style Message Gradient */
+            --msg-blue: linear-gradient(45deg, #0095f6, #a855f7); 
             --msg-grey: #efefef;
             --active-green: #4cd137;
             --btn-grey: #efefef;
@@ -30,7 +30,7 @@
         body {
             background-color: #fafafa;
             color: var(--text-main);
-            overflow: hidden; /* Screen ke andar hi scroll fit rahega */
+            overflow: hidden; 
             padding-bottom: 60px;
         }
 
@@ -51,6 +51,18 @@
         .nav-icons i { font-size: 22px; cursor: pointer; }
         .nav-profile-pic { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color); }
         
+        /* Mobile-only top icons container (initially hidden on desktop) */
+        .mobile-top-icons {
+            display: none;
+            gap: 18px;
+            align-items: center;
+        }
+        .mobile-top-icons i {
+            font-size: 22px;
+            cursor: pointer;
+        }
+
+        /* --- BOTTOM NAVBAR --- */
         .bottom-navbar { 
             position: fixed; bottom: 0; left: 0; width: 100%; height: 52px; 
             background-color: white; border-top: 1px solid var(--border-color); 
@@ -132,12 +144,10 @@
             max-width: 60%; padding: 12px 16px; border-radius: 22px; font-size: 14px; line-height: 18px;
             word-wrap: break-word;
         }
-        /* Bheja hua message (Sender: You) */
         .msg-bubble.outgoing {
             background: var(--msg-blue); color: white; align-self: flex-end;
             border-bottom-right-radius: 4px;
         }
-        /* Aaya hua message (Receiver: Friend) */
         .msg-bubble.incoming {
             background-color: var(--msg-grey); color: var(--text-main); align-self: flex-start;
             border-bottom-left-radius: 4px;
@@ -168,10 +178,10 @@
         @media (max-width: 768px) {
             body { padding-top: 50px; }
             .top-navbar .nav-icons { display: none; }
+            .top-navbar .mobile-top-icons { display: flex; } /* Show chat icon at top right on mobile */
             .bottom-navbar { display: flex; }
             .inbox-wrapper { margin-top: 60px; height: calc(100vh - 112px); border: none; }
             
-            /* Toggle classes for mobile panel shifting */
             .inbox-users-panel.hidden-mobile { display: none; }
             .inbox-chat-panel { display: none; }
             .inbox-chat-panel.active-mobile { display: flex; flex: 1; }
@@ -197,32 +207,29 @@
                 <a href="notifications.html"><i class="fa-regular fa-heart"></i></a>
                 <a href="profile.html"><img src="https://picsum.photos/150/150?random=1" alt="Profile" class="nav-profile-pic" id="nav-avatar"></a>
             </div>
+            <div class="mobile-top-icons">
+                <a href="explore.html"><i class="fa-solid fa-magnifying-glass"></i></a> <a href="messages.html"><i class="fa-solid fa-paper-plane" style="color: var(--text-main);"></i></a> </div>
         </div>
     </nav>
 
     <main class="inbox-wrapper">
         
-        <!-- LEFT USERS PANEL -->
         <section class="inbox-users-panel" id="users-panel">
             <div class="panel-header">
                 <span id="current-user-display">my_username</span> <i class="fa-solid fa-chevron-down" style="font-size: 12px;"></i>
             </div>
             <div class="users-list" id="users-list-container">
-                <!-- Dynamic users rows are loaded here -->
                 <div style="text-align:center; padding:20px; color:var(--text-muted);">Loading chats...</div>
             </div>
         </section>
 
-        <!-- RIGHT CHAT STREAM PANEL -->
         <section class="inbox-chat-panel" id="chat-panel">
-            <!-- Default Screen when no chat is active -->
             <div class="no-chat-selected" id="no-chat-screen">
                 <i class="fa-regular fa-paper-plane"></i>
                 <h2>Your Messages</h2>
                 <p>Send private photos and messages to a friend or group.</p>
             </div>
 
-            <!-- Active Conversation Window Container -->
             <div id="active-chat-screen" style="display: none; flex-direction: column; flex: 1;">
                 <div class="chat-header">
                     <i class="fa-solid fa-arrow-left back-btn-mobile" id="mobile-back-btn"></i>
@@ -230,9 +237,7 @@
                     <div class="chat-header-name" id="active-header-username">username</div>
                 </div>
 
-                <div class="chat-messages-area" id="chat-messages-container">
-                    <!-- Dynamic chat bubble list -->
-                </div>
+                <div class="chat-messages-area" id="chat-messages-container"></div>
 
                 <div class="chat-input-bar">
                     <div class="input-box-wrapper">
@@ -247,9 +252,7 @@
 
     <nav class="bottom-navbar">
         <a href="home.html"><i class="fa-regular fa-house"></i></a>
-        <a href="explore.html"><i class="fa-solid fa-magnifying-glass"></i></a>
-        <a href="create.html"><i class="fa-regular fa-square-plus"></i></a>
-        <a href="messages.html"><i class="fa-solid fa-paper-plane"></i></a>
+        <a href="explore.html"><i class="fa-regular fa-compass"></i></a> <a href="create.html"><i class="fa-regular fa-square-plus"></i></a>
         <a href="notifications.html"><i class="fa-regular fa-heart"></i></a>
         <img src="https://picsum.photos/150/150?random=1" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--border-color); cursor: pointer;" id="bottom-avatar" onclick="window.location.href='profile.html'">
     </nav>
@@ -278,7 +281,6 @@
             window.location.href = "index.html";
         }
 
-        // --- FETCH AND SYNC CURRENT LOGGED-IN USER AVATARS ---
         async function syncNavbarAvatars() {
             try {
                 const docRef = doc(db, "users", currentUserId);
@@ -293,7 +295,6 @@
             } catch (err) { console.error("Error setting avatars: ", err); }
         }
 
-        // --- FETCH REGISTERED INSTAGRAM USERS LIST ---
         function loadUsersList() {
             const container = document.getElementById("users-list-container");
             onSnapshot(collection(db, "users"), (snapshot) => {
@@ -304,7 +305,6 @@
                     const userData = doc.data();
                     const userId = doc.id;
 
-                    // Khud ka naam chat list me hide rakhenge
                     if (userId === currentUserId) return;
                     userFound = true;
 
@@ -332,11 +332,9 @@
             });
         }
 
-        // --- CHAT INITIATION AND LOADING ENGINE ---
         function startChat(receiverId, username, profilePic) {
             activeReceiverId = receiverId;
 
-            // UI Changes across layouts
             document.querySelectorAll('.user-chat-row').forEach(r => r.classList.remove('active-chat'));
             const activeRow = document.getElementById(`user-row-${receiverId}`);
             if(activeRow) activeRow.classList.add('active-chat');
@@ -344,7 +342,6 @@
             document.getElementById("no-chat-screen").style.display = "none";
             document.getElementById("active-chat-screen").style.display = "flex";
 
-            // Mobile view UI management shifting panels
             document.getElementById("users-panel").classList.add("hidden-mobile");
             document.getElementById("chat-panel").classList.add("active-mobile");
 
@@ -354,12 +351,11 @@
             listenToMessages();
         }
 
-        // --- REALTIME MESSAGES SYNC STREAM ---
         function listenToMessages() {
             if(unsubscribeChat) unsubscribeChat();
 
             const messagesContainer = document.getElementById("chat-messages-container");
-            messagesContainer.innerHTML = `<div style="text-align:center; color:var(--text-muted); font-size:13px; margin:auto;">Syncing encryption...</div>`;
+            messagesContainer.innerHTML = `<div style="text-align:center; color:var(--text-muted); font-size:13px; margin:auto;">Syncing...</div>`;
 
             const q = query(collection(db, "messages"), orderBy("timestamp", "asc"));
 
@@ -370,8 +366,7 @@
                 snapshot.forEach((doc) => {
                     const msg = doc.data();
                     
-                    // Smart Room Filtering Engine logic
-                    const isMyMessageToFriend = (msg.senderId === currentUserId && msg.receiverId === activeReceiverId);
+                    const isMyMessage ToFriend = (msg.senderId === currentUserId && msg.receiverId === activeReceiverId);
                     const isFriendMessageToMe = (msg.senderId === activeReceiverId && msg.receiverId === currentUserId);
 
                     if (isMyMessageToFriend || isFriendMessageToMe) {
@@ -387,12 +382,10 @@
                     messagesContainer.innerHTML = `<div style="text-align:center; color:var(--text-muted); font-size:13px; margin:auto 0 10px 0; width:100%;">No messages here yet. Say Hi! 👋</div>`;
                 }
                 
-                // Live tracking scroll shifting
                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
             });
         }
 
-        // --- MESSAGE TRANSMISSION AND STORAGE ENGINE ---
         const messageInput = document.getElementById("message-text-input");
         const sendBtn = document.getElementById("btn-send-message");
 
@@ -416,7 +409,6 @@
                 });
             } catch (err) {
                 console.error("Message injection failed: ", err);
-                alert("Message transmission error!");
             } finally {
                 messageInput.focus();
             }
@@ -425,7 +417,6 @@
         sendBtn.addEventListener("click", sendMessage);
         messageInput.addEventListener("keypress", (e) => { if (e.key === "Enter") sendMessage(); });
 
-        // --- MOBILE CHAT BACK BUTTON BEHAVIOR ---
         document.getElementById("mobile-back-btn").addEventListener("click", () => {
             document.getElementById("users-panel").classList.remove("hidden-mobile");
             document.getElementById("chat-panel").classList.remove("active-mobile");
@@ -437,7 +428,6 @@
             document.querySelectorAll('.user-chat-row').forEach(r => r.classList.remove('active-chat'));
         });
 
-        // Initialize Core System Modules
         syncNavbarAvatars();
         loadUsersList();
     </script>
