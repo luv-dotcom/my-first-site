@@ -134,7 +134,7 @@
                 <div class="username-row">
                     <h2 class="profile-username skeleton" id="prof-username">&nbsp;</h2>
                     <button class="edit-profile-btn" id="edit-profile-trigger">Edit Profile</button>
-                    <a href="settings.html"><i class="fa-solid fa-gear" style="font-size: 18px; cursor: pointer; color: #262626;"></i></a>
+                    <i class="fa-solid fa-right-from-bracket" id="logout-btn" style="font-size: 18px; cursor: pointer; color: #ed4956;" title="Logout Account"></i>
                 </div>
                 <ul class="stats-row">
                     <li><span id="post-count">0</span> posts</li>
@@ -228,7 +228,7 @@
         const targetUserId = localStorage.getItem("active_user");
 
         if (!targetUserId) {
-            // Agar koi user logged-in nahi mila localStorage me, to automatic index (login page) par bhej dega
+            // Check fail: user login nahi hai to automatic redirection
             window.location.href = "index.html";
         }
 
@@ -366,7 +366,7 @@
                     gender: inputGender.value
                 });
 
-                // Agar username change kiya hai to localStorage handle bhi update karna padega
+                // Username changes protection inside local storage session
                 const currentLocalUser = localStorage.getItem("active_user");
                 const newUsernameVal = inputUsername.value.trim().toLowerCase();
                 if(currentLocalUser !== newUsernameVal){
@@ -399,6 +399,19 @@
                 }
             });
         });
+
+        // --- LIVE LOGOUT TRIGGER SYSTEM ---
+        const logoutBtn = document.getElementById("logout-btn");
+        if (logoutBtn) {
+            logoutBtn.addEventListener("click", () => {
+                const checkUserConfirmation = confirm("Kya aap sach me Logout hona chahte hain?");
+                if (checkUserConfirmation) {
+                    // Session clear karenge aur redirect
+                    localStorage.removeItem("active_user");
+                    window.location.href = "index.html";
+                }
+            });
+        }
 
         // Initialize Engine
         listenToProfileData();
