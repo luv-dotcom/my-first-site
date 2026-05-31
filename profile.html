@@ -7,61 +7,106 @@
     <link href="https://fonts.googleapis.com/css2?family=Grand+Hotel&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --bg-color: #fafafa; --border-color: #dbdbdb; --text-main: #262626; --text-muted: #8e8e8e; --card-bg: #ffffff; --btn-grey: #efefef; }
+        :root { 
+            --bg-color: #fafafa; 
+            --border-color: #dbdbdb; 
+            --text-main: #262626; 
+            --text-muted: #8e8e8e; 
+            --card-bg: #ffffff; 
+            --btn-grey: #efefef; 
+            --insta-blue: #0095f6;
+        }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-main); padding-top: 60px; padding-bottom: 60px; }
         a { text-decoration: none; color: inherit; }
+        
+        /* Navbar */
         .top-navbar { position: fixed; top: 0; left: 0; width: 100%; height: 60px; background-color: var(--card-bg); border-bottom: 1px solid var(--border-color); display: flex; justify-content: center; align-items: center; z-index: 1000; }
         .nav-container { width: 100%; max-width: 975px; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; }
         .logo-text { font-family: 'Grand Hotel', cursive; font-size: 30px; }
         .nav-icons { display: flex; gap: 22px; align-items: center; }
         .nav-icons i { font-size: 22px; cursor: pointer; }
-        .nav-profile-pic { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 1px solid black; }
+        .nav-profile-pic { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color); }
         .bottom-navbar { position: fixed; bottom: 0; left: 0; width: 100%; height: 52px; background-color: var(--card-bg); border-top: 1px solid var(--border-color); display: none; justify-content: space-around; align-items: center; z-index: 1000; }
         .bottom-navbar i { font-size: 22px; }
+        
+        /* Profile Layout */
         .profile-container { max-width: 935px; margin: 30px auto 0 auto; padding: 0 20px; }
         .profile-header { display: flex; gap: 40px; padding-bottom: 44px; border-bottom: 1px solid var(--border-color); align-items: center; }
         .avatar-section { flex: 1; display: flex; justify-content: center; }
-        .avatar-section img { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color); }
+        .avatar-section img { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color); background: #eee; }
         .info-section { flex: 2; display: flex; flex-direction: column; gap: 18px; }
         .username-row { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
-        .profile-username { font-size: 28px; font-weight: 300; }
-        .edit-profile-btn { background-color: transparent; border: 1px solid var(--border-color); padding: 5px 9px; border-radius: 4px; font-size: 14px; font-weight: 600; cursor: pointer; }
+        .profile-username { font-size: 28px; font-weight: 300; min-width: 120px; }
+        .edit-profile-btn { background-color: transparent; border: 1px solid var(--border-color); padding: 5px 12px; border-radius: 4px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+        .edit-profile-btn:hover { background-color: var(--btn-grey); }
         .stats-row { display: flex; gap: 40px; font-size: 16px; list-style: none; }
         .stats-row li span { font-weight: 600; }
         .bio-row { font-size: 14px; line-height: 20px; }
         .full-name { font-weight: 600; display: block; margin-bottom: 2px; }
         .bio-link { color: #00376b; font-weight: 600; }
+        
+        /* Tabs */
         .profile-tabs { display: flex; justify-content: center; gap: 60px; text-transform: uppercase; letter-spacing: 1px; font-size: 12px; font-weight: 600; }
-        .tab-item { display: flex; align-items: center; gap: 6px; padding: 18px 0; color: var(--text-muted); cursor: pointer; border-top: 1px solid transparent; margin-top: -1px; }
+        .tab-item { display: flex; align-items: center; gap: 6px; padding: 18px 0; color: var(--text-muted); cursor: pointer; border-top: 1px solid transparent; margin-top: -1px; transition: all 0.2s; }
         .tab-item.active { color: var(--text-main); border-top: 1px solid var(--text-main); }
         
-        /* Gallery Grid Dynamic Stlyes */
-        .gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin-top: 5px; }
-        .grid-item { position: relative; aspect-ratio: 1 / 1; background-color: #efefef; overflow: hidden; cursor: pointer; }
+        /* Gallery */
+        .gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin-top: 5px; min-height: 200px; }
+        .grid-item { position: relative; aspect-ratio: 1 / 1; background-color: #efefef; overflow: hidden; cursor: pointer; animation: fadeIn 0.5s ease; }
         .grid-item img { width: 100%; height: 100%; object-fit: cover; }
         .grid-item-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.4); display: flex; justify-content: center; align-items: center; gap: 30px; color: white; font-size: 18px; font-weight: 600; opacity: 0; transition: opacity 0.2s ease; }
         .grid-item:hover .grid-item-overlay { opacity: 1; }
         .overlay-stat { display: flex; align-items: center; gap: 7px; }
-        
-        /* No post message style */
-        .no-posts { grid-column: span 3; text-align: center; padding: 50px 0; color: var(--text-muted); font-size: 18px; }
+        .no-posts { grid-column: span 3; text-align: center; padding: 60px 0; color: var(--text-muted); font-size: 18px; }
 
-        /* --- EDIT PROFILE MODAL STYLES --- */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 2000; }
-        .modal-box { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 420px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; }
-        .modal-box h3 { margin-bottom: 20px; font-size: 20px; text-align: center; }
+        /* Skeleton Shimmer Loading Effect */
+        .skeleton { background: linear-gradient(90deg, #f2f2f2 25%, #e6e6e6 50%, #f2f2f2 75%); background-size: 200% 100%; animation: loading 1.5s infinite; color: transparent !important; border-radius: 4px; }
+        .skeleton-img { border-radius: 50% !important; animation: loading 1.5s infinite; }
+        @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Smooth Modal Style Upgrade */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 2000; opacity: 0; transition: opacity 0.3s ease; }
+        .modal-overlay.show { opacity: 1; display: flex; }
+        .modal-box { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 420px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); max-height: 90vh; overflow-y: auto; transform: scale(0.8); transition: transform 0.3s ease; }
+        .modal-overlay.show .modal-box { transform: scale(1); }
+        .modal-box h3 { margin-bottom: 20px; font-size: 20px; text-align: center; font-weight: 600; }
         .input-group { margin-bottom: 15px; display: flex; flex-direction: column; gap: 5px; }
-        .input-group label { font-size: 13px; font-weight: 600; color: var(--text-muted); }
-        .input-group input, .input-group textarea, .input-group select { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 14px; outline: none; background: white; }
-        .input-group textarea { resize: none; height: 60px; }
-        .modal-buttons { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
-        .modal-btn { padding: 8px 16px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; }
-        .btn-cancel { background: #efefef; color: #262626; }
-        .btn-save { background: #0095f6; color: white; }
+        .input-group label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
+        .input-group input, .input-group textarea, .input-group select { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 14px; outline: none; background: #fafafa; transition: border 0.2s; }
+        .input-group input:focus, .input-group textarea:focus { border-color: var(--text-muted); background: white; }
+        .input-group textarea { resize: none; height: 70px; }
+        .modal-buttons { display: flex; gap: 10px; justify-content: flex-end; margin-top: 25px; }
+        .modal-btn { padding: 9px 16px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: opacity 0.2s; }
+        .modal-btn:hover { opacity: 0.9; }
+        .btn-cancel { background: var(--btn-grey); color: #262626; }
+        .btn-save { background: var(--insta-blue); color: white; }
         .btn-save:disabled { background: #b2dffc; cursor: not-allowed; }
 
-        @media (max-width: 768px) { body { padding-top: 50px; } .top-navbar .nav-icons { display: none; } .bottom-navbar { display: flex; } .profile-container { padding: 0; margin-top: 15px; } .profile-header { gap: 20px; padding: 10px 16px 24px 16px; border-bottom: none; } .avatar-section img { width: 77px; height: 77px; } .username-row { flex-direction: column; align-items: flex-start; gap: 10px; } .profile-username { font-size: 22px; } .edit-profile-btn { width: 100%; text-align: center; background-color: var(--btn-grey); border: none; } .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); padding: 12px 0; font-size: 14px; gap: 0; } .stats-row li { display: flex; flex-direction: column; color: var(--text-muted); } .stats-row li span { color: var(--text-main); } .bio-row { padding: 4px 16px; } .profile-tabs { gap: 0; justify-content: space-around; } .profile-tabs span { display: none; } .tab-item i { font-size: 24px; } .tab-item { padding: 14px 0; } .gallery-grid { gap: 3px; } .grid-item-overlay { display: none; } }
+        /* Responsive Breakpoint Mobile UI updates */
+        @media (max-width: 768px) { 
+            body { padding-top: 50px; } 
+            .top-navbar .nav-icons { display: none; } 
+            .bottom-navbar { display: flex; } 
+            .profile-container { padding: 0; margin-top: 10px; } 
+            .profile-header { gap: 20px; padding: 15px 16px; border-bottom: none; } 
+            .avatar-section img { width: 85px; height: 85px; } 
+            .username-row { display: grid; grid-template-columns: 1fr auto; width: 100%; gap: 12px; } 
+            .profile-username { font-size: 22px; } 
+            .edit-profile-btn { grid-column: span 2; width: 100%; text-align: center; background-color: var(--btn-grey); border: none; padding: 7px; } 
+            .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); padding: 12px 0; font-size: 14px; gap: 0; } 
+            .stats-row li { display: flex; flex-direction: column; color: var(--text-muted); } 
+            .stats-row li span { color: var(--text-main); } 
+            .bio-row { padding: 4px 16px 15px 16px; } 
+            .profile-tabs { gap: 0; justify-content: space-around; border-top: 1px solid var(--border-color); } 
+            .profile-tabs span { display: none; } 
+            .tab-item i { font-size: 22px; } 
+            .tab-item { padding: 14px 0; width: 100%; justify-content: center; } 
+            .tab-item.active { border-top: 2px solid var(--text-main); }
+            .gallery-grid { gap: 3px; margin-top: 2px; } 
+            .grid-item-overlay { display: none; } 
+        }
     </style>
 </head>
 <body>
@@ -82,12 +127,14 @@
 
     <main class="profile-container">
         <header class="profile-header">
-            <div class="avatar-section"><img src="https://picsum.photos/150/150?random=1" alt="My Big Avatar" id="main-avatar"></div>
+            <div class="avatar-section">
+                <img src="" alt="Avatar" id="main-avatar" class="skeleton skeleton-img">
+            </div>
             <div class="info-section">
                 <div class="username-row">
-                    <h2 class="profile-username" id="prof-username">Loading...</h2>
+                    <h2 class="profile-username skeleton" id="prof-username">&nbsp;</h2>
                     <button class="edit-profile-btn" id="edit-profile-trigger">Edit Profile</button>
-                    <a href="settings.html"><i class="fa-solid fa-gear" style="font-size: 20px; cursor: pointer; color: #262626;"></i></a>
+                    <a href="settings.html"><i class="fa-solid fa-gear" style="font-size: 18px; cursor: pointer; color: #262626;"></i></a>
                 </div>
                 <ul class="stats-row">
                     <li><span id="post-count">0</span> posts</li>
@@ -95,21 +142,23 @@
                     <li><span>189</span> following</li>
                 </ul>
                 <div class="bio-row">
-                    <span class="full-name" id="prof-name">Loading Name...</span>
-                    <p id="prof-bio">Loading Bio...</p>
+                    <span class="full-name skeleton" id="prof-name">&nbsp;</span>
+                    <p id="prof-bio" class="skeleton">&nbsp;</p>
                     <a href="https://github.com" target="_blank" class="bio-link">github.com/your-repo</a>
                 </div>
             </div>
         </header>
 
         <div class="profile-tabs">
-            <div class="tab-item active"><i class="fa-solid fa-table-cells"></i> <span>Posts</span></div>
-            <div class="tab-item"><i class="fa-regular fa-clapperboard"></i> <span>Reels</span></div>
-            <div class="tab-item"><i class="fa-regular fa-id-card"></i> <span>Tagged</span></div>
+            <div class="tab-item active" data-tab="posts"><i class="fa-solid fa-table-cells"></i> <span>Posts</span></div>
+            <div class="tab-item" data-tab="reels"><i class="fa-regular fa-clapperboard"></i> <span>Reels</span></div>
+            <div class="tab-item" data-tab="tagged"><i class="fa-regular fa-id-card"></i> <span>Tagged</span></div>
         </div>
 
         <section class="gallery-grid" id="posts-gallery">
-            <div class="no-posts">Loading posts...</div>
+            <div class="grid-item skeleton"></div>
+            <div class="grid-item skeleton"></div>
+            <div class="grid-item skeleton"></div>
         </section>
     </main>
 
@@ -153,13 +202,13 @@
         <a href="search.html"><i class="fa-solid fa-magnifying-glass"></i></a>
         <a href="create.html"><i class="fa-regular fa-square-plus"></i></a>
         <a href="reels.html"><i class="fa-regular fa-clapperboard"></i></a>
-        <img src="https://picsum.photos/150/150?random=1" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1.5px solid black;" id="bottom-avatar">
+        <img src="https://picsum.photos/150/150?random=1" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--border-color);" id="bottom-avatar">
     </nav>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-        // Added 'collection', 'getDocs', 'query', 'where' for Fetching Posts
-        import { getFirestore, doc, getDoc, updateDoc, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+        // Added 'onSnapshot' module for real-time live synchronization listeners
+        import { getFirestore, doc, onSnapshot, updateDoc, collection, query, where } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
         
         const firebaseConfig = {
             apiKey: "AIzaSyBrqMn7FrFW3jslaDNM0ui-VW4w6K_3Nmk",
@@ -175,57 +224,61 @@
         let databaseNameKey = "fullName"; 
         let defaultPic = "https://picsum.photos/150/150?random=1";
         let userCurrentGender = "Not Specified";
+        const targetUserId = "luv_5";
 
-        async function fetchProfileData() {
-            try {
-                const docRef = doc(db, "users", "luv_5");
-                const docSnap = await getDoc(docRef);
+        // Remove placeholder skeleton classes once dynamic content attaches
+        function removeSkeletons() {
+            document.querySelectorAll('.skeleton').forEach(el => el.classList.remove('skeleton'));
+        }
 
+        // --- REALTIME PROFILE DATA SYNC (onSnapshot) ---
+        function listenToProfileData() {
+            const docRef = doc(db, "users", targetUserId);
+            
+            onSnapshot(docRef, (docSnap) => {
                 if (docSnap.exists()) {
                     const userData = docSnap.data();
                     
-                    document.getElementById("prof-username").innerText = userData.username || "No Username";
-                    document.getElementById("prof-bio").innerText = userData.bio || "No Bio";
+                    const profUsername = document.getElementById("prof-username");
+                    const profBio = document.getElementById("prof-bio");
+                    const profName = document.getElementById("prof-name");
+                    
+                    profUsername.innerText = userData.username || "no_username";
+                    profBio.innerText = userData.bio || "No bio yet.";
                     userCurrentGender = userData.gender || "Not Specified";
 
-                    if (userData.profilePic) {
-                        document.getElementById("main-avatar").src = userData.profilePic;
-                        document.getElementById("nav-avatar").src = userData.profilePic;
-                        document.getElementById("bottom-avatar").src = userData.profilePic;
-                    }
+                    const currentPic = userData.profilePic || defaultPic;
+                    document.getElementById("main-avatar").src = currentPic;
+                    document.getElementById("nav-avatar").src = currentPic;
+                    document.getElementById("bottom-avatar").src = currentPic;
 
-                    let finalName = "User"; 
+                    let finalName = "Instagram User"; 
                     for (let key in userData) {
-                        if (key !== "username" && key !== "bio" && key !== "profilePic" && key !== "gender") {
+                        if (!["username", "bio", "profilePic", "gender"].includes(key)) {
                             finalName = userData[key];
                             databaseNameKey = key;
                             break;
                         }
                     }
-                    document.getElementById("prof-name").innerText = finalName;
-
-                    // profile load hote hi iske posts bhi load honge
-                    fetchUserPosts();
-
+                    profName.innerText = finalName;
+                    removeSkeletons();
                 }
-            } catch (error) {
-                console.error("Profile load issue: ", error);
-            }
+            }, (error) => {
+                console.error("Live profile listen sync failed: ", error);
+            });
         }
 
-        // --- FETCH DYNAMIC POSTS FROM FIREBASE ---
-        async function fetchUserPosts() {
+        // --- REALTIME POSTS SYNC GALLERY ---
+        function listenToUserPosts() {
             const gallery = document.getElementById("posts-gallery");
-            try {
-                // Sirf 'luv_5' ke posts nikalne ke liye query lagayi h
-                const q = query(collection(db, "posts"), where("userId", "==", "luv_5"));
-                const querySnapshot = await getDocs(q);
-                
-                gallery.innerHTML = ""; // Loader text clear karne ke liye
+            const q = query(collection(db, "posts"), where("userId", "==", targetUserId));
+            
+            onSnapshot(q, (querySnapshot) => {
+                gallery.innerHTML = ""; 
                 let count = 0;
 
                 if (querySnapshot.empty) {
-                    gallery.innerHTML = `<div class="no-posts"><i class="fa-camera" style="font-size:40px; margin-bottom:10px; display:block;"></i>No Posts Yet</div>`;
+                    gallery.innerHTML = `<div class="no-posts"><i class="fa-solid fa-camera" style="font-size:40px; margin-bottom:10px; display:block;"></i>No Posts Yet</div>`;
                     document.getElementById("post-count").innerText = "0";
                     return;
                 }
@@ -234,11 +287,10 @@
                     const postData = doc.data();
                     count++;
 
-                    // HTML item structured dynamically
                     const gridItem = document.createElement("div");
                     gridItem.className = "grid-item";
                     gridItem.innerHTML = `
-                        <img src="${postData.postImg}" alt="post">
+                        <img src="${postData.postImg || defaultPic}" alt="post">
                         <div class="grid-item-overlay">
                             <div class="overlay-stat"><i class="fa-solid fa-heart"></i> ${postData.likes || 0}</div>
                             <div class="overlay-stat"><i class="fa-solid fa-comment"></i> 0</div>
@@ -247,16 +299,14 @@
                     gallery.appendChild(gridItem);
                 });
 
-                // Total post count updates dynamically
                 document.getElementById("post-count").innerText = count;
-
-            } catch (error) {
-                console.error("Posts fetch error: ", error);
-                gallery.innerHTML = `<div class="no-posts">Error loading posts!</div>`;
-            }
+            }, (error) => {
+                console.error("Live posts sync failed: ", error);
+                gallery.innerHTML = `<div class="no-posts">Error syncing posts!</div>`;
+            });
         }
 
-        // --- EDIT PROFILE MODAL CODE ---
+        // --- MODAL TRIGGER CODE UPDATES ---
         const modal = document.getElementById("edit-modal");
         const editBtn = document.getElementById("edit-profile-trigger");
         const closeBtn = document.getElementById("btn-close-modal");
@@ -268,51 +318,73 @@
         const inputBio = document.getElementById("input-bio");
         const inputGender = document.getElementById("input-gender");
 
+        // Open Modal smoothly
         editBtn.addEventListener("click", () => {
             inputUsername.value = document.getElementById("prof-username").innerText;
             inputName.value = document.getElementById("prof-name").innerText;
-            inputPic.value = document.getElementById("main-avatar").src === defaultPic ? "" : document.getElementById("main-avatar").src;
-            inputBio.value = document.getElementById("prof-bio").innerText;
+            const mainAvatarSrc = document.getElementById("main-avatar").src;
+            inputPic.value = mainAvatarSrc.includes("random=") ? "" : mainAvatarSrc;
+            inputBio.value = document.getElementById("prof-bio").innerText === "No bio yet." ? "" : document.getElementById("prof-bio").innerText;
             inputGender.value = userCurrentGender;
+            
             modal.style.display = "flex";
+            setTimeout(() => modal.classList.add("show"), 10);
         });
 
-        closeBtn.addEventListener("click", () => { modal.style.display = "none"; });
+        // Close Modal handler
+        const closeModalFn = () => {
+            modal.classList.remove("show");
+            setTimeout(() => modal.style.display = "none", 300);
+        };
+        closeBtn.addEventListener("click", closeModalFn);
+        modal.addEventListener("click", (e) => { if(e.target === modal) closeModalFn(); });
 
+        // Save Profile Action updates
         saveBtn.addEventListener("click", async () => {
             saveBtn.innerText = "Updating...";
             saveBtn.disabled = true;
             try {
-                const docRef = doc(db, "users", "luv_5");
+                const docRef = doc(db, "users", targetUserId);
                 const updatedPicUrl = inputPic.value.trim() || defaultPic;
 
                 await updateDoc(docRef, {
-                    username: inputUsername.value,
-                    [databaseNameKey]: inputName.value,
-                    bio: inputBio.value,
+                    username: inputUsername.value.trim().toLowerCase(),
+                    [databaseNameKey]: inputName.value.trim(),
+                    bio: inputBio.value.trim(),
                     profilePic: updatedPicUrl,
                     gender: inputGender.value
                 });
 
-                document.getElementById("prof-username").innerText = inputUsername.value;
-                document.getElementById("prof-name").innerText = inputName.value;
-                document.getElementById("prof-bio").innerText = inputBio.value;
-                document.getElementById("main-avatar").src = updatedPicUrl;
-                document.getElementById("nav-avatar").src = updatedPicUrl;
-                document.getElementById("bottom-avatar").src = updatedPicUrl;
-                userCurrentGender = inputGender.value;
-
-                modal.style.display = "none";
-                alert("Profile Updated Successfully! 🔥");
+                closeModalFn();
             } catch (error) {
-                alert("Error updating profile!");
+                alert("Error saving profiles fields standard details!");
+                console.error(error);
             } finally {
                 saveBtn.innerText = "Save";
                 saveBtn.disabled = false;
             }
         });
 
-        fetchProfileData();
+        // --- TAB SWITCHING LOGIC INTERACTION ---
+        document.querySelectorAll('.tab-item').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelector('.tab-item.active').classList.remove('active');
+                this.classList.add('active');
+                
+                const gallery = document.getElementById("posts-gallery");
+                const currentTabType = this.getAttribute('data-tab');
+                
+                if(currentTabType !== 'posts') {
+                    gallery.innerHTML = `<div class="no-posts"><i class="fa-regular fa-square-minus" style="font-size:40px; margin-bottom:10px; display:block;"></i>No Dynamic ${this.innerText} Available</div>`;
+                } else {
+                    listenToUserPosts(); // Re-trigger live posts grid sync if true
+                }
+            });
+        });
+
+        // Main initialization calls
+        listenToProfileData();
+        listenToUserPosts();
     </script>
 </body>
 </html>
