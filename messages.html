@@ -1,266 +1,221 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instagram • Chats</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root { --bg-color: #fafafa; --border-color: #dbdbdb; --text-main: #262626; --text-muted: #8e8e8e; --card-bg: #ffffff; --insta-blue: #0095f6; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-main); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        a { text-decoration: none; color: inherit; }
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+    import { getFirestore, doc, collection, addDoc, setDoc, updateDoc, onSnapshot, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
-        /* --- NAVBAR --- */
-        .top-navbar { width: 100%; height: 60px; background-color: var(--card-bg); border-bottom: 1px solid var(--border-color); display: flex; justify-content: center; align-items: center; position: fixed; top: 0; left: 0; z-index: 1000; }
-        .nav-container { width: 100%; max-width: 975px; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; }
-        .back-home { font-size: 22px; cursor: pointer; }
-        .nav-username { font-weight: 600; font-size: 16px; }
+    // Firebase Config
+    const firebaseConfig = {
+        apiKey: "AIzaSyBrqMn7FrFW3jslaDNM0ui-VW4w6K_3Nmk",
+        authDomain: "insta-clone-863ae.firebaseapp.com",
+        projectId: "insta-clone-863ae",
+        storageBucket: "insta-clone-863ae.firebasestorage.app",
+        messagingSenderId: "599343109250",
+        appId: "1:599343109250:web:1306ec63908ba21c54509b"
+    };
+    const db = getFirestore(initializeApp(firebaseConfig));
 
-        /* --- CHAT CONTAINER --- */
-        .chat-workspace { display: flex; max-width: 935px; width: 100%; height: calc(100vh - 60px); margin: 60px auto 0 auto; background: var(--card-bg); border: 1px solid var(--border-color); border-bottom: none; }
+    let myUsername = localStorage.getItem("active_user");
+    if (!myUsername) { window.location.href = "login.html"; }
+    document.getElementById("nav-my-username").innerText = myUsername;
 
-        /* --- SIDEBAR (USERS LIST) --- */
-        .inbox-sidebar { width: 350px; border-right: 1px solid var(--border-color); display: flex; flex-direction: column; background: var(--card-bg); }
-        .sidebar-header { padding: 20px; border-bottom: 1px solid var(--border-color); font-weight: 600; font-size: 16px; text-align: center; }
-        .users-list { flex: 1; overflow-y: auto; }
-        .user-chat-row { display: flex; align-items: center; gap: 12px; padding: 12px 20px; cursor: pointer; transition: background 0.2s; }
-        .user-chat-row:hover, .user-chat-row.active { background-color: #f2f2f2; }
-        .user-chat-row img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; }
-        .chat-row-meta { display: flex; flex-direction: column; }
-        .chat-row-name { font-size: 14px; font-weight: 600; }
+    let selectedTargetUser = null;
+    let unsubscribeMessages = null;
 
-        /* --- CHAT BOX WINDOW --- */
-        .chat-window { flex: 1; display: flex; flex-direction: column; background: #ffffff; }
-        .chat-window-header { height: 60px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; padding: 0 20px; gap: 12px; }
-        .chat-window-header img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
-        .active-chat-user { font-weight: 600; font-size: 15px; }
-        
-        .messages-display-area { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; background: #fff; }
-        
-        /* Message Bubbles */
-        .msg-bubble { max-width: 60%; padding: 10px 16px; border-radius: 20px; font-size: 14px; line-height: 18px; word-wrap: break-word; }
-        .msg-bubble.sent { background-color: #efefef; color: var(--text-main); align-self: flex-end; border-bottom-right-radius: 4px; }
-        .msg-bubble.received { background-color: transparent; border: 1px solid var(--border-color); color: var(--text-main); align-self: flex-start; border-bottom-left-radius: 4px; }
+    const usersListElement = document.getElementById("global-users-chat-list");
+    const placeholderBox = document.getElementById("placeholder-box");
+    const activeChatBox = document.getElementById("active-chat-box");
+    const chatWindow = document.getElementById("chat-main-window");
+    const messagesContainer = document.getElementById("chat-messages-container");
+    const textInput = document.getElementById("message-text-input");
+    const sendBtn = document.getElementById("send-btn");
 
-        /* Input Area */
-        .message-input-bar { padding: 16px 20px; border-top: 1px solid var(--border-color); display: flex; align-items: center; background: #fff; }
-        .input-wrapper { width: 100%; border: 1px solid var(--border-color); border-radius: 24px; padding: 10px 16px; display: flex; align-items: center; gap: 12px; }
-        .input-wrapper input { flex: 1; border: none; outline: none; font-size: 14px; background: transparent; }
-        .send-msg-btn { color: var(--insta-blue); font-weight: 600; border: none; background: none; cursor: pointer; font-size: 14px; }
-        .send-msg-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    textInput.addEventListener("input", (e) => {
+        sendBtn.disabled = e.target.value.trim() === "";
+    });
 
-        /* No Active Chat Placeholder */
-        .no-chat-selected { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; color: var(--text-muted); gap: 12px; }
-        .no-chat-selected i { font-size: 60px; color: #262626; }
-        .no-chat-selected h2 { color: #262626; font-weight: 400; font-size: 22px; }
+    // 1. Live Listen Users & Rooms (For Last Message & Red Dots)
+    function listenToInbox() {
+        // Hame realtime updates chahiye taaki jaise hi koi msg aaye, sidebar turant bina refresh kiye badle
+        onSnapshot(collection(db, "users"), async (usersSnapshot) => {
+            usersListElement.innerHTML = "";
+            let overallUnreadForNavbar = false;
 
-        /* Mobile View Adjustment */
-        @media (max-width: 768px) {
-            .inbox-sidebar { width: 100%; }
-            .chat-window { display: none; position: fixed; top: 60px; left: 0; width: 100%; height: calc(100vh - 60px); z-index: 2000; }
-            .chat-window.open { display: flex; }
-            .back-to-list-btn { display: inline-block !important; margin-right: 10px; cursor: pointer; font-size: 18px; }
-        }
-        .back-to-list-btn { display: none; }
-    </style>
-</head>
-<body>
+            // Saare users ko check karenge
+            for (const userDoc of usersSnapshot.docs) {
+                const uData = userDoc.data();
+                const uName = uData.username || userDoc.id;
 
-    <nav class="top-navbar">
-        <div class="nav-container">
-            <a href="home.html" class="back-home"><i class="fa-solid fa-chevron-left"></i></a>
-            <div class="nav-username" id="nav-my-username">Direct Messages</div>
-            <div style="width: 22px;"></div> </div>
-    </nav>
-
-    <main class="chat-workspace">
-        <aside class="inbox-sidebar">
-            <div class="sidebar-header">Messages</div>
-            <div class="users-list" id="global-users-chat-list">
-                <div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 14px;">
-                    <i class="fa-solid fa-circle-notch fa-spin"></i> Loading contacts...
-                </div>
-            </div>
-        </aside>
-
-        <section class="chat-window" id="chat-main-window">
-            <div class="no-chat-selected" id="placeholder-box">
-                <i class="fa-regular fa-paper-plane"></i>
-                <h2>Your Messages</h2>
-                <p>Send private photos and messages to a friend.</p>
-            </div>
-
-            <div id="active-chat-box" style="display: none; flex-direction: column; height: 100%;">
-                <div class="chat-window-header">
-                    <i class="fa-solid fa-arrow-left back-to-list-btn" id="mobile-back-arrow"></i>
-                    <img src="" alt="" id="chat-user-avatar">
-                    <span class="active-chat-user" id="chat-user-username">Username</span>
-                </div>
-
-                <div class="messages-display-area" id="chat-messages-container">
-                    </div>
-
-                <div class="message-input-bar">
-                    <div class="input-wrapper">
-                        <input type="text" id="message-text-input" placeholder="Message...">
-                        <button class="send-msg-btn" id="send-btn" disabled>Send</button>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-        import { getFirestore, doc, collection, addDoc, onSnapshot, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
-
-        // Same Firebase Config
-        const firebaseConfig = {
-            apiKey: "AIzaSyBrqMn7FrFW3jslaDNM0ui-VW4w6K_3Nmk",
-            authDomain: "insta-clone-863ae.firebaseapp.com",
-            projectId: "insta-clone-863ae",
-            storageBucket: "insta-clone-863ae.firebasestorage.app",
-            messagingSenderId: "599343109250",
-            appId: "1:599343109250:web:1306ec63908ba21c54509b"
-        };
-        const db = getFirestore(initializeApp(firebaseConfig));
-
-        let myUsername = localStorage.getItem("active_user");
-        if (!myUsername) { window.location.href = "login.html"; }
-        document.getElementById("nav-my-username").innerText = myUsername;
-
-        let selectedTargetUser = null;
-        let unsubscribeMessages = null;
-
-        const usersListElement = document.getElementById("global-users-chat-list");
-        const placeholderBox = document.getElementById("placeholder-box");
-        const activeChatBox = document.getElementById("active-chat-box");
-        const chatWindow = document.getElementById("chat-main-window");
-        const messagesContainer = document.getElementById("chat-messages-container");
-        const textInput = document.getElementById("message-text-input");
-        const sendBtn = document.getElementById("send-btn");
-
-        // Input handler to toggle send button state
-        textInput.addEventListener("input", (e) => {
-            sendBtn.disabled = e.target.value.trim() === "";
-        });
-
-        // 1. Load All India Users in Sidebar
-        async function loadInboxUsers() {
-            try {
-                const snapshot = await getDocs(collection(db, "users"));
-                usersListElement.innerHTML = "";
-                let count = 0;
-
-                snapshot.forEach((userDoc) => {
-                    const uData = userDoc.data();
-                    const uName = uData.username || userDoc.id;
-
-                    // Apne aap ko list me nahi dikhana hai
-                    if (uName !== myUsername) {
-                        count++;
-                        const avatar = uData.profilePic || "https://picsum.photos/150/150?random=99";
-                        const row = document.createElement("div");
-                        row.className = "user-chat-row";
-                        row.setAttribute("data-username", uName);
-                        row.innerHTML = `
-                            <img src="${avatar}" alt="user">
-                            <div class="chat-row-meta">
-                                <span class="chat-row-name">${uName}</span>
-                            </div>
-                        `;
-
-                        row.addEventListener("click", () => openChatWithUser(uName, avatar, row));
-                        usersListElement.appendChild(row);
-                    }
-                });
-
-                if(count === 0) {
-                    usersListElement.innerHTML = `<div style="padding:20px; text-align:center; color:var(--text-muted);">No users found.</div>`;
-                }
-            } catch (err) {
-                console.error("Failed to load inbox users:", err);
-            }
-        }
-
-        // 2. Open Chat with Selected User
-        function openChatWithUser(targetUser, avatarUrl, rowElement) {
-            selectedTargetUser = targetUser;
-
-            // Update UI styles for active row
-            document.querySelectorAll(".user-chat-row").forEach(r => r.classList.remove("active"));
-            rowElement.classList.add("active");
-
-            // Show chat room panels
-            placeholderBox.style.display = "none";
-            activeChatBox.style.display = "flex";
-            chatWindow.classList.add("open"); // For Mobile Responsive
-
-            document.getElementById("chat-user-avatar").src = avatarUrl;
-            document.getElementById("chat-user-username").innerText = targetUser;
-
-            // Fetch Real-time messages for this conversation
-            listenToMessages(targetUser);
-        }
-
-        // 3. Real-time Message Listener
-        function listenToMessages(targetUser) {
-            if (unsubscribeMessages) unsubscribeMessages(); // Old listener close karo
-
-            // Chat unique ID banane ke liye: alphabetical sort order use karenge (A_to_B or B_to_A hamesha same room dega)
-            const chatRoomId = [myUsername, targetUser].sort().join("_chat_room_");
-
-            const q = query(collection(db, "chats", chatRoomId, "messages"), orderBy("timestamp", "asc"));
-            
-            unsubscribeMessages = onSnapshot(q, (snapshot) => {
-                messagesContainer.innerHTML = "";
-                snapshot.forEach((msgDoc) => {
-                    const mData = msgDoc.data();
-                    const bubble = document.createElement("div");
+                if (uName !== myUsername) {
+                    const avatar = uData.profilePic || "https://picsum.photos/150/150?random=99";
+                    const chatRoomId = [myUsername, uName].sort().join("_chat_room_");
                     
-                    if (mData.sender === myUsername) {
-                        bubble.className = "msg-bubble sent";
-                    } else {
-                        bubble.className = "msg-bubble received";
-                    }
-                    bubble.innerText = mData.text;
-                    messagesContainer.appendChild(bubble);
-                });
-                // Auto-scroll to bottom of chat
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            });
-        }
+                    // Room Document create ya fetch karne ke liye placeholder divs setup karte hain
+                    const row = document.createElement("div");
+                    row.className = `user-chat-row ${selectedTargetUser === uName ? 'active' : ''}`;
+                    row.setAttribute("data-username", uName);
+                    
+                    // Default Row Layout
+                    row.innerHTML = `
+                        <div style="position: relative;">
+                            <img src="${avatar}" alt="user" class="chat-avatar-img">
+                            <div class="profile-red-dot" id="dot-avatar-${uName}" style="position: absolute; top: 0; right: 0; width: 12px; height: 12px; background-color: #ed4956; border-radius: 50%; border: 2px solid white; display: none;"></div>
+                        </div>
+                        <div class="chat-row-meta" style="flex: 1; display: flex; flex-direction: column;">
+                            <span class="chat-row-name">${uName}</span>
+                            <span class="chat-row-last-msg" id="last-msg-${uName}" style="font-size: 13px; color: var(--text-muted); max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">No messages yet</span>
+                        </div>
+                        <div class="sidebar-status-dot" id="status-dot-${uName}" style="width: 8px; height: 8px; background-color: #0095f6; border-radius: 50%; display: none;"></div>
+                    `;
 
-        // 4. Send Message Functionality
-        sendBtn.addEventListener("click", async () => {
-            const msgText = textInput.value.trim();
-            if (!msgText || !selectedTargetUser) return;
+                    row.addEventListener("click", () => openChatWithUser(uName, avatar, row));
+                    usersListElement.appendChild(row);
 
-            textInput.value = "";
-            sendBtn.disabled = true;
+                    // Real-time track Room changes (Last message preview & status indicator)
+                    onSnapshot(doc(db, "chats", chatRoomId), (roomSnap) => {
+                        const lastMsgTextSpan = document.getElementById(`last-msg-${uName}`);
+                        const profileDot = document.getElementById(`dot-avatar-${uName}`);
+                        const statusDot = document.getElementById(`status-dot-${uName}`);
 
-            const chatRoomId = [myUsername, selectedTargetUser].sort().join("_chat_room_");
+                        if (roomSnap.exists()) {
+                            const roomData = roomSnap.data();
+                            
+                            // Point 4: Last Message text user ke name ke niche show karna
+                            if (roomData.lastMessageText) {
+                                lastMsgTextSpan.innerText = roomData.lastMessageText;
+                            }
 
-            try {
-                await addDoc(collection(db, "chats", chatRoomId, "messages"), {
-                    sender: myUsername,
-                    receiver: selectedTargetUser,
-                    text: msgText,
-                    timestamp: new Date()
-                });
-            } catch (err) {
-                console.error("Error sending message: ", err);
+                            // Point 2 & 3: Check agar samne wale ne bheja hai aur read nahi hua hai
+                            if (roomData.lastMessageSender !== myUsername && roomData.isRead === false) {
+                                // Msg Bold hoga
+                                lastMsgTextSpan.style.fontWeight = "700";
+                                lastMsgTextSpan.style.color = "var(--text-main)";
+                                // Profile aur row pe red/blue dots active honge
+                                profileDot.style.display = "block";
+                                statusDot.style.display = "block";
+                                
+                                overallUnreadForNavbar = true;
+                            } else {
+                                // Read ho chuka hai toh sab normal
+                                lastMsgTextSpan.style.fontWeight = "400";
+                                lastMsgTextSpan.style.color = "var(--text-muted)";
+                                profileDot.style.display = "none";
+                                statusDot.style.display = "none";
+                            }
+                        }
+                        
+                        // Point 1: Navbar ke Chat Icon pe red indicator toggle karne ke liye log
+                        updateNavbarChatIconStatus(overallUnreadForNavbar);
+                    });
+                }
             }
         });
+    }
 
-        // Mobile Responsive Back Arrow Control
-        document.getElementById("mobile-back-arrow").addEventListener("click", () => {
-            chatWindow.classList.remove("open");
+    // Top Header Chat Icon Status Handler
+    function updateNavbarChatIconStatus(hasUnread) {
+        const topNavBackIcon = document.querySelector(".back-home i");
+        if (topNavBackIcon) {
+            if (hasUnread) {
+                topNavBackIcon.style.color = "#ed4956"; // Agar unread hai toh back arrow/chat element red ho jaye
+            } else {
+                topNavBackIcon.style.color = "var(--text-main)";
+            }
+        }
+    }
+
+    // 2. Open Chat Room
+    async function openChatWithUser(targetUser, avatarUrl, rowElement) {
+        selectedTargetUser = targetUser;
+
+        document.querySelectorAll(".user-chat-row").forEach(r => r.classList.remove("active"));
+        rowElement.classList.add("active");
+
+        placeholderBox.style.display = "none";
+        activeChatBox.style.display = "flex";
+        chatWindow.classList.add("open");
+
+        document.getElementById("chat-user-avatar").src = avatarUrl;
+        document.getElementById("chat-user-username").innerText = targetUser;
+
+        const chatRoomId = [myUsername, targetUser].sort().join("_chat_room_");
+
+        // Point 3: Jaise hi saamne wala msg khol le (click kare), status normal ho jaye
+        try {
+            const roomRef = doc(db, "chats", chatRoomId);
+            const roomSnap = await getDocs(query(collection(db, "chats"))); // Quick check
+            
+            // Hum flag ko true update kar dete hain taaki unread status hat jaye
+            await updateDoc(roomRef, {
+                isRead: true
+            });
+        } catch (e) {
+            console.log("Room reference not initialized yet, will update on first message.");
+        }
+
+        listenToMessages(targetUser);
+    }
+
+    // 3. Listen to messages inside room
+    function listenToMessages(targetUser) {
+        if (unsubscribeMessages) unsubscribeMessages();
+
+        const chatRoomId = [myUsername, targetUser].sort().join("_chat_room_");
+        const q = query(collection(db, "chats", chatRoomId, "messages"), orderBy("timestamp", "asc"));
+        
+        unsubscribeMessages = onSnapshot(q, (snapshot) => {
+            messagesContainer.innerHTML = "";
+            snapshot.forEach((msgDoc) => {
+                const mData = msgDoc.data();
+                const bubble = document.createElement("div");
+                
+                if (mData.sender === myUsername) {
+                    bubble.className = "msg-bubble sent";
+                } else {
+                    bubble.className = "msg-bubble received";
+                }
+                bubble.innerText = mData.text;
+                messagesContainer.appendChild(bubble);
+            });
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
         });
+    }
 
-        // Initialize Users list
-        loadInboxUsers();
-    </script>
-</body>
-</html>
+    // 4. Send Message & Update Main Room Document
+    sendBtn.addEventListener("click", async () => {
+        const msgText = textInput.value.trim();
+        if (!msgText || !selectedTargetUser) return;
+
+        textInput.value = "";
+        sendBtn.disabled = true;
+
+        const chatRoomId = [myUsername, selectedTargetUser].sort().join("_chat_room_");
+        const roomRef = doc(db, "chats", chatRoomId);
+
+        try {
+            // Sub-collection me message add ho raha h
+            await addDoc(collection(db, "chats", chatRoomId, "messages"), {
+                sender: myUsername,
+                receiver: selectedTargetUser,
+                text: msgText,
+                timestamp: new Date()
+            });
+
+            // Main Room Document update ho raha hai (For last message metadata)
+            await setDoc(roomRef, {
+                lastMessageText: msgText,
+                lastMessageSender: myUsername,
+                isRead: false, // Naya message hamesha unread state me jayega
+                timestamp: new Date()
+            }, { merge: true });
+
+        } catch (err) {
+            console.error("Error sending message: ", err);
+        }
+    });
+
+    document.getElementById("mobile-back-arrow").addEventListener("click", () => {
+        chatWindow.classList.remove("open");
+    });
+
+    // Start App
+    listenToInbox();
+</script>
