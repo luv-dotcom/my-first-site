@@ -3,242 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instagram - Profile</title>
-    <link href="https://fonts.googleapis.com/css2?family=Grand+Hotel&display=swap" rel="stylesheet">
+    <title>Instagram Profile</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { 
-            --bg-color: #fafafa; 
-            --border-color: #dbdbdb; 
-            --text-main: #262626; 
-            --text-muted: #8e8e8e; 
-            --card-bg: #ffffff; 
-            --btn-grey: #efefef; 
-            --insta-blue: #0095f6;
+        /* CSS Reset & Variables */
+        :root {
+            --bg-color: #121212;
+            --border-color: #262626;
+            --text-main: #fafafa;
+            --text-muted: #a8a8a8;
+            --blue: #0095f6;
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-main); padding-top: 60px; padding-bottom: 60px; }
-        a { text-decoration: none; color: inherit; }
-        
-        /* Navbar */
-        .top-navbar { position: fixed; top: 0; left: 0; width: 100%; height: 60px; background-color: var(--card-bg); border-bottom: 1px solid var(--border-color); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-        .nav-container { width: 100%; max-width: 975px; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; }
-        .logo-text { font-family: 'Grand Hotel', cursive; font-size: 30px; }
-        .nav-icons { display: flex; gap: 22px; align-items: center; }
-        .nav-icons i { font-size: 22px; cursor: pointer; }
-        .nav-profile-pic { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color); }
-        .bottom-navbar { position: fixed; bottom: 0; left: 0; width: 100%; height: 52px; background-color: var(--card-bg); border-top: 1px solid var(--border-color); display: none; justify-content: space-around; align-items: center; z-index: 1000; }
-        .bottom-navbar i { font-size: 22px; }
-        
-        /* Profile Layout */
-        .profile-container { max-width: 935px; margin: 30px auto 0 auto; padding: 0 20px; }
-        .profile-header { display: flex; gap: 40px; padding-bottom: 44px; border-bottom: 1px solid var(--border-color); align-items: center; }
-        .avatar-section { flex: 1; display: flex; justify-content: center; }
-        .avatar-section img { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color); background: #eee; }
-        .info-section { flex: 2; display: flex; flex-direction: column; gap: 18px; }
-        .username-row { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
-        .profile-username { font-size: 28px; font-weight: 300; min-width: 120px; }
-        .edit-profile-btn { background-color: transparent; border: 1px solid var(--border-color); padding: 5px 12px; border-radius: 4px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
-        .edit-profile-btn:hover { background-color: var(--btn-grey); }
-        
-        /* Dynamic Action Button Styling */
-        .btn-follow { background-color: var(--insta-blue); color: white; border: none; }
-        .btn-follow:hover { background-color: #1877f2; }
-        .btn-unfollow { background-color: var(--btn-grey); color: black; border: 1px solid var(--border-color); }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: var(--bg-color); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: var(--text-main); }
 
-        /* Stats Row with click pointers */
-        .stats-row { display: flex; gap: 40px; font-size: 16px; list-style: none; }
-        .stats-row li { cursor: pointer; }
-        .stats-row li span { font-weight: 600; }
-        .bio-row { font-size: 14px; line-height: 20px; }
-        .full-name { font-weight: 600; display: block; margin-bottom: 2px; }
-        .bio-link { color: #00376b; font-weight: 600; }
+        /* Top Navigation */
+        .navbar { height: 60px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; background: #000; margin-bottom: 30px; position: sticky; top: 0; z-index: 100; }
+        .navbar a { text-decoration: none; color: var(--text-main); font-weight: 600; font-size: 18px; }
         
-        /* Tabs */
-        .profile-tabs { display: flex; justify-content: center; gap: 60px; text-transform: uppercase; letter-spacing: 1px; font-size: 12px; font-weight: 600; }
-        .tab-item { display: flex; align-items: center; gap: 6px; padding: 18px 0; color: var(--text-muted); cursor: pointer; border-top: 1px solid transparent; margin-top: -1px; transition: all 0.2s; }
+        /* Main Container */
+        .container { max-width: 935px; margin: 0 auto; padding: 0 20px; }
+
+        /* Header Section */
+        .profile-header { display: flex; align-items: center; gap: 80px; margin-bottom: 40px; }
+        .avatar-section { width: 150px; height: 150px; border-radius: 50%; border: 1px solid var(--border-color); overflow: hidden; padding: 2px; background: #000; }
+        .avatar-section img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+        
+        .info-section { flex: 1; }
+        .username-row { display: flex; align-items: center; gap: 20px; margin-bottom: 20px; }
+        .username { font-size: 28px; font-weight: 300; }
+        .btn-edit { background: #1f1f1f; border: none; color: white; padding: 7px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; }
+        
+        .stats-row { display: flex; gap: 40px; margin-bottom: 20px; font-size: 16px; }
+        .stats-row div { cursor: pointer; } 
+        .stats-row b { font-weight: 600; }
+        
+        .bio-info { font-size: 16px; line-height: 1.4; }
+        .bio-info .full-name { font-weight: 600; display: block; margin-bottom: 2px; }
+        
+        /* Grid Section */
+        .tabs { border-top: 1px solid var(--border-color); display: flex; justify-content: center; gap: 60px; margin-bottom: 20px; }
+        .tab-item { padding: 20px 0; font-size: 12px; font-weight: 600; color: var(--text-muted); cursor: pointer; text-transform: uppercase; }
         .tab-item.active { color: var(--text-main); border-top: 1px solid var(--text-main); }
         
-        /* Gallery */
-        .gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin-top: 5px; min-height: 200px; }
-        .grid-item { position: relative; aspect-ratio: 1 / 1; background-color: #efefef; overflow: hidden; cursor: pointer; animation: fadeIn 0.5s ease; }
-        .grid-item img { width: 100%; height: 100%; object-fit: cover; }
-        .grid-item-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.4); display: flex; justify-content: center; align-items: center; gap: 30px; color: white; font-size: 18px; font-weight: 600; opacity: 0; transition: opacity 0.2s ease; }
-        .grid-item:hover .grid-item-overlay { opacity: 1; }
-        .overlay-stat { display: flex; align-items: center; gap: 7px; }
-        .no-posts { grid-column: span 3; text-align: center; padding: 60px 0; color: var(--text-muted); font-size: 18px; }
+        /* The Grid */
+        .post-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+        .post-item { position: relative; aspect-ratio: 1/1; cursor: pointer; background: #222; overflow: hidden; }
+        .post-item img { width: 100%; height: 100%; object-fit: cover; transition: 0.3s; }
+        
+        /* Hover Overlay */
+        .overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.3); display: flex; justify-content: center; align-items: center; gap: 20px; color: white; opacity: 0; transition: 0.3s; }
+        .post-item:hover .overlay { opacity: 1; }
+        .post-item:hover img { transform: scale(1.05); }
 
-        /* Smooth List Modal Styles */
-        .list-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 3000; }
-        .list-modal-box { background: white; padding: 20px; border-radius: 12px; width: 90%; max-width: 400px; max-height: 400px; display: flex; flex-direction: column; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-        .list-modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #efefef; padding-bottom: 10px; margin-bottom: 15px; }
-        .list-modal-header h3 { font-size: 18px; font-weight: 600; }
-        .list-modal-header i { cursor: pointer; font-size: 20px; color: var(--text-muted); }
-        .list-users-container { overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 12px; }
-        .user-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #fafafa; }
-        .user-item-meta { display: flex; align-items: center; gap: 12px; cursor: pointer; }
-        .user-item-meta img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
-        .user-item-meta span { font-weight: 600; font-size: 14px; }
-
-        /* Skeleton Shimmer Loading Effect */
-        .skeleton { background: linear-gradient(90deg, #f2f2f2 25%, #e6e6e6 50%, #f2f2f2 75%); background-size: 200% 100%; animation: loading 1.5s infinite; color: transparent !important; border-radius: 4px; }
-        .skeleton-img { border-radius: 50% !important; animation: loading 1.5s infinite; }
-        @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Smooth Modal Style Upgrade */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 2000; opacity: 0; transition: opacity 0.3s ease; }
-        .modal-overlay.show { opacity: 1; display: flex; }
-        .modal-box { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 420px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); max-height: 90vh; overflow-y: auto; transform: scale(0.8); transition: transform 0.3s ease; }
-        .modal-overlay.show .modal-box { transform: scale(1); }
-        .modal-box h3 { margin-bottom: 20px; font-size: 20px; text-align: center; font-weight: 600; }
-        .input-group { margin-bottom: 15px; display: flex; flex-direction: column; gap: 5px; }
-        .input-group label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
-        .input-group input, .input-group textarea, .input-group select { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 14px; outline: none; background: #fafafa; transition: border 0.2s; }
-        .input-group input:focus, .input-group textarea:focus { border-color: var(--text-muted); background: white; }
-        .input-group textarea { resize: none; height: 70px; }
-        .modal-buttons { display: flex; gap: 10px; justify-content: flex-end; margin-top: 25px; }
-        .modal-btn { padding: 9px 16px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: opacity 0.2s; }
-        .modal-btn:hover { opacity: 0.9; }
-        .btn-cancel { background: var(--btn-grey); color: #262626; }
-        .btn-save { background: var(--insta-blue); color: white; }
-        .btn-save:disabled { background: #b2dffc; cursor: not-allowed; }
-
-        /* Responsive Breakpoint Mobile UI updates */
-        @media (max-width: 768px) { 
-            body { padding-top: 50px; } 
-            .top-navbar .nav-icons { display: none; } 
-            .bottom-navbar { display: flex; } 
-            .profile-container { padding: 0; margin-top: 10px; } 
-            .profile-header { gap: 20px; padding: 15px 16px; border-bottom: none; } 
-            .avatar-section img { width: 85px; height: 85px; } 
-            .username-row { display: grid; grid-template-columns: 1fr auto; width: 100%; gap: 12px; } 
-            .profile-username { font-size: 22px; } 
-            .edit-profile-btn { grid-column: span 2; width: 100%; text-align: center; background-color: var(--btn-grey); border: none; padding: 7px; } 
-            .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); padding: 12px 0; font-size: 14px; gap: 0; } 
-            .stats-row li { display: flex; flex-direction: column; color: var(--text-muted); } 
-            .stats-row li span { color: var(--text-main); } 
-            .bio-row { padding: 4px 16px 15px 16px; } 
-            .profile-tabs { gap: 0; justify-content: space-around; border-top: 1px solid var(--border-color); } 
-            .profile-tabs span { display: none; } 
-            .tab-item i { font-size: 22px; } 
-            .tab-item { padding: 14px 0; width: 100%; justify-content: center; } 
-            .tab-item.active { border-top: 2px solid var(--text-main); }
-            .gallery-grid { gap: 3px; margin-top: 2px; } 
-            .grid-item-overlay { display: none; } 
+        /* Responsive */
+        @media (max-width: 768px) {
+            .profile-header { gap: 30px; margin-bottom: 20px; }
+            .avatar-section { width: 90px; height: 90px; }
+            .username { font-size: 22px; }
+            .post-grid { gap: 3px; }
+            .stats-row { gap: 20px; font-size: 14px; }
         }
     </style>
 </head>
 <body>
 
-    <nav class="top-navbar">
-        <div class="nav-container">
-            <div class="logo"><a href="home.html" class="logo-text">Instagram</a></div>
-            <div class="nav-icons">
-                <a href="home.html"><i class="fa-regular fa-house"></i></a>
-                <a href="messages.html"><i class="fa-regular fa-paper-plane"></i></a>
-                <a href="create.html"><i class="fa-regular fa-square-plus"></i></a>
-                <a href="explore.html"><i class="fa-regular fa-compass"></i></a>
-                <a href="notifications.html"><i class="fa-regular fa-heart"></i></a>
-                <a href="profile.html"><img src="https://picsum.photos/150/150?random=1" alt="Profile" class="nav-profile-pic" id="nav-avatar"></a>
-            </div>
-        </div>
-    </nav>
+    <nav class="navbar"><a href="home.html" style="color: white;"><i class="fa-solid fa-chevron-left" style="margin-right: 10px;"></i> Instagram Profile</a></nav>
 
-    <main class="profile-container">
-        <header class="profile-header">
+    <main class="container">
+        <section class="profile-header">
             <div class="avatar-section">
-                <img src="" alt="Avatar" id="main-avatar" class="skeleton skeleton-img">
+                <img src="https://picsum.photos/150/150?random=99" alt="Profile Picture" id="profile-avatar">
             </div>
             <div class="info-section">
                 <div class="username-row">
-                    <h2 class="profile-username skeleton" id="prof-username">&nbsp;</h2>
-                    <button class="edit-profile-btn" id="edit-profile-trigger">Edit Profile</button>
-                    <i class="fa-solid fa-right-from-bracket" id="logout-btn" style="font-size: 18px; cursor: pointer; color: #ed4956;" title="Logout Account"></i>
+                    <h2 class="username" id="profile-username">Loading...</h2>
+                    
+                    <div id="profile-actions-container" style="display: flex; gap: 10px; align-items: center;">
+                        <button class="btn-edit" id="profile-action-btn">Follow</button>
+                        <button class="btn-edit" id="message-btn" style="display: none;">Message</button>
+                    </div>
+                    
+                    <i class="fa-solid fa-gear" style="font-size: 22px; cursor: pointer;"></i>
                 </div>
-                <ul class="stats-row">
-                    <li id="post-count-btn"><span id="post-count">0</span> posts</li>
-                    <li id="follower-btn"><span id="follower-count">0</span> followers</li>
-                    <li id="following-btn"><span id="following-count">0</span> following</li>
-                </ul>
-                <div class="bio-row">
-                    <span class="full-name skeleton" id="prof-name">&nbsp;</span>
-                    <p id="prof-bio" class="skeleton">&nbsp;</p>
-                    <a href="https://github.com" target="_blank" class="bio-link">github.com/your-repo</a>
+                <div class="stats-row">
+                    <div><b id="post-count">0</b> posts</div>
+                    <div id="follower-click-area"><b id="follower-count">0</b> followers</div>
+                    <div id="following-click-area"><b id="following-count">0</b> following</div>
+                </div>
+                <div class="bio-info">
+                    <span class="full-name" id="profile-fullname">Loading Name...</span>
+                    <p id="profile-bio">Loading bio information...</p>
                 </div>
             </div>
-        </header>
+        </section>
 
-        <div class="profile-tabs">
-            <div class="tab-item active" data-tab="posts"><i class="fa-solid fa-table-cells"></i> <span>Posts</span></div>
-            <div class="tab-item" data-tab="reels"><i class="fa-regular fa-clapperboard"></i> <span>Reels</span></div>
-            <div class="tab-item" data-tab="tagged"><i class="fa-regular fa-id-card"></i> <span>Tagged</span></div>
+        <div class="tabs">
+            <div class="tab-item active">POSTS</div>
+            <div class="tab-item">REELS</div>
+            <div class="tab-item">TAGGED</div>
         </div>
 
-        <section class="gallery-grid" id="posts-gallery">
-            <div class="grid-item skeleton"></div>
-            <div class="grid-item skeleton"></div>
-            <div class="grid-item skeleton"></div>
-        </section>
+        <div class="post-grid" id="user-posts-grid">
+            <div style="grid-column: span 3; text-align: center; padding: 50px; color: var(--text-muted);">
+                <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 24px; margin-bottom: 10px;"></i><br>Loading posts...
+            </div>
+        </div>
     </main>
 
-    <div class="list-modal-overlay" id="list-modal">
-        <div class="list-modal-box">
-            <div class="list-modal-header">
-                <h3 id="modal-title">Users</h3>
-                <i class="fa-solid fa-xmark" id="close-list-modal"></i>
+    <div id="list-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); justify-content: center; align-items: center; z-index: 1000;">
+        <div style="background: #262626; width: 400px; max-height: 400px; border-radius: 12px; padding: 20px; display: flex; flex-direction: column;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #363636; padding-bottom: 10px; margin-bottom: 15px;">
+                <h3 id="modal-title" style="color: white;">Users</h3>
+                <i class="fa-solid fa-xmark" id="close-modal" style="cursor: pointer; font-size: 20px; color: white;"></i>
             </div>
-            <div class="list-users-container" id="modal-users-list"></div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="edit-modal">
-        <div class="modal-box">
-            <h3>Edit Profile</h3>
-            <div class="input-group">
-                <label>Username</label>
-                <input type="text" id="input-username">
-            </div>
-            <div class="input-group">
-                <label>Name</label>
-                <input type="text" id="input-name">
-            </div>
-            <div class="input-group">
-                <label>Profile Picture URL</label>
-                <input type="text" id="input-pic">
-            </div>
-            <div class="input-group">
-                <label>Bio</label>
-                <textarea id="input-bio"></textarea>
-            </div>
-            <div class="input-group">
-                <label>Gender</label>
-                <select id="input-gender">
-                    <option value="Not Specified">Prefer not to say</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Custom">Custom</option>
-                </select>
-            </div>
-            <div class="modal-buttons">
-                <button class="modal-btn btn-cancel" id="btn-close-modal">Cancel</button>
-                <button class="modal-btn btn-save" id="btn-save-profile">Save</button>
+            <div id="modal-users-list" style="overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 15px;">
             </div>
         </div>
     </div>
-
-    <nav class="bottom-navbar">
-        <a href="home.html"><i class="fa-regular fa-house"></i></a>
-        <a href="search.html"><i class="fa-solid fa-magnifying-glass"></i></a>
-        <a href="create.html"><i class="fa-regular fa-square-plus"></i></a>
-        <a href="reels.html"><i class="fa-regular fa-clapperboard"></i></a>
-        <a href="profile.html"><img src="https://picsum.photos/150/150?random=1" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--border-color);" id="bottom-avatar"></a>
-    </nav>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-        import { getFirestore, doc, onSnapshot, updateDoc, collection, query, where, getDocs, getDoc, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
-        
+        import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+
         const firebaseConfig = {
             apiKey: "AIzaSyBrqMn7FrFW3jslaDNM0ui-VW4w6K_3Nmk",
             authDomain: "insta-clone-863ae.firebaseapp.com",
@@ -247,348 +134,206 @@
             messagingSenderId: "599343109250",
             appId: "1:599343109250:web:1306ec63908ba21c54509b"
         };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
         
-        let databaseNameKey = "fullName"; 
-        let defaultPic = "https://picsum.photos/150/150?random=1";
-        let userCurrentGender = "Not Specified";
-        
-        const loggedInUserId = localStorage.getItem("active_user");
-        if (!loggedInUserId) {
-            window.location.href = "index.html";
-        }
+        const db = getFirestore(initializeApp(firebaseConfig));
 
+        // Sabse bada fix: Dono param name handles check karega (?username= ya ?id=)
         const urlParams = new URLSearchParams(window.location.search);
-        const rawParam = urlParams.get("user");
-
-        let targetUserId = loggedInUserId; 
-        let isOwnProfile = true;
-
-        function removeSkeletons() {
-            document.querySelectorAll('.skeleton').forEach(el => el.classList.remove('skeleton'));
+        let targetUsername = urlParams.get('username') || urlParams.get('id'); 
+        
+        let activeUser = localStorage.getItem("active_user");
+        if (!activeUser || activeUser.trim() === "") {
+            activeUser = "user_1";
+            localStorage.setItem("active_user", "user_1");
         }
 
-        async function loadActiveUserNavbar() {
-            if (loggedInUserId) {
-                onSnapshot(doc(db, "users", loggedInUserId), (docSnap) => {
-                    if (docSnap.exists()) {
-                        const myPic = docSnap.data().profilePic || defaultPic;
-                        document.getElementById("nav-avatar").src = myPic;
-                        document.getElementById("bottom-avatar").src = myPic;
-                    }
-                });
-            }
+        // Agar URL mein dono me se koi bhi parameter nahi mila, tabhi sirf activeUser (khud ki id) par set hoga
+        if (!targetUsername || targetUsername.trim() === "") {
+            targetUsername = activeUser;
         }
-        loadActiveUserNavbar();
 
-        // MASTER ENGINE - Resolves User safely without full loop leaks
-        async function initializeProfileEngine() {
-            if (rawParam && rawParam !== loggedInUserId) {
-                // Pehle check karo ki kya rawParam direct document ID hai
-                const directDocRef = doc(db, "users", rawParam);
-                const directDocSnap = await getDoc(directDocRef);
+        window.navigateToUser = function(username) {
+            const cleanPath = window.location.origin + window.location.pathname;
+            window.location.href = `${cleanPath}?username=${username}`;
+        };
 
-                if (directDocSnap.exists()) {
-                    targetUserId = rawParam;
+        async function fetchUserProfileData() {
+            try {
+                document.getElementById("follower-count").innerText = "0";
+                document.getElementById("following-count").innerText = "0";
+                document.getElementById("post-count").innerText = "0";
+
+                const userDocRef = doc(db, "users", targetUsername);
+                const userDocSnap = await getDoc(userDocRef);
+
+                if (userDocSnap.exists()) {
+                    const userData = userDocSnap.data();
+                    document.getElementById("profile-username").innerText = userData.username || targetUsername;
+                    document.getElementById("profile-fullname").innerText = userData.name || "Instagram User";
+                    document.getElementById("profile-bio").innerHTML = userData.bio ? userData.bio.replace(/\n/g, '<br>') : "Welcome to my profile! 🌟";
+                    document.getElementById("profile-avatar").src = userData.profilePic || "https://picsum.photos/150/150?random=99";
+                    document.title = `${userData.username || targetUsername} • Instagram Profile`;
                 } else {
-                    // Agar direct ID nhi h, tab username match dhoondo
-                    const usersRef = collection(db, "users");
-                    const q = query(usersRef, where("username", "==", rawParam.toLowerCase()));
-                    const querySnapshot = await getDocs(q);
-                    
-                    if (!querySnapshot.empty) {
-                        targetUserId = querySnapshot.docs[0].id;
-                    } else {
-                        // Agar kuch nhi mila toh raw bhej do target pr
-                        targetUserId = rawParam;
-                    }
+                    // Agar user Firestore me explicitly saved nahi bhi hai, toh username param fallback se profile load hogi
+                    document.getElementById("profile-username").innerText = targetUsername;
+                    document.getElementById("profile-fullname").innerText = "Instagram User";
+                    document.getElementById("profile-bio").innerText = "Welcome to my profile! 🌟";
+                    document.getElementById("profile-avatar").src = "https://picsum.photos/150/150?random=99";
+                    document.title = `${targetUsername} • Instagram Profile`;
                 }
-            }
 
-            isOwnProfile = (targetUserId === loggedInUserId);
+                const followersQuery = query(collection(db, "follows"), where("following", "==", targetUsername));
+                const followersSnap = await getDocs(followersQuery);
+                let followersCount = followersSnap.size;
 
-            // UI Identity state sync
-            if (!isOwnProfile) {
-                const logoutBtn = document.getElementById("logout-btn");
-                if (logoutBtn) logoutBtn.style.display = "none";
-                
-                const actionBtn = document.getElementById("edit-profile-trigger");
-                actionBtn.innerText = "Loading...";
-                actionBtn.className = "edit-profile-btn btn-follow";
-            } else {
-                const logoutBtn = document.getElementById("logout-btn");
-                if (logoutBtn) logoutBtn.style.display = "inline-block";
-                const actionBtn = document.getElementById("edit-profile-trigger");
-                actionBtn.innerText = "Edit Profile";
-                actionBtn.className = "edit-profile-btn";
-            }
+                const followingQuery = query(collection(db, "follows"), where("follower", "==", targetUsername));
+                const followingSnap = await getDocs(followingQuery);
+                let followingCount = followingSnap.size;
 
-            listenToProfileData();
-            listenToUserPosts();
-            setupFollowClickHandlers();
-        }
+                document.getElementById("follower-count").innerText = followersCount;
+                document.getElementById("following-count").innerText = followingCount;
 
-        // Realtime Profile Data Sync
-        function listenToProfileData() {
-            onSnapshot(doc(db, "users", targetUserId), (docSnap) => {
-                if (docSnap.exists()) {
-                    const userData = docSnap.data();
-                    
-                    document.getElementById("prof-username").innerText = userData.username || targetUserId;
-                    document.getElementById("prof-bio").innerText = userData.bio || "No bio yet.";
-                    userCurrentGender = userData.gender || "Not Specified";
-                    document.getElementById("main-avatar").src = userData.profilePic || defaultPic;
+                const actionBtn = document.getElementById("profile-action-btn");
+                const msgBtn = document.getElementById("message-btn");
 
-                    let finalName = "Instagram User"; 
-                    if (userData.fullName) {
-                        finalName = userData.fullName;
-                        databaseNameKey = "fullName";
-                    } else if (userData.name) {
-                        finalName = userData.name;
-                        databaseNameKey = "name";
-                    }
-                    document.getElementById("prof-name").innerText = finalName;
-                    removeSkeletons();
+                if (targetUsername === activeUser) {
+                    actionBtn.innerText = "Edit Profile";
+                    actionBtn.style.background = "#1f1f1f";
+                    actionBtn.style.color = "white";
+                    actionBtn.onclick = () => window.location.href = "edit-profile.html"; 
+                    msgBtn.style.display = "none";
                 } else {
-                    document.getElementById("prof-username").innerText = "User Not Found";
-                    removeSkeletons();
-                }
-            });
+                    msgBtn.style.display = "inline-block";
+                    msgBtn.onclick = () => window.location.href = `chat.html?id=${targetUsername}`;
 
-            // Followers counter
-            onSnapshot(query(collection(db, "follows"), where("following", "==", targetUserId)), (snapshot) => {
-                document.getElementById("follower-count").innerText = snapshot.size;
-            });
+                    const followDocRef = doc(db, "follows", `${activeUser}_${targetUsername}`);
+                    const followSnap = await getDoc(followDocRef);
 
-            // Following counter
-            onSnapshot(query(collection(db, "follows"), where("follower", "==", targetUserId)), (snapshot) => {
-                document.getElementById("following-count").innerText = snapshot.size;
-            });
-
-            // Relation tracking for follow/unfollow button text
-            if (!isOwnProfile) {
-                const followCheckQuery = query(
-                    collection(db, "follows"), 
-                    where("follower", "==", loggedInUserId), 
-                    where("following", "==", targetUserId)
-                );
-                onSnapshot(followCheckQuery, (snapshot) => {
-                    const actionBtn = document.getElementById("edit-profile-trigger");
-                    if (!snapshot.empty) {
-                        actionBtn.innerText = "Unfollow";
-                        actionBtn.className = "edit-profile-btn btn-unfollow";
+                    if (followSnap.exists()) {
+                        actionBtn.innerText = "Following";
+                        actionBtn.style.background = "#1f1f1f";
+                        actionBtn.style.color = "white";
                     } else {
                         actionBtn.innerText = "Follow";
-                        actionBtn.className = "edit-profile-btn btn-follow";
+                        actionBtn.style.background = "#0095f6";
+                        actionBtn.style.color = "white";
                     }
-                });
+
+                    actionBtn.onclick = async () => {
+                        if (actionBtn.innerText === "Follow") {
+                            await setDoc(followDocRef, {
+                                follower: activeUser,
+                                following: targetUsername
+                            });
+                            actionBtn.innerText = "Following";
+                            actionBtn.style.background = "#1f1f1f";
+                            actionBtn.style.color = "white";
+                            followersCount++;
+                        } else {
+                            await deleteDoc(followDocRef);
+                            actionBtn.innerText = "Follow";
+                            actionBtn.style.background = "#0095f6";
+                            actionBtn.style.color = "white";
+                            followersCount--;
+                        }
+                        document.getElementById("follower-count").innerText = followersCount;
+                    };
+                }
+
+                setupListModals();
+                await loadTargetUserPosts();
+
+            } catch (err) {
+                console.error("Error loading user profile system: ", err);
             }
         }
 
-        // Post Rendering Setup
-        function listenToUserPosts() {
-            const gallery = document.getElementById("posts-gallery");
-            const q = query(collection(db, "posts"), where("userId", "==", targetUserId));
-            
-            onSnapshot(q, (querySnapshot) => {
-                gallery.innerHTML = ""; 
-                let count = 0;
+        function setupListModals() {
+            const listModal = document.getElementById("list-modal");
+            const modalTitle = document.getElementById("modal-title");
+            const modalUsersList = document.getElementById("modal-users-list");
+            document.getElementById("close-modal").onclick = () => listModal.style.display = "none";
 
-                if (querySnapshot.empty) {
-                    gallery.innerHTML = `<div class="no-posts"><i class="fa-solid fa-camera" style="font-size:40px; margin-bottom:10px; display:block;"></i>No Posts Yet</div>`;
-                    document.getElementById("post-count").innerText = "0";
-                    return;
-                }
+            document.getElementById("follower-click-area").onclick = async () => {
+                modalTitle.innerText = "Followers";
+                modalUsersList.innerHTML = '<div style="text-align:center; padding:20px; color:white;"><i class="fa-solid fa-circle-notch fa-spin"></i> Loading...</div>';
+                listModal.style.display = "flex";
+                
+                const q = query(collection(db, "follows"), where("following", "==", targetUsername));
+                const snap = await getDocs(q);
+                modalUsersList.innerHTML = snap.empty ? '<div style="text-align:center; color:gray; padding:20px;">No followers yet.</div>' : "";
+                
+                snap.forEach((doc) => {
+                    const data = doc.data();
+                    modalUsersList.innerHTML += `
+                        <div style="display: flex; align-items: center; gap: 12px; font-weight: 600; padding: 5px 0;">
+                            <i class="fa-solid fa-circle-user" style="font-size: 32px; color: #555;"></i>
+                            <span style="color: white; cursor:pointer;" onclick="navigateToUser('${data.follower}')">@${data.follower}</span>
+                        </div>`;
+                });
+            };
 
-                querySnapshot.forEach((doc) => {
-                    const postData = doc.data();
-                    count++;
+            document.getElementById("following-click-area").onclick = async () => {
+                modalTitle.innerText = "Following";
+                modalUsersList.innerHTML = '<div style="text-align:center; padding:20px; color:white;"><i class="fa-solid fa-circle-notch fa-spin"></i> Loading...</div>';
+                listModal.style.display = "flex";
+                
+                const q = query(collection(db, "follows"), where("follower", "==", targetUsername));
+                const snap = await getDocs(q);
+                modalUsersList.innerHTML = snap.empty ? '<div style="text-align:center; color:gray; padding:20px;">Not following anyone.</div>' : "";
+                
+                snap.forEach((doc) => {
+                    const data = doc.data();
+                    modalUsersList.innerHTML += `
+                        <div style="display: flex; align-items: center; gap: 12px; font-weight: 600; padding: 5px 0;">
+                            <i class="fa-solid fa-circle-user" style="font-size: 32px; color: #555;"></i>
+                            <span style="color: white; cursor:pointer;" onclick="navigateToUser('${data.following}')">@${data.following}</span>
+                        </div>`;
+                });
+            };
+        }
 
-                    const gridItem = document.createElement("div");
-                    gridItem.className = "grid-item";
-                    gridItem.innerHTML = `
-                        <img src="${postData.postImg || defaultPic}" alt="post">
-                        <div class="grid-item-overlay">
-                            <div class="overlay-stat"><i class="fa-solid fa-heart"></i> ${postData.likes || 0}</div>
-                            <div class="overlay-stat"><i class="fa-solid fa-comment"></i> 0</div>
+        async function loadTargetUserPosts() {
+            const gridContainer = document.getElementById("user-posts-grid");
+            try {
+                const postsQuery = query(collection(db, "posts"), where("username", "==", targetUsername));
+                const querySnapshot = await getDocs(postsQuery);
+                gridContainer.innerHTML = "";
+                let postCounter = 0;
+
+                querySnapshot.forEach((postDoc) => {
+                    const postData = postDoc.data();
+                    postCounter++;
+
+                    const postItem = document.createElement("div");
+                    postItem.className = "post-item";
+                    postItem.innerHTML = `
+                        <img src="${postData.postImg}" alt="User Post Graphic">
+                        <div class="overlay">
+                            <span><i class="fa-solid fa-heart"></i> ${postData.likesCount || 0}</span>
+                            <span><i class="fa-solid fa-comment"></i> Live</span>
                         </div>
                     `;
-                    gallery.appendChild(gridItem);
+                    gridContainer.appendChild(postItem);
                 });
 
-                document.getElementById("post-count").innerText = count;
-            });
-        }
+                document.getElementById("post-count").innerText = postCounter;
 
-        // Follow Click Handler
-        function setupFollowClickHandlers() {
-            const modal = document.getElementById("edit-modal");
-            const actionBtn = document.getElementById("edit-profile-trigger");
-
-            actionBtn.onclick = async () => {
-                if (isOwnProfile) {
-                    document.getElementById("input-username").value = document.getElementById("prof-username").innerText;
-                    document.getElementById("input-name").value = document.getElementById("prof-name").innerText;
-                    const mainAvatarSrc = document.getElementById("main-avatar").src;
-                    document.getElementById("input-pic").value = mainAvatarSrc.includes("random=") ? "" : mainAvatarSrc;
-                    document.getElementById("input-bio").value = document.getElementById("prof-bio").innerText === "No bio yet." ? "" : document.getElementById("prof-bio").innerText;
-                    document.getElementById("input-gender").value = userCurrentGender;
-                    
-                    modal.style.display = "flex";
-                    setTimeout(() => modal.classList.add("show"), 10);
-                } else {
-                    actionBtn.disabled = true;
-                    const q = query(collection(db, "follows"), where("follower", "==", loggedInUserId), where("following", "==", targetUserId));
-                    const snapshot = await getDocs(q);
-
-                    if (!snapshot.empty) {
-                        snapshot.forEach(async (docSnap) => {
-                            await deleteDoc(doc(db, "follows", docSnap.id));
-                        });
-                    } else {
-                        await addDoc(collection(db, "follows"), {
-                            follower: loggedInUserId,
-                            following: targetUserId
-                        });
-                    }
-                    actionBtn.disabled = false;
+                if (postCounter === 0) {
+                    gridContainer.innerHTML = `
+                        <div style="grid-column: span 3; text-align: center; padding: 60px 20px; color: var(--text-muted);">
+                            <i class="fa-solid fa-camera" style="font-size: 40px; margin-bottom: 15px; color: #333;"></i><br>
+                            <strong style="color: var(--text-main); font-size: 18px; display: block; margin-bottom: 5px;">No Posts Yet</strong>
+                            When this user shares photos, you'll see them right here.
+                        </div>`;
                 }
-            };
-        }
-
-        const closeModalFn = () => {
-            const modal = document.getElementById("edit-modal");
-            modal.classList.remove("show");
-            setTimeout(() => modal.style.display = "none", 300);
-        };
-        document.getElementById("btn-close-modal").onclick = closeModalFn;
-
-        // Profile Update Engine
-        document.getElementById("btn-save-profile").onclick = async () => {
-            if (!isOwnProfile) return;
-            const saveBtn = document.getElementById("btn-save-profile");
-            saveBtn.innerText = "Updating...";
-            saveBtn.disabled = true;
-            try {
-                const docRef = doc(db, "users", loggedInUserId);
-                const updatedPicUrl = document.getElementById("input-pic").value.trim() || defaultPic;
-
-                await updateDoc(docRef, {
-                    username: document.getElementById("input-username").value.trim().toLowerCase(),
-                    [databaseNameKey]: document.getElementById("input-name").value.trim(),
-                    bio: document.getElementById("input-bio").value.trim(),
-                    profilePic: updatedPicUrl,
-                    gender: document.getElementById("input-gender").value
-                });
-
-                closeModalFn();
             } catch (error) {
-                alert("Error saving profile details!");
-                console.error(error);
-            } finally {
-                saveBtn.innerText = "Save";
-                saveBtn.disabled = false;
+                console.error("Error filtering target posts: ", error);
+                gridContainer.innerHTML = `<div style="grid-column: span 3; text-align:center; padding:20px; color:red;">Failed to fetch specific user posts.</div>`;
             }
-        };
-
-        // --- 👥 MODAL LIST COMPONENT UPGRADE ---
-        const listModal = document.getElementById("list-modal");
-        const modalTitle = document.getElementById("modal-title");
-        const modalUsersList = document.getElementById("modal-users-list");
-        
-        document.getElementById("close-list-modal").onclick = () => { listModal.style.display = "none"; };
-
-        // Helper function to render a clean user node in modal lists
-        async function buildUserRow(uid, fieldType) {
-            const userDoc = await getDoc(doc(db, "users", uid));
-            const item = document.createElement("div");
-            item.className = "user-item";
-
-            let uName = uid;
-            let uPic = defaultPic;
-
-            if (userDoc.exists()) {
-                const d = userDoc.data();
-                uName = d.username || uid;
-                uPic = d.profilePic || defaultPic;
-            }
-
-            item.innerHTML = `
-                <div class="user-item-meta">
-                    <img src="${uPic}" alt="avatar">
-                    <span>@${uName}</span>
-                </div>
-            `;
-            
-            item.querySelector('.user-item-meta').onclick = () => { 
-                listModal.style.display = "none";
-                window.location.href = `profile.html?user=${uid}`; 
-            };
-            return item;
         }
 
-        document.getElementById("follower-btn").onclick = async () => {
-            modalTitle.innerText = "Followers";
-            modalUsersList.innerHTML = '<div style="text-align:center; padding:10px;"><i class="fa-solid fa-circle-notch fa-spin"></i> Loading...</div>';
-            listModal.style.display = "flex";
-
-            const q = query(collection(db, "follows"), where("following", "==", targetUserId));
-            const querySnapshot = await getDocs(q);
-            modalUsersList.innerHTML = querySnapshot.empty ? '<div style="text-align:center; color:gray; padding:10px;">No followers yet.</div>' : '';
-            
-            querySnapshot.forEach(async (fDoc) => {
-                const fData = fDoc.data();
-                const row = await buildUserRow(fData.follower, 'follower');
-                modalUsersList.appendChild(row);
-            });
-        };
-
-        document.getElementById("following-btn").onclick = async () => {
-            modalTitle.innerText = "Following";
-            modalUsersList.innerHTML = '<div style="text-align:center; padding:10px;"><i class="fa-solid fa-circle-notch fa-spin"></i> Loading...</div>';
-            listModal.style.display = "flex";
-
-            const q = query(collection(db, "follows"), where("follower", "==", targetUserId));
-            const querySnapshot = await getDocs(q);
-            modalUsersList.innerHTML = querySnapshot.empty ? '<div style="text-align:center; color:gray; padding:10px;">Not following anyone.</div>' : '';
-            
-            querySnapshot.forEach(async (fDoc) => {
-                const fData = fDoc.data();
-                const row = await buildUserRow(fData.following, 'following');
-                modalUsersList.appendChild(row);
-            });
-        };
-
-        // Tabs Configuration
-        document.querySelectorAll('.tab-item').forEach(tab => {
-            tab.addEventListener('click', function() {
-                document.querySelector('.tab-item.active').classList.remove('active');
-                this.classList.add('active');
-                
-                const gallery = document.getElementById("posts-gallery");
-                const currentTabType = this.getAttribute('data-tab');
-                
-                if(currentTabType !== 'posts') {
-                    gallery.innerHTML = `<div class="no-posts"><i class="fa-regular fa-square-minus" style="font-size:40px; margin-bottom:10px; display:block;"></i>No Dynamic ${this.innerText} Available</div>`;
-                } else {
-                    listenToUserPosts();
-                }
-            });
-        });
-
-        // Logout Configuration
-        const logoutBtn = document.getElementById("logout-btn");
-        if (logoutBtn) {
-            logoutBtn.addEventListener("click", () => {
-                if (confirm("Kya aap sach me Logout hona chahte hain?")) {
-                    localStorage.removeItem("active_user");
-                    window.location.href = "index.html";
-                }
-            });
-        }
-
-        initializeProfileEngine();
+        fetchUserProfileData();
     </script>
 </body>
 </html>
