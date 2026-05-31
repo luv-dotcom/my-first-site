@@ -46,6 +46,15 @@
             color: white;
             align-self: flex-start;
         }
+
+        /* Responsive UI States */
+        /* Jab chat active hogi toh sidebar ko hide karne ke liye classes */
+        .hide-sidebar #chat-sidebar {
+            display: none !important;
+        }
+        .hide-sidebar #chat-main-window {
+            display: flex !important;
+        }
     </style>
 </head>
 <body>
@@ -61,9 +70,9 @@
             <div style="width: 50px;"></div>
         </div>
 
-        <div style="display: flex; flex: 1; overflow: hidden;">
+        <div id="main-layout-container" style="display: flex; flex: 1; overflow: hidden;">
             
-            <div id="chat-sidebar" style="width: 350px; border-right: 1px solid var(--border-color); display: flex; flex-direction: column; background: var(--sidebar-bg);">
+            <div id="chat-sidebar" style="width: 350px; border-right: 1px solid var(--border-color); display: flex; flex-direction: column; background: var(--sidebar-bg); width: 100%; max-width: 350px; flex-shrink: 0;">
                 <div id="global-users-chat-list" style="flex: 1; overflow-y: auto;">
                     </div>
             </div>
@@ -72,12 +81,16 @@
                 
                 <div id="placeholder-box" style="flex: 1; display: flex; align-items: center; justify-content: center; flex-direction: column; color: #8e8e8e;">
                     <h2>Your Messages</h2>
-                    <p>Send private messages to a friend.</p>
+                    <p>Select a user to start chatting.</p>
                 </div>
                 
                 <div id="active-chat-box" style="flex: 1; display: none; flex-direction: column; height: 100%; overflow: hidden;">
                     
                     <div style="padding: 15px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; background: var(--sidebar-bg);">
+                        <button id="chat-back-btn" style="background: none; border: none; color: #0095f6; font-size: 16px; font-weight: bold; cursor: pointer; margin-right: 15px; display: flex; align-items: center; gap: 4px; padding: 5px 0;">
+                            ⬅️ Users
+                        </button>
+                        
                         <img id="chat-user-avatar" src="" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px; object-fit: cover;">
                         <span id="chat-user-username" style="font-weight: 600;">Username</span>
                     </div>
@@ -136,6 +149,17 @@
                     sendBtn.addEventListener("click", sendMessageLogic);
                 }
 
+                // Back Button Click Logic (Sidebar wapas lane ke liye)
+                const backBtn = safeGet("chat-back-btn");
+                if (backBtn) {
+                    backBtn.addEventListener("click", () => {
+                        selectedTargetUser = null;
+                        safeGet("main-layout-container").classList.remove("hide-sidebar");
+                        if(safeGet("placeholder-box")) safeGet("placeholder-box").style.display = "flex";
+                        if(safeGet("active-chat-box")) safeGet("active-chat-box").style.display = "none";
+                    });
+                }
+
                 listenToInbox();
             } catch (domErr) {
                 console.error("Initialization error:", domErr);
@@ -174,10 +198,10 @@
             const list = safeGet("global-users-chat-list");
             if (!list) return;
 
-            // 1. SORTING LOGIC: Latest messages move instantly to the top
+            // Sorting logic
             userList.sort((a, b) => b.timestamp - a.timestamp);
             
-            // 2. NAVBAR RED DOT INDICATOR TOGGLE
+            // Global Nav red dot
             const hasUnread = userList.some(u => u.unread);
             const navDot = safeGet("nav-chat-indicator");
             if (navDot) navDot.style.display = hasUnread ? "block" : "none";
@@ -205,6 +229,10 @@
 
         async function openChat(target, avatar) {
             selectedTargetUser = target;
+            
+            // 🛠️ ACTIVATE FULLSCREEN CHAT LAYER (Hide left list)
+            safeGet("main-layout-container").add("hide-sidebar");
+
             if(safeGet("placeholder-box")) safeGet("placeholder-box").style.display = "none";
             if(safeGet("active-chat-box")) safeGet("active-chat-box").style.display = "flex";
             if(safeGet("chat-user-username")) safeGet("chat-user-username").innerText = target;
@@ -215,7 +243,6 @@
                 await setDoc(doc(db, "chats", roomId), { isRead: true }, { merge: true });
             } catch (e) {}
             
-            // Re-render list to clear dot visually instantly
             listenToMessages(target);
         }
 
