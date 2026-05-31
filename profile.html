@@ -138,8 +138,8 @@
                 </div>
                 <ul class="stats-row">
                     <li><span id="post-count">0</span> posts</li>
-                    <li><span>0</span> followers</li>
-                    <li><span>0</span> following</li>
+                    <li><span id="follower-count">0</span> followers</li>
+                    <li><span id="following-count">0</span> following</li>
                 </ul>
                 <div class="bio-row">
                     <span class="full-name skeleton" id="prof-name">&nbsp;</span>
@@ -224,11 +224,9 @@
         let defaultPic = "https://picsum.photos/150/150?random=1";
         let userCurrentGender = "Not Specified";
         
-        // Dynamic active user pick from signup localStorage system
         const targetUserId = localStorage.getItem("active_user");
 
         if (!targetUserId) {
-            // Check fail: user login nahi hai to automatic redirection
             window.location.href = "index.html";
         }
 
@@ -257,7 +255,6 @@
                     document.getElementById("nav-avatar").src = currentPic;
                     document.getElementById("bottom-avatar").src = currentPic;
 
-                    // Support multiple dynamic names keys if found
                     let finalName = "Instagram User"; 
                     if(userData.fullName) {
                         finalName = userData.fullName;
@@ -279,6 +276,18 @@
                 }
             }, (error) => {
                 console.error("Live profile listen sync failed: ", error);
+            });
+
+            // LIVE FOLLOWERS COUNTER ADDED BY PEER
+            const followersQuery = query(collection(db, "follows"), where("following", "==", targetUserId));
+            onSnapshot(followersQuery, (snapshot) => {
+                document.getElementById("follower-count").innerText = snapshot.size;
+            });
+
+            // LIVE FOLLOWING COUNTER ADDED BY PEER
+            const followingQuery = query(collection(db, "follows"), where("follower", "==", targetUserId));
+            onSnapshot(followingQuery, (snapshot) => {
+                document.getElementById("following-count").innerText = snapshot.size;
             });
         }
 
@@ -320,7 +329,7 @@
             });
         }
 
-        // --- MODAL TRIGGER CODE UPDATES ---
+        // --- MODAL TRIGGER CODE ---
         const modal = document.getElementById("edit-modal");
         const editBtn = document.getElementById("edit-profile-trigger");
         const closeBtn = document.getElementById("btn-close-modal");
@@ -366,7 +375,6 @@
                     gender: inputGender.value
                 });
 
-                // Username changes protection inside local storage session
                 const currentLocalUser = localStorage.getItem("active_user");
                 const newUsernameVal = inputUsername.value.trim().toLowerCase();
                 if(currentLocalUser !== newUsernameVal){
@@ -406,7 +414,6 @@
             logoutBtn.addEventListener("click", () => {
                 const checkUserConfirmation = confirm("Kya aap sach me Logout hona chahte hain?");
                 if (checkUserConfirmation) {
-                    // Session clear karenge aur redirect
                     localStorage.removeItem("active_user");
                     window.location.href = "index.html";
                 }
