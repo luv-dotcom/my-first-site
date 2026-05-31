@@ -11,16 +11,34 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-main); padding-top: 60px; padding-bottom: 60px; }
         a { text-decoration: none; color: inherit; }
+        
+        /* --- TOP NAVBAR --- */
         .top-navbar { position: fixed; top: 0; left: 0; width: 100%; height: 60px; background-color: var(--card-bg); border-bottom: 1px solid var(--border-color); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-        .nav-container { width: 100%; max-width: 975px; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; }
-        .logo-text { font-family: 'Grand Hotel', cursive; font-size: 30px; cursor: pointer; }
+        .nav-container { width: 100%; max-width: 975px; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; gap: 15px; }
+        .logo-text { font-family: 'Grand Hotel', cursive; font-size: 30px; cursor: pointer; min-width: 100px; }
+        
+        /* Search Box Layout */
+        .search-engine-box { position: relative; width: 240px; max-width: 100%; }
+        
+        /* Desktop Icons */
         .nav-icons { display: flex; gap: 22px; align-items: center; }
         .nav-icons i { font-size: 22px; cursor: pointer; }
         .nav-profile-pic { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 1px solid black; }
+        
+        /* Mobile Header Right Controls */
+        .mobile-header-right { display: none; align-items: center; gap: 18px; } /* Added gap for spacing between icons */
+        .mobile-header-right i { font-size: 22px; cursor: pointer; color: var(--text-main); }
+
+        /* --- BOTTOM NAVBAR --- */
         .bottom-navbar { position: fixed; bottom: 0; left: 0; width: 100%; height: 52px; background-color: var(--card-bg); border-top: 1px solid var(--border-color); display: none; justify-content: space-around; align-items: center; z-index: 1000; }
         .bottom-navbar i { font-size: 22px; }
+        .bottom-profile-pic { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1.5px solid black; }
+
+        /* --- WORKSPACE LAYOUT --- */
         .main-workspace { max-width: 935px; margin: 30px auto 0 auto; display: flex; gap: 28px; padding: 0 20px; }
         .feed-section { flex: 1; max-width: 614px; display: flex; flex-direction: column; gap: 24px; }
+        
+        /* Stories */
         .stories-wrapper { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; display: flex; gap: 16px; overflow-x: auto; scrollbar-width: none; }
         .stories-wrapper::-webkit-scrollbar { display: none; }
         .story-node { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 12px; cursor: pointer; min-width: 66px; position: relative; }
@@ -29,6 +47,7 @@
         .story-node img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid var(--card-bg); }
         .story-username { width: 100%; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-main); }
         
+        /* Posts */
         .post-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; display: flex; flex-direction: column; }
         .post-header { padding: 14px; display: flex; justify-content: space-between; align-items: center; }
         .post-user-meta { display: flex; align-items: center; gap: 12px; }
@@ -55,6 +74,7 @@
         .comment-post-btn { color: #0095f6; font-weight: 600; border: none; background: none; cursor: pointer; font-size: 14px; }
         .comment-post-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
+        /* Suggestions Sidebar */
         .desktop-suggestions { flex: 0.4; max-width: 293px; display: flex; flex-direction: column; gap: 16px; padding-top: 10px; }
         .self-profile-row { display: flex; align-items: center; justify-content: space-between; }
         .self-meta { display: flex; align-items: center; gap: 16px; }
@@ -71,6 +91,7 @@
         .s-reason { font-size: 12px; color: var(--text-muted); }
         .follow-link { color: #0095f6; font-size: 12px; font-weight: 600; cursor: pointer; }
 
+        /* Story Viewer Modal */
         .story-viewer-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a1a; display: none; justify-content: center; align-items: center; z-index: 3000; }
         .story-content-box { position: relative; width: 100%; max-width: 450px; height: 100vh; background: black; display: flex; justify-content: center; align-items: center; }
         .story-content-box img { width: 100%; height: 100%; object-fit: contain; }
@@ -80,14 +101,21 @@
         .story-viewer-header img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid white; }
         .story-close-btn { position: absolute; top: 25px; right: 15px; color: white; font-size: 22px; cursor: pointer; background: none; border: none; }
 
-        @media (max-width: 1000px) { .desktop-suggestions { display: none; } .main-workspace { justify-content: center; } }
+        /* --- 📱 PURE MOBILE RESPONSIVE QUERIES --- */
+        @media (max-width: 1000px) { 
+            .desktop-suggestions { display: none; } 
+            .main-workspace { justify-content: center; } 
+        }
+        
         @media (max-width: 768px) { 
-            .top-navbar .nav-icons { display: none; } 
-            .bottom-navbar { display: flex; } 
+            .top-navbar .nav-icons { display: none !important; } /* Hide Desktop Icons completely */
+            .mobile-header-right { display: flex !important; } /* Show Heart & Chat icon on top-right */
+            .bottom-navbar { display: flex !important; } /* Show Bottom Navbar */
+            
+            .search-engine-box { width: 140px !important; } /* Adjust top search size in mobile */
             .main-workspace { margin-top: 60px; padding: 0; } 
             .stories-wrapper { border: none; border-bottom: 1px solid var(--border-color); border-radius: 0; } 
             .post-card { border-left: none; border-right: none; border-radius: 0; } 
-            .search-engine-box { width: 160px !important; }
         }
     </style>
 </head>
@@ -97,11 +125,12 @@
         <div class="nav-container">
             <div class="logo"><h1 class="logo-text" onclick="window.location.reload()">Instagram</h1></div>
             
-            <div class="search-engine-box" style="position: relative; width: 240px; max-width: 100%;">
+            <div class="search-engine-box">
                 <input type="text" id="global-search-input" placeholder="Search users..." style="width: 100%; padding: 6px 12px 6px 32px; border: 1px solid var(--border-color); border-radius: 8px; background: #efefef; outline: none; font-size: 14px;">
                 <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 12px; color: var(--text-muted);"></i>
                 <div id="search-results-dropdown" style="position: absolute; top: 40px; left: 0; width: 100%; background: white; border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: none; max-height: 250px; overflow-y: auto; z-index: 2000; padding: 6px 0;"></div>
             </div>
+
             <div class="nav-icons">
                 <a href="home.html"><i class="fa-solid fa-house"></i></a>
                 <a href="messages.html"><i class="fa-regular fa-paper-plane"></i></a>
@@ -109,6 +138,11 @@
                 <a href="explore.html"><i class="fa-regular fa-compass"></i></a>
                 <a href="notifications.html"><i class="fa-regular fa-heart"></i></a>
                 <a href="profile.html"><img src="https://picsum.photos/150/150?random=1" alt="Profile" class="nav-profile-pic" id="top-nav-avatar"></a>
+            </div>
+
+            <div class="mobile-header-right">
+                <a href="notifications.html"><i class="fa-regular fa-heart"></i></a>
+                <a href="messages.html"><i class="fa-regular fa-paper-plane"></i></a>
             </div>
         </div>
     </nav>
@@ -172,7 +206,7 @@
         <a href="search.html"><i class="fa-solid fa-magnifying-glass"></i></a>
         <a href="create.html"><i class="fa-regular fa-square-plus"></i></a>
         <a href="reels.html"><i class="fa-solid fa-clapperboard"></i></a>
-        <a href="profile.html"><img src="https://picsum.photos/150/150?random=1" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1.5px solid black;" id="bottom-nav-avatar"></a>
+        <a href="profile.html"><img src="https://picsum.photos/150/150?random=1" class="bottom-profile-pic" id="bottom-nav-avatar"></a>
     </nav>
 
     <script type="module">
@@ -204,7 +238,6 @@
             window.location.href = "login.html";
         });
 
-        // --- SYNC ACTIVE USER CONTEXT DATA ---
         async function syncUserData() {
             try {
                 const docRef = doc(db, "users", currentUsername);
@@ -232,7 +265,6 @@
             }
         }
 
-        // --- STORIES MANAGER CONTROLS ---
         async function checkUserStories() {
             try {
                 const querySnapshot = await getDocs(collection(db, "stories"));
@@ -254,6 +286,7 @@
                     document.querySelector("#my-story-node .story-ring-box").style.background = "#dbdbdb";
                 }
             } catch (err) {
+                document.getElementById("story-plus-icon").style.display = "flex";
                 console.error("Story context sync error: ", err);
             } finally {
                 isCheckingStory = false;
@@ -286,7 +319,6 @@
         }
         document.getElementById("close-story-btn").addEventListener("click", closeStory);
 
-        // --- GLOBAL FEED FOR ALL REGISTERED USERS ---
         const postsTargetContainer = document.getElementById("dynamic-posts-container");
 
         onSnapshot(query(collection(db, "posts"), orderBy("timestamp", "desc")), (snapshot) => {
@@ -296,15 +328,12 @@
             snapshot.forEach((postDoc) => {
                 const postId = postDoc.id;
                 const postData = postDoc.data();
-
-                // UPGRADED: Yahan se filter condition hata di hai taaki All India ke sabhi users ki posts load hon
                 totalPostsCounter++;
 
                 const article = document.createElement("article");
                 article.className = "post-card";
                 article.setAttribute("data-post-id", postId);
 
-                // Default Avatar fallback handle kiya hai taaki kisi ka photo na ho toh broken logo na aaye
                 const postUserAvatar = postData.profilePic || "https://picsum.photos/150/150?random=99";
 
                 article.innerHTML = `
@@ -354,7 +383,6 @@
                 bindLiveCommentsToPost(postId);
             });
 
-            // Agar database me ek bhi post nahi hai
             if (totalPostsCounter === 0) {
                 postsTargetContainer.innerHTML = `
                     <div style="background: white; border: 1px solid var(--border-color); border-radius: 8px; padding: 50px 20px; text-align: center; color: var(--text-muted); font-size: 14px;">
@@ -408,7 +436,6 @@
             }
         });
 
-        // --- REAL-TIME GLOBAL USER SEARCH LOGIC ---
         const searchInput = document.getElementById("global-search-input");
         const resultsDropdown = document.getElementById("search-results-dropdown");
 
