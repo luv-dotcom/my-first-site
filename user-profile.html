@@ -77,7 +77,12 @@
             <div class="info-section">
                 <div class="username-row">
                     <h2 class="username" id="profile-username">Loading...</h2>
-                    <button class="btn-edit" id="profile-action-btn">Follow</button>
+                    
+                    <div id="profile-actions-container" style="display: flex; gap: 10px; align-items: center;">
+                        <button class="btn-edit" id="profile-action-btn">Follow</button>
+                        <button class="btn-edit" id="message-btn" style="display: none;">Message</button>
+                    </div>
+                    
                     <i class="fa-solid fa-gear" style="font-size: 22px; cursor: pointer;"></i>
                 </div>
                 <div class="stats-row">
@@ -107,9 +112,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-        import { getFirestore, doc, getDoc, collection, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
-        // Same Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyBrqMn7FrFW3jslaDNM0ui-VW4w6K_3Nmk",
             authDomain: "insta-clone-863ae.firebaseapp.com",
@@ -121,12 +125,10 @@
         
         const db = getFirestore(initializeApp(firebaseConfig));
 
-        // 1. URL se target user ki ID auto-extract karna
         const urlParams = new URLSearchParams(window.location.search);
         let targetUsername = urlParams.get('id'); 
         const activeUser = localStorage.getItem("active_user");
 
-        // Fallback: Agar bina ID ke direct koi page khole, toh use active logged-in user ki profile dikhao
         if (!targetUsername) {
             targetUsername = activeUser;
         }
@@ -138,37 +140,73 @@
             }
 
             try {
-                // 2. Target User ki metadata doc read karna (Name, ProfilePic, Bio)
+                // User Details Fetching
                 const userDocRef = doc(db, "users", targetUsername);
                 const userDocSnap = await getDoc(userDocRef);
 
                 if (userDocSnap.exists()) {
                     const userData = userDocSnap.data();
-                    
                     document.getElementById("profile-username").innerText = userData.username || targetUsername;
                     document.getElementById("profile-fullname").innerText = userData.name || "Instagram User";
                     document.getElementById("profile-bio").innerHTML = userData.bio ? userData.bio.replace(/\n/g, '<br>') : "Welcome to my profile! 🌟";
                     document.getElementById("profile-avatar").src = userData.profilePic || "https://picsum.photos/150/150?random=99";
                     document.title = `${userData.username || targetUsername} • Instagram Profile`;
                 } else {
-                    // Agar user database me bilkul naya hai aur details set nahi ki
                     document.getElementById("profile-username").innerText = targetUsername;
                     document.getElementById("profile-fullname").innerText = "Instagram User";
                     document.getElementById("profile-bio").innerText = "No bio available.";
                 }
 
-                // Agar apni khud ki profile dekh rhe ho toh Edit profile ka button dikhega
+                // Follow/Unfollow & Message Dynamic View Setup
                 const actionBtn = document.getElementById("profile-action-btn");
+                const msgBtn = document.getElementById("message-btn");
+
                 if (targetUsername === activeUser) {
+                    // Agar khud ki profile h
                     actionBtn.innerText = "Edit Profile";
+                    actionBtn.style.background = "#efefef";
+                    actionBtn.style.color = "black";
                     actionBtn.onclick = () => window.location.href = "edit-profile.html"; 
+                    msgBtn.style.display = "none"; // Apne aap ko message nahi kar sakte
                 } else {
-                    actionBtn.innerText = "Follow";
-                    actionBtn.style.background = "#0095f6";
-                    actionBtn.style.color = "white";
+                    // Agar dusre user ki profile h (e.g. Lucky bhaiya)
+                    msgBtn.style.display = "inline-block";
+                    msgBtn.onclick = () => window.location.href = `chat.html?id=${targetUsername}`;
+
+                    // Database se check karna ki follow kiya h ya nahi
+                    const followDocRef = doc(db, "follows", `${activeUser}_${targetUsername}`);
+                    const followSnap = await getDoc(followDocRef);
+
+                    if (followSnap.exists()) {
+                        actionBtn.innerText = "Following";
+                        actionBtn.style.background = "#efefef";
+                        actionBtn.style.color = "black";
+                    } else {
+                        actionBtn.innerText = "Follow";
+                        actionBtn.style.background = "#0095f6";
+                        actionBtn.style.color = "white";
+                    }
+
+                    // Click hone par Follow/Unfollow toggle logic
+                    actionBtn.onclick = async () => {
+                        if (actionBtn.innerText === "Follow") {
+                            await setDoc(followDocRef, {
+                                follower: activeUser,
+                                following: targetUsername
+                            });
+                            actionBtn.innerText = "Following";
+                            actionBtn.style.background = "#efefef";
+                            actionBtn.style.color = "black";
+                        } else {
+                            await deleteDoc(followDocRef);
+                            actionBtn.innerText = "Follow";
+                            actionBtn.style.background = "#0095f6";
+                            actionBtn.style.color = "white";
+                        }
+                    };
                 }
 
-                // 3. THE FIX: Filter query jo sirf target user ke posts fetch karegi
+                // Posts Load logic call
                 await loadTargetUserPosts();
 
             } catch (err) {
@@ -180,7 +218,6 @@
             const gridContainer = document.getElementById("user-posts-grid");
             
             try {
-                // Posts collection se query bana rhe hain jisme sirf is username ka matched data mile
                 const postsQuery = query(
                     collection(db, "posts"),
                     where("username", "==", targetUsername),
@@ -195,7 +232,6 @@
                     const postData = postDoc.data();
                     postCounter++;
 
-                    // Ek ek post card grid layout mein append hoga
                     const postItem = document.createElement("div");
                     postItem.className = "post-item";
                     postItem.innerHTML = `
@@ -208,10 +244,8 @@
                     gridContainer.appendChild(postItem);
                 });
 
-                // Total post count updates in real-time
                 document.getElementById("post-count").innerText = postCounter;
 
-                // Agar unhone abhi tak kuch post nahi kiya hai toh safe blank slate placeholder dikhao
                 if (postCounter === 0) {
                     gridContainer.innerHTML = `
                         <div style="grid-column: span 3; text-align: center; padding: 60px 20px; color: var(--text-muted);">
@@ -223,12 +257,11 @@
 
             } catch (error) {
                 console.error("Error filtering target posts: ", error);
-                // Fallback agar indexing issue ho tab bhi safe filter trigger back
                 gridContainer.innerHTML = `<div style="grid-column: span 3; text-align:center; padding:20px; color:red;">Failed to fetch specific user grid layout pipeline.</div>`;
             }
         }
 
-        // Script initial execute loop
+        // Script starting execution point
         fetchUserProfileData();
     </script>
 </body>
