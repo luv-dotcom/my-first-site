@@ -20,6 +20,7 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             overflow: hidden;
             height: 100vh;
+            width: 100vw;
         }
         .user-chat-row {
             transition: background 0.2s;
@@ -48,7 +49,7 @@
             align-self: flex-start;
         }
 
-        /* 📱 RESPONSIVE MOBILE LOGIC */
+        /* 📱 MOBILE RESPONSIVE STATES */
         @media (max-width: 768px) {
             #chat-sidebar {
                 width: 100% !important;
@@ -56,25 +57,22 @@
                 display: flex !important;
             }
             #chat-main-window {
-                display: none !important;
+                display: none !important; /* Shuruat me hidden rahega jab tak ID select na ho */
                 width: 100% !important;
             }
             
-            /* Jab chat open ho (hide-sidebar class active ho) */
-            .hide-sidebar #chat-sidebar {
-                display: none !important;
+            /* Jab main layout container par '.mobile-chat-active' class lagegi */
+            .mobile-chat-active #chat-sidebar {
+                display: none !important; /* IDs ki list hide ho jayegi */
             }
-            .hide-sidebar #chat-main-window {
-                display: flex !important;
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100vw;
-                height: 100vh;
-                z-index: 999;
+            .mobile-chat-active #chat-main-window {
+                display: flex !important; /* Pura chat box saamne aa jayega */
+                flex-direction: column;
+                width: 100% !important;
+                height: 100% !important;
             }
             #chat-back-btn {
-                display: flex !important;
+                display: flex !important; /* Back button chalu ho jayega */
             }
         }
     </style>
@@ -92,14 +90,14 @@
             <div style="width: 50px;"></div>
         </div>
 
-        <div id="main-layout-container" style="display: flex; flex: 1; overflow: hidden; position: relative;">
+        <div id="main-layout-container" style="display: flex; flex: 1; overflow: hidden; position: relative; height: calc(100vh - 60px);">
             
             <div id="chat-sidebar" style="width: 350px; border-right: 1px solid var(--border-color); display: flex; flex-direction: column; background: var(--sidebar-bg); flex-shrink: 0;">
                 <div id="global-users-chat-list" style="flex: 1; overflow-y: auto;">
                     </div>
             </div>
 
-            <div id="chat-main-window" style="flex: 1; display: flex; flex-direction: column; background: var(--chat-bg);">
+            <div id="chat-main-window" style="flex: 1; display: flex; flex-direction: column; background: var(--chat-bg); height: 100%;">
                 
                 <div id="placeholder-box" style="flex: 1; display: flex; align-items: center; justify-content: center; flex-direction: column; color: #8e8e8e;">
                     <h2>Your Messages</h2>
@@ -171,13 +169,13 @@
                     sendBtn.addEventListener("click", sendMessageLogic);
                 }
 
-                // Back Button Click Logic for Mobile
+                // Back Button Logic
                 const backBtn = safeGet("chat-back-btn");
                 if (backBtn) {
                     backBtn.addEventListener("click", () => {
                         selectedTargetUser = null;
-                        const layout = safeGet("messages-page-wrapper");
-                        if (layout) layout.classList.remove("hide-sidebar");
+                        const container = safeGet("main-layout-container");
+                        if (container) container.classList.remove("mobile-chat-active");
                         if (safeGet("placeholder-box")) safeGet("placeholder-box").style.display = "flex";
                         if (safeGet("active-chat-box")) safeGet("active-chat-box").style.display = "none";
                     });
@@ -251,9 +249,10 @@
         async function openChat(target, avatar) {
             selectedTargetUser = target;
             
-            const layout = safeGet("messages-page-wrapper");
-            if (layout) {
-                layout.classList.add("hide-sidebar");
+            // 🛠️ FIXING THE CLASS TRIGGER PLACE:
+            const container = safeGet("main-layout-container");
+            if (container) {
+                container.classList.add("mobile-chat-active");
             }
 
             if(safeGet("placeholder-box")) safeGet("placeholder-box").style.display = "none";
