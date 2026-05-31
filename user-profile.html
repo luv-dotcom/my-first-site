@@ -152,12 +152,11 @@
 
         async function fetchUserProfileData() {
             try {
-                // --- ENFORCE ABSOLUTE ZERO COUNTERS RESET BEFORE FETCH ---
+                // FORCE RESETS FIRST
                 document.getElementById("follower-count").innerText = "0";
                 document.getElementById("following-count").innerText = "0";
                 document.getElementById("post-count").innerText = "0";
 
-                // User Details Fetching from Firestore
                 const userDocRef = doc(db, "users", targetUsername);
                 const userDocSnap = await getDoc(userDocRef);
 
@@ -169,7 +168,6 @@
                     document.getElementById("profile-avatar").src = userData.profilePic || "https://picsum.photos/150/150?random=99";
                     document.title = `${userData.username || targetUsername} • Instagram Profile`;
                 } else {
-                    // FIXED: Resetting all content safely when user document doesn't exist in DB
                     document.getElementById("profile-username").innerText = targetUsername;
                     document.getElementById("profile-fullname").innerText = "Instagram User";
                     document.getElementById("profile-bio").innerText = "Welcome to my profile! 🌟";
@@ -292,10 +290,10 @@
             const gridContainer = document.getElementById("user-posts-grid");
             
             try {
+                // FIXED QUERY: Crash proof without composite index dependency
                 const postsQuery = query(
                     collection(db, "posts"),
-                    where("username", "==", targetUsername),
-                    orderBy("timestamp", "desc")
+                    where("username", "==", targetUsername)
                 );
 
                 const querySnapshot = await getDocs(postsQuery);
@@ -331,7 +329,7 @@
 
             } catch (error) {
                 console.error("Error filtering target posts: ", error);
-                gridContainer.innerHTML = `<div style="grid-column: span 3; text-align:center; padding:20px; color:red;">Failed to fetch specific user grid layout pipeline.</div>`;
+                gridContainer.innerHTML = `<div style="grid-column: span 3; text-align:center; padding:20px; color:red;">Failed to fetch specific user posts.</div>`;
             }
         }
 
