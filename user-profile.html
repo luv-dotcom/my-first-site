@@ -150,9 +150,14 @@
             targetUsername = activeUser;
         }
 
+        // Modal template helper to fix redirect path and properly handle variable scoping
+        window.navigateToUser = function(username) {
+            window.location.href = `?username=${username}`;
+        };
+
         async function fetchUserProfileData() {
             try {
-                // HARD RESET AT ABSOLUTE START
+                // HARD RESET
                 document.getElementById("follower-count").innerText = "0";
                 document.getElementById("following-count").innerText = "0";
                 document.getElementById("post-count").innerText = "0";
@@ -184,7 +189,6 @@
                 const followingSnap = await getDocs(followingQuery);
                 let followingCount = followingSnap.size;
 
-                // FORCE UPDATE THE SCREEN DIRECTLY FROM THE DATABASE DATA
                 document.getElementById("follower-count").innerText = followersCount;
                 document.getElementById("following-count").innerText = followingCount;
 
@@ -235,6 +239,7 @@
                     };
                 }
 
+                // Call setup modals and post loaders *after* state registration
                 setupListModals();
                 await loadTargetUserPosts();
 
@@ -263,7 +268,7 @@
                     modalUsersList.innerHTML += `
                         <div style="display: flex; align-items: center; gap: 12px; font-weight: 600; padding: 5px 0;">
                             <i class="fa-solid fa-circle-user" style="font-size: 32px; color: #555;"></i>
-                            <span style="color: white; cursor:pointer;" onclick="window.location.href='user-profile.html?username=${data.follower}'">@${data.follower}</span>
+                            <span style="color: white; cursor:pointer;" onclick="navigateToUser('${data.follower}')">@${data.follower}</span>
                         </div>`;
                 });
             };
@@ -282,7 +287,7 @@
                     modalUsersList.innerHTML += `
                         <div style="display: flex; align-items: center; gap: 12px; font-weight: 600; padding: 5px 0;">
                             <i class="fa-solid fa-circle-user" style="font-size: 32px; color: #555;"></i>
-                            <span style="color: white; cursor:pointer;" onclick="window.location.href='user-profile.html?username=${data.following}'">@${data.following}</span>
+                            <span style="color: white; cursor:pointer;" onclick="navigateToUser('${data.following}')">@${data.following}</span>
                         </div>`;
                 });
             };
@@ -328,6 +333,7 @@
             }
         }
 
+        // Initialize Everything
         fetchUserProfileData();
     </script>
 </body>
