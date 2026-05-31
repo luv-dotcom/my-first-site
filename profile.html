@@ -75,10 +75,10 @@
         .list-modal-header h3 { font-size: 18px; font-weight: 600; }
         .list-modal-header i { cursor: pointer; font-size: 20px; color: var(--text-muted); }
         .list-users-container { overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 12px; }
-        .user-item { display: flex; align-items: center; gap: 12px; padding: 6px 0; border-bottom: 1px solid #fafafa; }
-        .user-item i { font-size: 32px; color: #dbdbdb; }
-        .user-item span { font-weight: 600; font-size: 14px; cursor: pointer; }
-        .user-item span:hover { text-decoration: underline; }
+        .user-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #fafafa; }
+        .user-item-meta { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        .user-item-meta img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
+        .user-item-meta span { font-weight: 600; font-size: 14px; }
 
         /* Skeleton Shimmer Loading Effect */
         .skeleton { background: linear-gradient(90deg, #f2f2f2 25%, #e6e6e6 50%, #f2f2f2 75%); background-size: 200% 100%; animation: loading 1.5s infinite; color: transparent !important; border-radius: 4px; }
@@ -237,7 +237,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-        import { getFirestore, doc, onSnapshot, updateDoc, collection, query, where, getDocs, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, collection, query, where, getDocs, getDoc, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
         
         const firebaseConfig = {
             apiKey: "AIzaSyBrqMn7FrFW3jslaDNM0ui-VW4w6K_3Nmk",
@@ -282,32 +282,33 @@
         }
         loadActiveUserNavbar();
 
-        // MASTER ENGINE - Resolves User id vs username safely
+        // MASTER ENGINE - Resolves User safely without full loop leaks
         async function initializeProfileEngine() {
             if (rawParam && rawParam !== loggedInUserId) {
-                // 1. Check if rawParam is directly a valid Firebase Doc ID
+                // Pehle check karo ki kya rawParam direct document ID hai
                 const directDocRef = doc(db, "users", rawParam);
-                const directDocSnap = await getDocs(query(collection(db, "users")));
-                
-                let foundMatchId = null;
-                directDocSnap.forEach((uDoc) => {
-                    if (uDoc.id === rawParam) {
-                        foundMatchId = uDoc.id;
-                    } else if (uDoc.data().username && uDoc.data().username.toLowerCase() === rawParam.toLowerCase()) {
-                        foundMatchId = uDoc.id;
-                    }
-                });
+                const directDocSnap = await getDoc(directDocRef);
 
-                if (foundMatchId) {
-                    targetUserId = foundMatchId;
+                if (directDocSnap.exists()) {
+                    targetUserId = rawParam;
                 } else {
-                    targetUserId = rawParam; 
+                    // Agar direct ID nhi h, tab username match dhoondo
+                    const usersRef = collection(db, "users");
+                    const q = query(usersRef, where("username", "==", rawParam.toLowerCase()));
+                    const querySnapshot = await getDocs(q);
+                    
+                    if (!querySnapshot.empty) {
+                        targetUserId = querySnapshot.docs[0].id;
+                    } else {
+                        // Agar kuch nhi mila toh raw bhej do target pr
+                        targetUserId = rawParam;
+                    }
                 }
             }
 
             isOwnProfile = (targetUserId === loggedInUserId);
 
-            // Initial UI Setup based on identity
+            // UI Identity state sync
             if (!isOwnProfile) {
                 const logoutBtn = document.getElementById("logout-btn");
                 if (logoutBtn) logoutBtn.style.display = "none";
@@ -315,15 +316,20 @@
                 const actionBtn = document.getElementById("edit-profile-trigger");
                 actionBtn.innerText = "Loading...";
                 actionBtn.className = "edit-profile-btn btn-follow";
+            } else {
+                const logoutBtn = document.getElementById("logout-btn");
+                if (logoutBtn) logoutBtn.style.display = "inline-block";
+                const actionBtn = document.getElementById("edit-profile-trigger");
+                actionBtn.innerText = "Edit Profile";
+                actionBtn.className = "edit-profile-btn";
             }
 
-            // Start Syncing Systems
             listenToProfileData();
             listenToUserPosts();
             setupFollowClickHandlers();
         }
 
-        // Realtime Profile Listener
+        // Realtime Profile Data Sync
         function listenToProfileData() {
             onSnapshot(doc(db, "users", targetUserId), (docSnap) => {
                 if (docSnap.exists()) {
@@ -341,14 +347,6 @@
                     } else if (userData.name) {
                         finalName = userData.name;
                         databaseNameKey = "name";
-                    } else {
-                        for (let key in userData) {
-                            if (!["username", "bio", "profilePic", "gender", "email", "password"].includes(key)) {
-                                finalName = userData[key];
-                                databaseNameKey = key;
-                                break;
-                            }
-                        }
                     }
                     document.getElementById("prof-name").innerText = finalName;
                     removeSkeletons();
@@ -368,7 +366,7 @@
                 document.getElementById("following-count").innerText = snapshot.size;
             });
 
-            // If visiting someone else, live track your relation with them (Follow/Unfollow button text)
+            // Relation tracking for follow/unfollow button text
             if (!isOwnProfile) {
                 const followCheckQuery = query(
                     collection(db, "follows"), 
@@ -388,7 +386,7 @@
             }
         }
 
-        // Post Syncing System
+        // Post Rendering Setup
         function listenToUserPosts() {
             const gallery = document.getElementById("posts-gallery");
             const q = query(collection(db, "posts"), where("userId", "==", targetUserId));
@@ -423,14 +421,13 @@
             });
         }
 
-        // Dynamic click handlers for buttons
+        // Follow Click Handler
         function setupFollowClickHandlers() {
             const modal = document.getElementById("edit-modal");
             const actionBtn = document.getElementById("edit-profile-trigger");
 
             actionBtn.onclick = async () => {
                 if (isOwnProfile) {
-                    // Fill and open modal
                     document.getElementById("input-username").value = document.getElementById("prof-username").innerText;
                     document.getElementById("input-name").value = document.getElementById("prof-name").innerText;
                     const mainAvatarSrc = document.getElementById("main-avatar").src;
@@ -460,7 +457,6 @@
             };
         }
 
-        // Close Modal Setup
         const closeModalFn = () => {
             const modal = document.getElementById("edit-modal");
             modal.classList.remove("show");
@@ -468,9 +464,9 @@
         };
         document.getElementById("btn-close-modal").onclick = closeModalFn;
 
-        // Save Profile Logic (Ensuring it targets user identity safely)
+        // Profile Update Engine
         document.getElementById("btn-save-profile").onclick = async () => {
-            if (!isOwnProfile) return; // Guard logic
+            if (!isOwnProfile) return;
             const saveBtn = document.getElementById("btn-save-profile");
             saveBtn.innerText = "Updating...";
             saveBtn.disabled = true;
@@ -496,12 +492,41 @@
             }
         };
 
-        // --- FOLLOWERS / FOLLOWING LIST POPUP SYSTEM ---
+        // --- 👥 MODAL LIST COMPONENT UPGRADE ---
         const listModal = document.getElementById("list-modal");
         const modalTitle = document.getElementById("modal-title");
         const modalUsersList = document.getElementById("modal-users-list");
         
         document.getElementById("close-list-modal").onclick = () => { listModal.style.display = "none"; };
+
+        // Helper function to render a clean user node in modal lists
+        async function buildUserRow(uid, fieldType) {
+            const userDoc = await getDoc(doc(db, "users", uid));
+            const item = document.createElement("div");
+            item.className = "user-item";
+
+            let uName = uid;
+            let uPic = defaultPic;
+
+            if (userDoc.exists()) {
+                const d = userDoc.data();
+                uName = d.username || uid;
+                uPic = d.profilePic || defaultPic;
+            }
+
+            item.innerHTML = `
+                <div class="user-item-meta">
+                    <img src="${uPic}" alt="avatar">
+                    <span>@${uName}</span>
+                </div>
+            `;
+            
+            item.querySelector('.user-item-meta').onclick = () => { 
+                listModal.style.display = "none";
+                window.location.href = `profile.html?user=${uid}`; 
+            };
+            return item;
+        }
 
         document.getElementById("follower-btn").onclick = async () => {
             modalTitle.innerText = "Followers";
@@ -512,13 +537,10 @@
             const querySnapshot = await getDocs(q);
             modalUsersList.innerHTML = querySnapshot.empty ? '<div style="text-align:center; color:gray; padding:10px;">No followers yet.</div>' : '';
             
-            querySnapshot.forEach((doc) => {
-                const data = doc.data();
-                const item = document.createElement("div");
-                item.className = "user-item";
-                item.innerHTML = `<i class="fa-solid fa-circle-user"></i> <span>@${data.follower}</span>`;
-                item.querySelector('span').onclick = () => { window.location.href = `profile.html?user=${data.follower}`; };
-                modalUsersList.appendChild(item);
+            querySnapshot.forEach(async (fDoc) => {
+                const fData = fDoc.data();
+                const row = await buildUserRow(fData.follower, 'follower');
+                modalUsersList.appendChild(row);
             });
         };
 
@@ -531,17 +553,14 @@
             const querySnapshot = await getDocs(q);
             modalUsersList.innerHTML = querySnapshot.empty ? '<div style="text-align:center; color:gray; padding:10px;">Not following anyone.</div>' : '';
             
-            querySnapshot.forEach((doc) => {
-                const data = doc.data();
-                const item = document.createElement("div");
-                item.className = "user-item";
-                item.innerHTML = `<i class="fa-solid fa-circle-user"></i> <span>@${data.following}</span>`;
-                item.querySelector('span').onclick = () => { window.location.href = `profile.html?user=${data.following}`; };
-                modalUsersList.appendChild(item);
+            querySnapshot.forEach(async (fDoc) => {
+                const fData = fDoc.data();
+                const row = await buildUserRow(fData.following, 'following');
+                modalUsersList.appendChild(row);
             });
         };
 
-        // --- TAB SWITCHING LOGIC ---
+        // Tabs Configuration
         document.querySelectorAll('.tab-item').forEach(tab => {
             tab.addEventListener('click', function() {
                 document.querySelector('.tab-item.active').classList.remove('active');
@@ -558,7 +577,7 @@
             });
         });
 
-        // --- LIVE LOGOUT TRIGGER SYSTEM ---
+        // Logout Configuration
         const logoutBtn = document.getElementById("logout-btn");
         if (logoutBtn) {
             logoutBtn.addEventListener("click", () => {
@@ -569,7 +588,6 @@
             });
         }
 
-        // Initialize Core Engine
         initializeProfileEngine();
     </script>
 </body>
