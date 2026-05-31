@@ -1,6 +1,6 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-    import { getFirestore, doc, collection, addDoc, setDoc, updateDoc, onSnapshot, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+    import { getFirestore, doc, collection, addDoc, setDoc, onSnapshot, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
     // Firebase Config
     const firebaseConfig = {
@@ -34,12 +34,10 @@
 
     // 1. Live Listen Users & Rooms (For Last Message & Red Dots)
     function listenToInbox() {
-        // Hame realtime updates chahiye taaki jaise hi koi msg aaye, sidebar turant bina refresh kiye badle
         onSnapshot(collection(db, "users"), async (usersSnapshot) => {
             usersListElement.innerHTML = "";
             let overallUnreadForNavbar = false;
 
-            // Saare users ko check karenge
             for (const userDoc of usersSnapshot.docs) {
                 const uData = userDoc.data();
                 const uName = uData.username || userDoc.id;
@@ -48,12 +46,10 @@
                     const avatar = uData.profilePic || "https://picsum.photos/150/150?random=99";
                     const chatRoomId = [myUsername, uName].sort().join("_chat_room_");
                     
-                    // Room Document create ya fetch karne ke liye placeholder divs setup karte hain
                     const row = document.createElement("div");
                     row.className = `user-chat-row ${selectedTargetUser === uName ? 'active' : ''}`;
                     row.setAttribute("data-username", uName);
                     
-                    // Default Row Layout
                     row.innerHTML = `
                         <div style="position: relative;">
                             <img src="${avatar}" alt="user" class="chat-avatar-img">
@@ -69,7 +65,7 @@
                     row.addEventListener("click", () => openChatWithUser(uName, avatar, row));
                     usersListElement.appendChild(row);
 
-                    // Real-time track Room changes (Last message preview & status indicator)
+                    // Real-time tracking of Room changes
                     onSnapshot(doc(db, "chats", chatRoomId), (roomSnap) => {
                         const lastMsgTextSpan = document.getElementById(`last-msg-${uName}`);
                         const profileDot = document.getElementById(`dot-avatar-${uName}`);
@@ -78,23 +74,20 @@
                         if (roomSnap.exists()) {
                             const roomData = roomSnap.data();
                             
-                            // Point 4: Last Message text user ke name ke niche show karna
+                            // Last Message Preview logic
                             if (roomData.lastMessageText) {
                                 lastMsgTextSpan.innerText = roomData.lastMessageText;
                             }
 
-                            // Point 2 & 3: Check agar samne wale ne bheja hai aur read nahi hua hai
+                            // Unread Conditions (Agar doosre ne bheja aur read nahi hua)
                             if (roomData.lastMessageSender !== myUsername && roomData.isRead === false) {
-                                // Msg Bold hoga
                                 lastMsgTextSpan.style.fontWeight = "700";
                                 lastMsgTextSpan.style.color = "var(--text-main)";
-                                // Profile aur row pe red/blue dots active honge
                                 profileDot.style.display = "block";
                                 statusDot.style.display = "block";
                                 
                                 overallUnreadForNavbar = true;
                             } else {
-                                // Read ho chuka hai toh sab normal
                                 lastMsgTextSpan.style.fontWeight = "400";
                                 lastMsgTextSpan.style.color = "var(--text-muted)";
                                 profileDot.style.display = "none";
@@ -102,7 +95,6 @@
                             }
                         }
                         
-                        // Point 1: Navbar ke Chat Icon pe red indicator toggle karne ke liye log
                         updateNavbarChatIconStatus(overallUnreadForNavbar);
                     });
                 }
@@ -115,14 +107,14 @@
         const topNavBackIcon = document.querySelector(".back-home i");
         if (topNavBackIcon) {
             if (hasUnread) {
-                topNavBackIcon.style.color = "#ed4956"; // Agar unread hai toh back arrow/chat element red ho jaye
+                topNavBackIcon.style.color = "#ed4956"; 
             } else {
                 topNavBackIcon.style.color = "var(--text-main)";
             }
         }
     }
 
-    // 2. Open Chat Room
+    // 2. Open Chat Room (FIXED: CRASH SE BACHNE KE LIYE SETDOC WITH MERGE LAGA DIYA HAI)
     async function openChatWithUser(targetUser, avatarUrl, rowElement) {
         selectedTargetUser = targetUser;
 
@@ -138,17 +130,17 @@
 
         const chatRoomId = [myUsername, targetUser].sort().join("_chat_room_");
 
-        // Point 3: Jaise hi saamne wala msg khol le (click kare), status normal ho jaye
+        // Click hote hi message ko seen/read mark karne ka solid tarika
         try {
             const roomRef = doc(db, "chats", chatRoomId);
-            const roomSnap = await getDocs(query(collection(db, "chats"))); // Quick check
             
-            // Hum flag ko true update kar dete hain taaki unread status hat jaye
-            await updateDoc(roomRef, {
+            // updateDoc hata kar setDoc lagaya hai takia naye room pe blank screen crash na ho
+            await setDoc(roomRef, {
                 isRead: true
-            });
+            }, { merge: true });
+            
         } catch (e) {
-            console.log("Room reference not initialized yet, will update on first message.");
+            console.error("Error updating read status: ", e);
         }
 
         listenToMessages(targetUser);
@@ -191,7 +183,6 @@
         const roomRef = doc(db, "chats", chatRoomId);
 
         try {
-            // Sub-collection me message add ho raha h
             await addDoc(collection(db, "chats", chatRoomId, "messages"), {
                 sender: myUsername,
                 receiver: selectedTargetUser,
@@ -199,11 +190,10 @@
                 timestamp: new Date()
             });
 
-            // Main Room Document update ho raha hai (For last message metadata)
             await setDoc(roomRef, {
                 lastMessageText: msgText,
                 lastMessageSender: myUsername,
-                isRead: false, // Naya message hamesha unread state me jayega
+                isRead: false, 
                 timestamp: new Date()
             }, { merge: true });
 
