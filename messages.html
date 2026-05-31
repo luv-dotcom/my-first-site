@@ -1,6 +1,6 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-    import { getFirestore, doc, collection, addDoc, setDoc, onSnapshot, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+    import { getFirestore, doc, collection, addDoc, setDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
     // Firebase Config
     const firebaseConfig = {
@@ -15,38 +15,66 @@
 
     let myUsername = localStorage.getItem("active_user");
     if (!myUsername) { 
-        // Agar localstorage me nahi hai toh safer fallback test name de do crash se bachne ke liye
         myUsername = "test_user"; 
         localStorage.setItem("active_user", "test_user");
     }
-    document.getElementById("nav-my-username").innerText = myUsername;
 
     let selectedTargetUser = null;
     let unsubscribeMessages = null;
+    let activeRoomListeners = {}; // Multi-listener refresh handle karne ke liye
 
-    const usersListElement = document.getElementById("global-users-chat-list");
-    const placeholderBox = document.getElementById("placeholder-box");
-    const activeChatBox = document.getElementById("active-chat-box");
-    const chatWindow = document.getElementById("chat-main-window");
-    const messagesContainer = document.getElementById("chat-messages-container");
-    const textInput = document.getElementById("message-text-input");
-    const sendBtn = document.getElementById("send-btn");
+    // Safe Element Fetcher Wrapper (Taaki element na milne par crash na ho)
+    const safeGet = (id) => document.getElementById(id);
 
-    textInput.addEventListener("input", (e) => {
-        sendBtn.disabled = e.target.value.trim() === "";
+    // CRITICAL FIX: Jab poora HTML page browser me load ho jaye, TABHI saara code chalu hoga
+    window.addEventListener("DOMContentLoaded", () => {
+        try {
+            if (safeGet("nav-my-username")) {
+                safeGet("nav-my-username").innerText = myUsername;
+            }
+
+            const textInput = safeGet("message-text-input");
+            const sendBtn = safeGet("send-btn");
+            if (textInput && sendBtn) {
+                textInput.addEventListener("input", (e) => {
+                    sendBtn.disabled = e.target.value.trim() === "";
+                });
+            }
+
+            if (sendBtn) {
+                sendBtn.addEventListener("click", sendMessageLogic);
+            }
+
+            if (safeGet("mobile-back-arrow")) {
+                safeGet("mobile-back-arrow").addEventListener("click", () => {
+                    if (safeGet("chat-main-window")) safeGet("chat-main-window").classList.remove("open");
+                });
+            }
+
+            // Sab ready hone ke baad inbox loading start hogi
+            listenToInbox();
+
+        } catch (domErr) {
+            console.error("DOM Initialization safe catch:", domErr);
+        }
     });
 
-    // 1. Live Listen Users
+    // 1. Live Listen Users (Optimized & Non-blocking)
     function listenToInbox() {
+        const usersListElement = safeGet("global-users-chat-list");
+        if (!usersListElement) return;
+
         onSnapshot(collection(db, "users"), (usersSnapshot) => {
             usersListElement.innerHTML = "";
             let overallUnreadForNavbar = false;
+            let loadedUsers = [];
 
             usersSnapshot.forEach((userDoc) => {
                 const uData = userDoc.data();
                 const uName = uData.username || userDoc.id;
 
-                if (uName !== myUsername) {
+                if (uName !== myUsername && !loadedUsers.includes(uName)) {
+                    loadedUsers.push(uName);
                     const avatar = uData.profilePic || "https://picsum.photos/150/150?random=99";
                     const chatRoomId = [myUsername, uName].sort().join("_chat_room_");
                     
@@ -59,7 +87,7 @@
                             <img src="${avatar}" alt="user" class="chat-avatar-img" style="width:44px; height:44px; border-radius:50%; object-fit:cover;">
                             <div class="profile-red-dot" id="dot-avatar-${uName}" style="position: absolute; top: 0; right: 0; width: 12px; height: 12px; background-color: #ed4956; border-radius: 50%; border: 2px solid white; display: none;"></div>
                         </div>
-                        <div class="chat-row-meta" style="flex: 1; display: flex; flex-direction: column; margin-left: 12px;">
+                        <div class="chat-row-meta" style="flex: 1; display: flex; flex-direction: column; margin-left: 12px; text-align: left;">
                             <span class="chat-row-name" style="font-weight:600; font-size:14px;">${uName}</span>
                             <span class="chat-row-last-msg" id="last-msg-${uName}" style="font-size: 13px; color: #8e8e8e; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">No messages yet</span>
                         </div>
@@ -69,40 +97,49 @@
                     row.addEventListener("click", () => openChatWithUser(uName, avatar, row));
                     usersListElement.appendChild(row);
 
-                    // Safe realtime room monitoring
-                    onSnapshot(doc(db, "chats", chatRoomId), (roomSnap) => {
-                        try {
-                            const lastMsgTextSpan = document.getElementById(`last-msg-${uName}`);
-                            const profileDot = document.getElementById(`dot-avatar-${uName}`);
-                            const statusDot = document.getElementById(`status-dot-${uName}`);
+                    // Pehle se chal rahe listener ko band karne ka solid system
+                    if (activeRoomListeners[chatRoomId]) {
+                        activeRoomListeners[chatRoomId]();
+                    }
 
-                            if (roomSnap.exists() && lastMsgTextSpan) {
+                    // Background listener binding bina app render roke
+                    activeRoomListeners[chatRoomId] = onSnapshot(doc(db, "chats", chatRoomId), (roomSnap) => {
+                        try {
+                            const lastMsgTextSpan = safeGet(`last-msg-${uName}`);
+                            const profileDot = safeGet(`dot-avatar-${uName}`);
+                            const statusDot = safeGet(`status-dot-${uName}`);
+
+                            if (roomSnap.exists()) {
                                 const roomData = roomSnap.data();
                                 
-                                if (roomData.lastMessageText) {
+                                if (roomData.lastMessageText && lastMsgTextSpan) {
                                     lastMsgTextSpan.innerText = roomData.lastMessageText;
                                 }
 
                                 if (roomData.lastMessageSender !== myUsername && roomData.isRead === false) {
-                                    lastMsgTextSpan.style.fontWeight = "700";
-                                    lastMsgTextSpan.style.color = "#262626";
+                                    if (lastMsgTextSpan) {
+                                        lastMsgTextSpan.style.fontWeight = "700";
+                                        lastMsgTextSpan.style.color = "#262626";
+                                    }
                                     if(profileDot) profileDot.style.display = "block";
                                     if(statusDot) statusDot.style.display = "block";
                                     overallUnreadForNavbar = true;
                                 } else {
-                                    lastMsgTextSpan.style.fontWeight = "400";
-                                    lastMsgTextSpan.style.color = "#8e8e8e";
+                                    if (lastMsgTextSpan) {
+                                        lastMsgTextSpan.style.fontWeight = "400";
+                                        lastMsgTextSpan.style.color = "#8e8e8e";
+                                    }
                                     if(profileDot) profileDot.style.display = "none";
                                     if(statusDot) statusDot.style.display = "none";
                                 }
                             }
-                        } catch (err) { console.log("Silent room updates error handler"); }
-                        updateNavbarChatIconStatus(overallUnreadForNavbar);
+                            updateNavbarChatIconStatus(overallUnreadForNavbar);
+                        } catch (err) { }
                     });
                 }
             });
         }, (error) => {
-            console.error("Firestore snapshot error handled layout reset:", error);
+            console.error("Firestore user listing stream broken:", error);
         });
     }
 
@@ -113,36 +150,33 @@
         }
     }
 
-    // 2. Open Chat Room (Ekdam Safe Tarika bina crash hone wala)
+    // 2. Open Chat Room
     async function openChatWithUser(targetUser, avatarUrl, rowElement) {
         selectedTargetUser = targetUser;
 
         document.querySelectorAll(".user-chat-row").forEach(r => r.classList.remove("active"));
         rowElement.classList.add("active");
 
-        placeholderBox.style.display = "none";
-        activeChatBox.style.display = "flex";
-        chatWindow.classList.add("open");
+        if(safeGet("placeholder-box")) safeGet("placeholder-box").style.display = "none";
+        if(safeGet("active-chat-box")) safeGet("active-chat-box").style.display = "flex";
+        if(safeGet("chat-main-window")) safeGet("chat-main-window").classList.add("open");
 
-        document.getElementById("chat-user-avatar").src = avatarUrl;
-        document.getElementById("chat-user-username").innerText = targetUser;
+        if(safeGet("chat-user-avatar")) safeGet("chat-user-avatar").src = avatarUrl;
+        if(safeGet("chat-user-username")) safeGet("chat-user-username").innerText = targetUser;
 
-        const chatRoomId = [myUsername, targetUser].sort().join("_chat_room_");
-
-        // UI ko turant reset kar do bina database response ka wait kiye (Taaki screen crash na dikhe)
-        const profileDot = document.getElementById(`dot-avatar-${targetUser}`);
-        const statusDot = document.getElementById(`status-dot-${targetUser}`);
-        const lastMsgTextSpan = document.getElementById(`last-msg-${targetUser}`);
+        // Dots and Unread bold fonts clear instantly
+        const profileDot = safeGet(`dot-avatar-${targetUser}`);
+        const statusDot = safeGet(`status-dot-${targetUser}`);
+        const lastMsgTextSpan = safeGet(`last-msg-${targetUser}`);
         if(profileDot) profileDot.style.display = "none";
         if(statusDot) statusDot.style.display = "none";
         if(lastMsgTextSpan) { lastMsgTextSpan.style.fontWeight = "400"; lastMsgTextSpan.style.color = "#8e8e8e"; }
 
-        // Background me chupchaap Firestore state read update karega, fail hua toh bhi UI chalega
+        const chatRoomId = [myUsername, targetUser].sort().join("_chat_room_");
         try {
-            const roomRef = doc(db, "chats", chatRoomId);
-            await setDoc(roomRef, { isRead: true }, { merge: true });
+            await setDoc(doc(db, "chats", chatRoomId), { isRead: true }, { merge: true });
         } catch (e) {
-            console.warn("Database rules blocked active update, falling back gracefully.");
+            console.warn("Database sync rules warning handled.");
         }
 
         listenToMessages(targetUser);
@@ -156,22 +190,29 @@
         const q = query(collection(db, "chats", chatRoomId, "messages"), orderBy("timestamp", "asc"));
         
         unsubscribeMessages = onSnapshot(q, (snapshot) => {
-            messagesContainer.innerHTML = "";
+            const container = safeGet("chat-messages-container");
+            if (!container) return;
+
+            container.innerHTML = "";
             snapshot.forEach((msgDoc) => {
                 const mData = msgDoc.data();
                 const bubble = document.createElement("div");
                 bubble.className = (mData.sender === myUsername) ? "msg-bubble sent" : "msg-bubble received";
                 bubble.innerText = mData.text;
-                messagesContainer.appendChild(bubble);
+                container.appendChild(bubble);
             });
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            container.scrollTop = container.scrollHeight;
         }, (err) => {
-            console.error("Messages loader error handled safely");
+            console.error("Messages loader safe captured.");
         });
     }
 
-    // 4. Send Message
-    sendBtn.addEventListener("click", async () => {
+    // 4. Send Message Logic Function
+    async function sendMessageLogic() {
+        const textInput = safeGet("message-text-input");
+        const sendBtn = safeGet("send-btn");
+        if (!textInput || !sendBtn) return;
+
         const msgText = textInput.value.trim();
         if (!msgText || !selectedTargetUser) return;
 
@@ -199,12 +240,5 @@
         } catch (err) {
             console.error("Error sending message: ", err);
         }
-    });
-
-    document.getElementById("mobile-back-arrow").addEventListener("click", () => {
-        chatWindow.classList.remove("open");
-    });
-
-    // Start App
-    listenToInbox();
+    }
 </script>
