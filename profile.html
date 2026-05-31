@@ -40,7 +40,10 @@
         .profile-username { font-size: 28px; font-weight: 300; min-width: 120px; }
         .edit-profile-btn { background-color: transparent; border: 1px solid var(--border-color); padding: 5px 12px; border-radius: 4px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
         .edit-profile-btn:hover { background-color: var(--btn-grey); }
+        
+        /* Stats Row with click pointers */
         .stats-row { display: flex; gap: 40px; font-size: 16px; list-style: none; }
+        .stats-row li { cursor: pointer; }
         .stats-row li span { font-weight: 600; }
         .bio-row { font-size: 14px; line-height: 20px; }
         .full-name { font-weight: 600; display: block; margin-bottom: 2px; }
@@ -59,6 +62,18 @@
         .grid-item:hover .grid-item-overlay { opacity: 1; }
         .overlay-stat { display: flex; align-items: center; gap: 7px; }
         .no-posts { grid-column: span 3; text-align: center; padding: 60px 0; color: var(--text-muted); font-size: 18px; }
+
+        /* Smooth List Modal Styles */
+        .list-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 3000; }
+        .list-modal-box { background: white; padding: 20px; border-radius: 12px; width: 90%; max-width: 400px; max-height: 400px; display: flex; flex-direction: column; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .list-modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #efefef; padding-bottom: 10px; margin-bottom: 15px; }
+        .list-modal-header h3 { font-size: 18px; font-weight: 600; }
+        .list-modal-header i { cursor: pointer; font-size: 20px; color: var(--text-muted); }
+        .list-users-container { overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 12px; }
+        .user-item { display: flex; align-items: center; gap: 12px; padding: 6px 0; border-bottom: 1px solid #fafafa; }
+        .user-item i { font-size: 32px; color: #dbdbdb; }
+        .user-item span { font-weight: 600; font-size: 14px; cursor: pointer; }
+        .user-item span:hover { text-decoration: underline; }
 
         /* Skeleton Shimmer Loading Effect */
         .skeleton { background: linear-gradient(90deg, #f2f2f2 25%, #e6e6e6 50%, #f2f2f2 75%); background-size: 200% 100%; animation: loading 1.5s infinite; color: transparent !important; border-radius: 4px; }
@@ -138,8 +153,8 @@
                 </div>
                 <ul class="stats-row">
                     <li><span id="post-count">0</span> posts</li>
-                    <li><span id="follower-count">0</span> followers</li>
-                    <li><span id="following-count">0</span> following</li>
+                    <li id="follower-btn"><span id="follower-count">0</span> followers</li>
+                    <li id="following-btn"><span id="following-count">0</span> following</li>
                 </ul>
                 <div class="bio-row">
                     <span class="full-name skeleton" id="prof-name">&nbsp;</span>
@@ -161,6 +176,17 @@
             <div class="grid-item skeleton"></div>
         </section>
     </main>
+
+    <div class="list-modal-overlay" id="list-modal">
+        <div class="list-modal-box">
+            <div class="list-modal-header">
+                <h3 id="modal-title">Users</h3>
+                <i class="fa-solid fa-xmark" id="close-list-modal"></i>
+            </div>
+            <div class="list-users-container" id="modal-users-list">
+                </div>
+        </div>
+    </div>
 
     <div class="modal-overlay" id="edit-modal">
         <div class="modal-box">
@@ -207,7 +233,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-        import { getFirestore, doc, onSnapshot, updateDoc, collection, query, where } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
         
         const firebaseConfig = {
             apiKey: "AIzaSyBrqMn7FrFW3jslaDNM0ui-VW4w6K_3Nmk",
@@ -278,13 +304,13 @@
                 console.error("Live profile listen sync failed: ", error);
             });
 
-            // LIVE FOLLOWERS COUNTER ADDED BY PEER
+            // LIVE FOLLOWERS COUNTER
             const followersQuery = query(collection(db, "follows"), where("following", "==", targetUserId));
             onSnapshot(followersQuery, (snapshot) => {
                 document.getElementById("follower-count").innerText = snapshot.size;
             });
 
-            // LIVE FOLLOWING COUNTER ADDED BY PEER
+            // LIVE FOLLOWING COUNTER
             const followingQuery = query(collection(db, "follows"), where("follower", "==", targetUserId));
             onSnapshot(followingQuery, (snapshot) => {
                 document.getElementById("following-count").innerText = snapshot.size;
@@ -329,7 +355,59 @@
             });
         }
 
-        // --- MODAL TRIGGER CODE ---
+        // --- FOLLOWERS / FOLLOWING LIST POPUP SYSTEM ---
+        const listModal = document.getElementById("list-modal");
+        const modalTitle = document.getElementById("modal-title");
+        const modalUsersList = document.getElementById("modal-users-list");
+        
+        document.getElementById("close-list-modal").onclick = () => {
+            listModal.style.display = "none";
+        };
+
+        // Followers Click Trigger
+        document.getElementById("follower-btn").onclick = async () => {
+            modalTitle.innerText = "Followers";
+            modalUsersList.innerHTML = '<div style="text-align:center; padding:10px;"><i class="fa-solid fa-circle-notch fa-spin"></i> Loading...</div>';
+            listModal.style.display = "flex";
+
+            const q = query(collection(db, "follows"), where("following", "==", targetUserId));
+            const querySnapshot = await getDocs(q);
+            
+            modalUsersList.innerHTML = querySnapshot.empty ? '<div style="text-align:center; color:gray; padding:10px;">No followers yet.</div>' : '';
+            
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                modalUsersList.innerHTML += `
+                    <div class="user-item">
+                        <i class="fa-solid fa-circle-user"></i>
+                        <span onclick="window.location.href='user-profile.html?username=${data.follower}'">@${data.follower}</span>
+                    </div>`;
+            });
+        };
+
+        // Following Click Trigger
+        document.getElementById("following-btn").onclick = async () => {
+            modalTitle.innerText = "Following";
+            modalUsersList.innerHTML = '<div style="text-align:center; padding:10px;"><i class="fa-solid fa-circle-notch fa-spin"></i> Loading...</div>';
+            listModal.style.display = "flex";
+
+            const q = query(collection(db, "follows"), where("follower", "==", targetUserId));
+            const querySnapshot = await getDocs(q);
+            
+            modalUsersList.innerHTML = querySnapshot.empty ? '<div style="text-align:center; color:gray; padding:10px;">Not following anyone.</div>' : '';
+            
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                modalUsersList.innerHTML += `
+                    <div class="user-item">
+                        <i class="fa-solid fa-circle-user"></i>
+                        <span onclick="window.location.href='user-profile.html?username=${data.following}'">@${data.following}</span>
+                    </div>`;
+            });
+        };
+
+
+        // --- EDIT PROFILE MODAL TRIGGER ---
         const modal = document.getElementById("edit-modal");
         const editBtn = document.getElementById("edit-profile-trigger");
         const closeBtn = document.getElementById("btn-close-modal");
