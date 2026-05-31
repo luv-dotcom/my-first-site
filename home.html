@@ -130,10 +130,9 @@
                 <div class="story-node"><div class="story-ring-box"><img src="https://picsum.photos/100/100?random=8" alt="user"></div><span class="story-username">travel_geek</span></div>
             </div>
 
-            <!-- Target Container Area for User Specific Posts -->
             <div id="dynamic-posts-container" style="display: flex; flex-direction: column; gap: 24px;">
                 <div style="padding: 40px; text-align: center; color: var(--text-muted); font-size: 14px;">
-                    <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 24px; margin-bottom: 10px;"></i><br>Syncing your personal feed content...
+                    <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 24px; margin-bottom: 10px;"></i><br>Syncing global feed content...
                 </div>
             </div>
         </section>
@@ -287,80 +286,81 @@
         }
         document.getElementById("close-story-btn").addEventListener("click", closeStory);
 
-        // --- FILTERED FEED FOR EXCLUSIVE LOGGED IN USER ---
+        // --- GLOBAL FEED FOR ALL REGISTERED USERS ---
         const postsTargetContainer = document.getElementById("dynamic-posts-container");
 
         onSnapshot(query(collection(db, "posts"), orderBy("timestamp", "desc")), (snapshot) => {
             postsTargetContainer.innerHTML = "";
-            let uniqueUserPostCounter = 0;
+            let totalPostsCounter = 0;
             
             snapshot.forEach((postDoc) => {
                 const postId = postDoc.id;
                 const postData = postDoc.data();
 
-                // condition validation filtering layer (sirf wahi posts load hongi jo active logged-in user ki hain)
-                if (postData.username === currentUsername) {
-                    uniqueUserPostCounter++;
+                // UPGRADED: Yahan se filter condition hata di hai taaki All India ke sabhi users ki posts load hon
+                totalPostsCounter++;
 
-                    const article = document.createElement("article");
-                    article.className = "post-card";
-                    article.setAttribute("data-post-id", postId);
+                const article = document.createElement("article");
+                article.className = "post-card";
+                article.setAttribute("data-post-id", postId);
 
-                    article.innerHTML = `
-                        <div class="post-header">
-                            <div class="post-user-meta">
-                                <a href="profile.html"><img src="${postData.profilePic || currentProfilePic}" alt="user"></a>
-                                <div class="post-user-details">
-                                    <a href="profile.html" class="post-username">${postData.username}</a>
-                                    <span class="post-location">${postData.location || 'Global Territory'}</span>
-                                </div>
+                // Default Avatar fallback handle kiya hai taaki kisi ka photo na ho toh broken logo na aaye
+                const postUserAvatar = postData.profilePic || "https://picsum.photos/150/150?random=99";
+
+                article.innerHTML = `
+                    <div class="post-header">
+                        <div class="post-user-meta">
+                            <a href="user-profile.html?id=${postData.username}"><img src="${postUserAvatar}" alt="user"></a>
+                            <div class="post-user-details">
+                                <a href="user-profile.html?id=${postData.username}" class="post-username">${postData.username}</a>
+                                <span class="post-location">${postData.location || 'Global Territory'}</span>
                             </div>
-                            <i class="fa-solid fa-ellipsis post-options-btn"></i>
                         </div>
-                        <div class="post-image-box">
-                            <img src="${postData.postImg}" alt="Post Graphic">
+                        <i class="fa-solid fa-ellipsis post-options-btn"></i>
+                    </div>
+                    <div class="post-image-box">
+                        <img src="${postData.postImg}" alt="Post Graphic">
+                    </div>
+                    <div class="post-controls">
+                        <div class="left-controls">
+                            <i class="fa-regular fa-heart like-toggle-btn"></i>
+                            <i class="fa-regular fa-comment basic-focus-trigger"></i>
+                            <i class="fa-regular fa-paper-plane"></i>
                         </div>
-                        <div class="post-controls">
-                            <div class="left-controls">
-                                <i class="fa-regular fa-heart like-toggle-btn"></i>
-                                <i class="fa-regular fa-comment basic-focus-trigger"></i>
-                                <i class="fa-regular fa-paper-plane"></i>
-                            </div>
-                            <i class="fa-regular fa-bookmark"></i>
-                        </div>
-                        <div class="post-body-content">
-                            <span class="likes-count">${postData.likesCount || 0} likes</span>
-                            <p class="caption-line"><span class="bold-user">${postData.username}</span>${postData.caption || ''}</p>
-                            <div class="post-time-stamp">Recent Activity Pipeline</div>
-                        </div>
-                        <div class="comments-container" id="comments-box-${postId}"></div>
-                        <div class="comment-input-area">
-                            <input type="text" class="comment-input-field" placeholder="Add a comment..." id="input-field-${postId}">
-                            <button class="comment-post-btn" data-target-id="${postId}" disabled>Post</button>
-                        </div>
-                    `;
+                        <i class="fa-regular fa-bookmark"></i>
+                    </div>
+                    <div class="post-body-content">
+                        <span class="likes-count">${postData.likesCount || 0} likes</span>
+                        <p class="caption-line"><span class="bold-user">${postData.username}</span>${postData.caption || ''}</p>
+                        <div class="post-time-stamp">Recent Activity Pipeline</div>
+                    </div>
+                    <div class="comments-container" id="comments-box-${postId}"></div>
+                    <div class="comment-input-area">
+                        <input type="text" class="comment-input-field" placeholder="Add a comment..." id="input-field-${postId}">
+                        <button class="comment-post-btn" data-target-id="${postId}" disabled>Post</button>
+                    </div>
+                `;
 
-                    postsTargetContainer.appendChild(article);
+                postsTargetContainer.appendChild(article);
 
-                    const currentInputField = document.getElementById(`input-field-${postId}`);
-                    const currentPostBtn = article.querySelector(`[data-target-id="${postId}"]`);
+                const currentInputField = document.getElementById(`input-field-${postId}`);
+                const currentPostBtn = article.querySelector(`[data-target-id="${postId}"]`);
 
-                    currentInputField.addEventListener("input", (e) => {
-                        currentPostBtn.disabled = e.target.value.trim() === "";
-                    });
+                currentInputField.addEventListener("input", (e) => {
+                    currentPostBtn.disabled = e.target.value.trim() === "";
+                });
 
-                    article.querySelector(".basic-focus-trigger").addEventListener("click", () => currentInputField.focus());
-                    bindLiveCommentsToPost(postId);
-                }
+                article.querySelector(".basic-focus-trigger").addEventListener("click", () => currentInputField.focus());
+                bindLiveCommentsToPost(postId);
             });
 
-            // Agar user ne koi post nahi ki toh placeholder layout trigger hoga
-            if (uniqueUserPostCounter === 0) {
+            // Agar database me ek bhi post nahi hai
+            if (totalPostsCounter === 0) {
                 postsTargetContainer.innerHTML = `
                     <div style="background: white; border: 1px solid var(--border-color); border-radius: 8px; padding: 50px 20px; text-align: center; color: var(--text-muted); font-size: 14px;">
                         <i class="fa-regular fa-image" style="font-size: 40px; margin-bottom: 14px; color: #ccc;"></i><br>
-                        <strong style="color: #262626; font-size: 16px; display:block; margin-bottom: 5px;">No Posts Yet</strong>
-                        When you share photos, they will appear on your customized feed pipeline.
+                        <strong style="color: #262626; font-size: 16px; display:block; margin-bottom: 5px;">No Posts Globally</strong>
+                        Be the first one to upload a post on this platform!
                     </div>`;
             }
         });
