@@ -26,7 +26,7 @@
         .nav-profile-pic { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 1px solid black; }
         
         /* Mobile Header Right Controls */
-        .mobile-header-right { display: none; align-items: center; gap: 18px; } /* Added gap for spacing between icons */
+        .mobile-header-right { display: none; align-items: center; gap: 18px; }
         .mobile-header-right i { font-size: 22px; cursor: pointer; color: var(--text-main); }
 
         /* --- BOTTOM NAVBAR --- */
@@ -108,11 +108,11 @@
         }
         
         @media (max-width: 768px) { 
-            .top-navbar .nav-icons { display: none !important; } /* Hide Desktop Icons completely */
-            .mobile-header-right { display: flex !important; } /* Show Heart & Chat icon on top-right */
-            .bottom-navbar { display: flex !important; } /* Show Bottom Navbar */
+            .top-navbar .nav-icons { display: none !important; }
+            .mobile-header-right { display: flex !important; }
+            .bottom-navbar { display: flex !important; }
             
-            .search-engine-box { width: 140px !important; } /* Adjust top search size in mobile */
+            .search-engine-box { width: 140px !important; }
             .main-workspace { margin-top: 60px; padding: 0; } 
             .stories-wrapper { border: none; border-bottom: 1px solid var(--border-color); border-radius: 0; } 
             .post-card { border-left: none; border-right: none; border-radius: 0; } 
@@ -335,13 +335,16 @@
                 article.setAttribute("data-post-id", postId);
 
                 const postUserAvatar = postData.profilePic || "https://picsum.photos/150/150?random=99";
+                
+                // FIXED HERE: Replaced postData.username with postData.userId
+                const postAuthor = postData.userId || "anonymous";
 
                 article.innerHTML = `
                     <div class="post-header">
                         <div class="post-user-meta">
-                            <a href="user-profile.html?id=${postData.username}"><img src="${postUserAvatar}" alt="user"></a>
+                            <a href="user-profile.html?id=${postAuthor}"><img src="${postUserAvatar}" alt="user"></a>
                             <div class="post-user-details">
-                                <a href="user-profile.html?id=${postData.username}" class="post-username">${postData.username}</a>
+                                <a href="user-profile.html?id=${postAuthor}" class="post-username">${postAuthor}</a>
                                 <span class="post-location">${postData.location || 'Global Territory'}</span>
                             </div>
                         </div>
@@ -360,7 +363,7 @@
                     </div>
                     <div class="post-body-content">
                         <span class="likes-count">${postData.likesCount || 0} likes</span>
-                        <p class="caption-line"><span class="bold-user">${postData.username}</span>${postData.caption || ''}</p>
+                        <p class="caption-line"><span class="bold-user">${postAuthor}</span>${postData.caption || ''}</p>
                         <div class="post-time-stamp">Recent Activity Pipeline</div>
                     </div>
                     <div class="comments-container" id="comments-box-${postId}"></div>
