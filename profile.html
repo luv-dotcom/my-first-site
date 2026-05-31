@@ -208,8 +208,6 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
         import { getFirestore, doc, onSnapshot, updateDoc, collection, query, where } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
-        // Dynamic detection ke liye Firebase Auth module ko import kiya hai
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
         
         const firebaseConfig = {
             apiKey: "AIzaSyBrqMn7FrFW3jslaDNM0ui-VW4w6K_3Nmk",
@@ -221,20 +219,26 @@
         };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const auth = getAuth(app);
         
         let databaseNameKey = "fullName"; 
         let defaultPic = "https://picsum.photos/150/150?random=1";
         let userCurrentGender = "Not Specified";
-        let targetUserId = null; // Yeh ab dynamic ho gaya hai
+        
+        // Dynamic active user pick from signup localStorage system
+        const targetUserId = localStorage.getItem("active_user");
+
+        if (!targetUserId) {
+            // Agar koi user logged-in nahi mila localStorage me, to automatic index (login page) par bhej dega
+            window.location.href = "index.html";
+        }
 
         function removeSkeletons() {
             document.querySelectorAll('.skeleton').forEach(el => el.classList.remove('skeleton'));
         }
 
         // --- REALTIME PROFILE DATA SYNC ---
-        function listenToProfileData(uid) {
-            const docRef = doc(db, "users", uid);
+        function listenToProfileData() {
+            const docRef = doc(db, "users", targetUserId);
             
             onSnapshot(docRef, (docSnap) => {
                 if (docSnap.exists()) {
@@ -253,12 +257,21 @@
                     document.getElementById("nav-avatar").src = currentPic;
                     document.getElementById("bottom-avatar").src = currentPic;
 
+                    // Support multiple dynamic names keys if found
                     let finalName = "Instagram User"; 
-                    for (let key in userData) {
-                        if (!["username", "bio", "profilePic", "gender"].includes(key)) {
-                            finalName = userData[key];
-                            databaseNameKey = key;
-                            break;
+                    if(userData.fullName) {
+                        finalName = userData.fullName;
+                        databaseNameKey = "fullName";
+                    } else if (userData.name) {
+                        finalName = userData.name;
+                        databaseNameKey = "name";
+                    } else {
+                        for (let key in userData) {
+                            if (!["username", "bio", "profilePic", "gender", "email", "password"].includes(key)) {
+                                finalName = userData[key];
+                                databaseNameKey = key;
+                                break;
+                            }
                         }
                     }
                     profName.innerText = finalName;
@@ -270,9 +283,9 @@
         }
 
         // --- REALTIME POSTS SYNC GALLERY ---
-        function listenToUserPosts(uid) {
+        function listenToUserPosts() {
             const gallery = document.getElementById("posts-gallery");
-            const q = query(collection(db, "posts"), where("userId", "==", uid));
+            const q = query(collection(db, "posts"), where("userId", "==", targetUserId));
             
             onSnapshot(q, (querySnapshot) => {
                 gallery.innerHTML = ""; 
@@ -307,19 +320,7 @@
             });
         }
 
-        // --- AUTH CHECK ENGINE (Aane wale login.html ke user ko trace karne ke liye) ---
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                targetUserId = user.uid; // Logged-in user ki actual ID fetch ho gayi
-                listenToProfileData(targetUserId);
-                listenToUserPosts(targetUserId);
-            } else {
-                // Agar koi login nahi hai, toh automatic login page par redirect kar dega
-                window.location.href = "login.html";
-            }
-        });
-
-        // --- MODAL TRIGGER CODE ---
+        // --- MODAL TRIGGER CODE UPDATES ---
         const modal = document.getElementById("edit-modal");
         const editBtn = document.getElementById("edit-profile-trigger");
         const closeBtn = document.getElementById("btn-close-modal");
@@ -332,7 +333,6 @@
         const inputGender = document.getElementById("input-gender");
 
         editBtn.addEventListener("click", () => {
-            if(!targetUserId) return;
             inputUsername.value = document.getElementById("prof-username").innerText;
             inputName.value = document.getElementById("prof-name").innerText;
             const mainAvatarSrc = document.getElementById("main-avatar").src;
@@ -352,7 +352,6 @@
         modal.addEventListener("click", (e) => { if(e.target === modal) closeModalFn(); });
 
         saveBtn.addEventListener("click", async () => {
-            if(!targetUserId) return;
             saveBtn.innerText = "Updating...";
             saveBtn.disabled = true;
             try {
@@ -366,6 +365,13 @@
                     profilePic: updatedPicUrl,
                     gender: inputGender.value
                 });
+
+                // Agar username change kiya hai to localStorage handle bhi update karna padega
+                const currentLocalUser = localStorage.getItem("active_user");
+                const newUsernameVal = inputUsername.value.trim().toLowerCase();
+                if(currentLocalUser !== newUsernameVal){
+                    localStorage.setItem("active_user", newUsernameVal);
+                }
 
                 closeModalFn();
             } catch (error) {
@@ -389,10 +395,14 @@
                 if(currentTabType !== 'posts') {
                     gallery.innerHTML = `<div class="no-posts"><i class="fa-regular fa-square-minus" style="font-size:40px; margin-bottom:10px; display:block;"></i>No Dynamic ${this.innerText} Available</div>`;
                 } else {
-                    if(targetUserId) listenToUserPosts(targetUserId);
+                    listenToUserPosts();
                 }
             });
         });
+
+        // Initialize Engine
+        listenToProfileData();
+        listenToUserPosts();
     </script>
 </body>
 </html>
