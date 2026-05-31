@@ -17,6 +17,7 @@
             --msg-blue: linear-gradient(45deg, #0095f6, #a855f7); /* Insta Style Message Gradient */
             --msg-grey: #efefef;
             --active-green: #4cd137;
+            --btn-grey: #efefef;
         }
 
         * {
@@ -30,6 +31,7 @@
             background-color: #fafafa;
             color: var(--text-main);
             overflow: hidden; /* Screen ke andar hi scroll fit rahega */
+            padding-bottom: 60px;
         }
 
         a { text-decoration: none; color: inherit; }
@@ -47,12 +49,19 @@
         .logo-text { font-family: 'Grand Hotel', cursive; font-size: 30px; }
         .nav-icons { display: flex; gap: 22px; align-items: center; }
         .nav-icons i { font-size: 22px; cursor: pointer; }
-        .nav-profile-pic { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 1px solid black; }
+        .nav-profile-pic { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color); }
+        
+        .bottom-navbar { 
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 52px; 
+            background-color: white; border-top: 1px solid var(--border-color); 
+            display: none; justify-content: space-around; align-items: center; z-index: 1000; 
+        }
+        .bottom-navbar i { font-size: 22px; }
 
         /* --- 💬 MAIN MESSAGES CONTAINER SPLIT --- */
         .inbox-wrapper {
             max-width: 935px;
-            height: calc(100vh - 80px);
+            height: calc(100vh - 120px);
             margin: 75px auto 0 auto;
             background-color: #ffffff;
             border: 1px solid var(--border-color);
@@ -89,12 +98,7 @@
         .user-chat-row.active-chat { background-color: #efefef; }
         
         .avatar-box { position: relative; }
-        .avatar-box img { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; }
-        .active-dot {
-            width: 14px; height: 14px; background-color: var(--active-green);
-            border-radius: 50%; position: absolute; bottom: 2px; right: 2px;
-            border: 2px solid white;
-        }
+        .avatar-box img { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; background: #eee; }
 
         .chat-meta { display: flex; flex-direction: column; gap: 4px; }
         .chat-username { font-size: 14px; font-weight: 500; }
@@ -112,8 +116,9 @@
             display: flex; align-items: center; gap: 12px;
             border-bottom: 1px solid var(--border-color);
         }
-        .chat-header img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+        .chat-header img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #eee; }
         .chat-header-name { font-weight: 600; font-size: 15px; }
+        .back-btn-mobile { display: none; font-size: 20px; cursor: pointer; margin-right: 10px; }
 
         /* Messages Stream Bubble Container */
         .chat-messages-area {
@@ -125,6 +130,7 @@
         /* Base Message Style */
         .msg-bubble {
             max-width: 60%; padding: 12px 16px; border-radius: 22px; font-size: 14px; line-height: 18px;
+            word-wrap: break-word;
         }
         /* Bheja hua message (Sender: You) */
         .msg-bubble.outgoing {
@@ -136,6 +142,11 @@
             background-color: var(--msg-grey); color: var(--text-main); align-self: flex-start;
             border-bottom-left-radius: 4px;
         }
+        .no-chat-selected {
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            flex: 1; color: var(--text-muted); text-align: center; gap: 15px;
+        }
+        .no-chat-selected i { font-size: 50px; color: var(--text-main); }
 
         /* Bottom Text Input Action Bar */
         .chat-input-bar {
@@ -151,14 +162,23 @@
         .send-msg-btn {
             color: #0095f6; font-weight: 600; border: none; background: none; cursor: pointer; font-size: 14px;
         }
+        .send-msg-btn:disabled { color: #b2dffc; cursor: not-allowed; }
 
         /* --- 📱 MOBILE VIEW ADJUSTMENTS --- */
         @media (max-width: 768px) {
+            body { padding-top: 50px; }
             .top-navbar .nav-icons { display: none; }
-            .inbox-wrapper { margin-top: 60px; height: calc(100vh - 60px); border: none; }
-            /* Mobile par left side wali user list pure screen par dikhegi, right window hidden */
-            .inbox-chat-panel { display: none; } 
+            .bottom-navbar { display: flex; }
+            .inbox-wrapper { margin-top: 60px; height: calc(100vh - 112px); border: none; }
+            
+            /* Toggle classes for mobile panel shifting */
+            .inbox-users-panel.hidden-mobile { display: none; }
+            .inbox-chat-panel { display: none; }
+            .inbox-chat-panel.active-mobile { display: flex; flex: 1; }
+            
             .inbox-users-panel { max-width: 100vw; }
+            .back-btn-mobile { display: block; }
+            .msg-bubble { max-width: 75%; }
         }
     </style>
 </head>
@@ -175,75 +195,251 @@
                 <a href="create.html"><i class="fa-regular fa-square-plus"></i></a>
                 <a href="explore.html"><i class="fa-regular fa-compass"></i></a>
                 <a href="notifications.html"><i class="fa-regular fa-heart"></i></a>
-                <a href="profile.html"><img src="https://picsum.photos/150/150?random=1" alt="Profile" class="nav-profile-pic"></a>
+                <a href="profile.html"><img src="https://picsum.photos/150/150?random=1" alt="Profile" class="nav-profile-pic" id="nav-avatar"></a>
             </div>
         </div>
     </nav>
 
     <main class="inbox-wrapper">
         
-        <section class="inbox-users-panel">
+        <!-- LEFT USERS PANEL -->
+        <section class="inbox-users-panel" id="users-panel">
             <div class="panel-header">
-                <span>my_username</span> <i class="fa-solid fa-chevron-down" style="font-size: 12px;"></i>
+                <span id="current-user-display">my_username</span> <i class="fa-solid fa-chevron-down" style="font-size: 12px;"></i>
             </div>
-            
-            <div class="users-list">
-                <div class="user-chat-row active-chat">
-                    <div class="avatar-box">
-                        <img src="https://picsum.photos/100/100?random=6" alt="user">
-                        <div class="active-dot"></div>
-                    </div>
-                    <div class="chat-meta">
-                        <span class="chat-username">virat.kohli</span>
-                        <span class="chat-subtext" style="font-weight: 600; color: black;">Sent a message · 2m</span>
-                    </div>
-                </div>
-
-                <div class="user-chat-row">
-                    <div class="avatar-box">
-                        <img src="https://picsum.photos/100/100?random=5" alt="user">
-                        <div class="active-dot"></div>
-                    </div>
-                    <div class="chat-meta">
-                        <span class="chat-username">rohit_sharma</span>
-                        <span class="chat-subtext">Active 15m ago</span>
-                    </div>
-                </div>
-                
-                <div class="user-chat-row">
-                    <div class="avatar-box">
-                        <img src="https://picsum.photos/100/100?random=12" alt="user">
-                    </div>
-                    <div class="chat-meta">
-                        <span class="chat-username">ananya_p</span>
-                        <span class="chat-subtext">Liked a message · 2h</span>
-                    </div>
-                </div>
+            <div class="users-list" id="users-list-container">
+                <!-- Dynamic users rows are loaded here -->
+                <div style="text-align:center; padding:20px; color:var(--text-muted);">Loading chats...</div>
             </div>
         </section>
 
-        <section class="inbox-chat-panel">
-            <div class="chat-header">
-                <img src="https://picsum.photos/100/100?random=6" alt="active user">
-                <div class="chat-header-name">virat.kohli</div>
+        <!-- RIGHT CHAT STREAM PANEL -->
+        <section class="inbox-chat-panel" id="chat-panel">
+            <!-- Default Screen when no chat is active -->
+            <div class="no-chat-selected" id="no-chat-screen">
+                <i class="fa-regular fa-paper-plane"></i>
+                <h2>Your Messages</h2>
+                <p>Send private photos and messages to a friend or group.</p>
             </div>
 
-            <div class="chat-messages-area">
-                <div class="msg-bubble incoming">Hey bro! Kasie ho? Project kaha tak pahucha?</div>
-                <div class="msg-bubble outgoing">Bhai ekdum bawal chal rha h! Saare responsive pages ready kar rha hu abhi.</div>
-                <div class="msg-bubble incoming">Zabardast! Firebase kab connect kar rhe hain fir? Me test krne k liye excited hu! 🙌🔥</div>
-                <div class="msg-bubble outgoing">Bas saare frontend layout ready hote hi Firebase par account banake realtime data wire up karenge!</div>
-            </div>
+            <!-- Active Conversation Window Container -->
+            <div id="active-chat-screen" style="display: none; flex-direction: column; flex: 1;">
+                <div class="chat-header">
+                    <i class="fa-solid fa-arrow-left back-btn-mobile" id="mobile-back-btn"></i>
+                    <img src="" alt="active user" id="active-header-img">
+                    <div class="chat-header-name" id="active-header-username">username</div>
+                </div>
 
-            <div class="chat-input-bar">
-                <div class="input-box-wrapper">
-                    <input type="text" placeholder="Message...">
-                    <button class="send-msg-btn">Send</button>
+                <div class="chat-messages-area" id="chat-messages-container">
+                    <!-- Dynamic chat bubble list -->
+                </div>
+
+                <div class="chat-input-bar">
+                    <div class="input-box-wrapper">
+                        <input type="text" placeholder="Message..." id="message-text-input">
+                        <button class="send-msg-btn" id="btn-send-message" disabled>Send</button>
+                    </div>
                 </div>
             </div>
         </section>
 
     </main>
 
+    <nav class="bottom-navbar">
+        <a href="home.html"><i class="fa-regular fa-house"></i></a>
+        <a href="explore.html"><i class="fa-solid fa-magnifying-glass"></i></a>
+        <a href="create.html"><i class="fa-regular fa-square-plus"></i></a>
+        <a href="messages.html"><i class="fa-solid fa-paper-plane"></i></a>
+        <a href="notifications.html"><i class="fa-regular fa-heart"></i></a>
+        <img src="https://picsum.photos/150/150?random=1" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--border-color); cursor: pointer;" id="bottom-avatar" onclick="window.location.href='profile.html'">
+    </nav>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, addDoc, query, orderBy, where, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBrqMn7FrFW3jslaDNM0ui-VW4w6K_3Nmk",
+            authDomain: "insta-clone-863ae.firebaseapp.com",
+            projectId: "insta-clone-863ae",
+            storageBucket: "insta-clone-863ae.firebasestorage.app",
+            messagingSenderId: "599343109250",
+            appId: "1:599343109250:web:1306ec63908ba21c54509b"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const currentUserId = localStorage.getItem("active_user");
+        let activeReceiverId = null;
+        let unsubscribeChat = null;
+        const defaultPic = "https://picsum.photos/150/150?random=1";
+
+        if (!currentUserId) {
+            window.location.href = "index.html";
+        }
+
+        // --- FETCH AND SYNC CURRENT LOGGED-IN USER AVATARS ---
+        async function syncNavbarAvatars() {
+            try {
+                const docRef = doc(db, "users", currentUserId);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    document.getElementById("current-user-display").innerText = data.username || currentUserId;
+                    const userPic = data.profilePic || defaultPic;
+                    document.getElementById("nav-avatar").src = userPic;
+                    document.getElementById("bottom-avatar").src = userPic;
+                }
+            } catch (err) { console.error("Error setting avatars: ", err); }
+        }
+
+        // --- FETCH REGISTERED INSTAGRAM USERS LIST ---
+        function loadUsersList() {
+            const container = document.getElementById("users-list-container");
+            onSnapshot(collection(db, "users"), (snapshot) => {
+                container.innerHTML = "";
+                let userFound = false;
+
+                snapshot.forEach((doc) => {
+                    const userData = doc.data();
+                    const userId = doc.id;
+
+                    // Khud ka naam chat list me hide rakhenge
+                    if (userId === currentUserId) return;
+                    userFound = true;
+
+                    const picUrl = userData.profilePic || defaultPic;
+                    const row = document.createElement("div");
+                    row.className = `user-chat-row ${activeReceiverId === userId ? 'active-chat' : ''}`;
+                    row.id = `user-row-${userId}`;
+                    row.innerHTML = `
+                        <div class="avatar-box">
+                            <img src="${picUrl}" alt="${userData.username}">
+                        </div>
+                        <div class="chat-meta">
+                            <span class="chat-username">${userData.username || 'Insta User'}</span>
+                            <span class="chat-subtext">${userData.fullName || userData.name || 'Click to message'}</span>
+                        </div>
+                    `;
+                    
+                    row.addEventListener("click", () => startChat(userId, userData.username, picUrl));
+                    container.appendChild(row);
+                });
+
+                if(!userFound) {
+                    container.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-muted);">No users found on platform</div>`;
+                }
+            });
+        }
+
+        // --- CHAT INITIATION AND LOADING ENGINE ---
+        function startChat(receiverId, username, profilePic) {
+            activeReceiverId = receiverId;
+
+            // UI Changes across layouts
+            document.querySelectorAll('.user-chat-row').forEach(r => r.classList.remove('active-chat'));
+            const activeRow = document.getElementById(`user-row-${receiverId}`);
+            if(activeRow) activeRow.classList.add('active-chat');
+
+            document.getElementById("no-chat-screen").style.display = "none";
+            document.getElementById("active-chat-screen").style.display = "flex";
+
+            // Mobile view UI management shifting panels
+            document.getElementById("users-panel").classList.add("hidden-mobile");
+            document.getElementById("chat-panel").classList.add("active-mobile");
+
+            document.getElementById("active-header-img").src = profilePic;
+            document.getElementById("active-header-username").innerText = username;
+
+            listenToMessages();
+        }
+
+        // --- REALTIME MESSAGES SYNC STREAM ---
+        function listenToMessages() {
+            if(unsubscribeChat) unsubscribeChat();
+
+            const messagesContainer = document.getElementById("chat-messages-container");
+            messagesContainer.innerHTML = `<div style="text-align:center; color:var(--text-muted); font-size:13px; margin:auto;">Syncing encryption...</div>`;
+
+            const q = query(collection(db, "messages"), orderBy("timestamp", "asc"));
+
+            unsubscribeChat = onSnapshot(q, (snapshot) => {
+                messagesContainer.innerHTML = "";
+                let conversationEmpty = true;
+
+                snapshot.forEach((doc) => {
+                    const msg = doc.data();
+                    
+                    // Smart Room Filtering Engine logic
+                    const isMyMessageToFriend = (msg.senderId === currentUserId && msg.receiverId === activeReceiverId);
+                    const isFriendMessageToMe = (msg.senderId === activeReceiverId && msg.receiverId === currentUserId);
+
+                    if (isMyMessageToFriend || isFriendMessageToMe) {
+                        conversationEmpty = false;
+                        const bubble = document.createElement("div");
+                        bubble.className = `msg-bubble ${isMyMessageToFriend ? 'outgoing' : 'incoming'}`;
+                        bubble.innerText = msg.text;
+                        messagesContainer.appendChild(bubble);
+                    }
+                });
+
+                if(conversationEmpty) {
+                    messagesContainer.innerHTML = `<div style="text-align:center; color:var(--text-muted); font-size:13px; margin:auto 0 10px 0; width:100%;">No messages here yet. Say Hi! 👋</div>`;
+                }
+                
+                // Live tracking scroll shifting
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            });
+        }
+
+        // --- MESSAGE TRANSMISSION AND STORAGE ENGINE ---
+        const messageInput = document.getElementById("message-text-input");
+        const sendBtn = document.getElementById("btn-send-message");
+
+        messageInput.addEventListener("input", () => {
+            sendBtn.disabled = messageInput.value.trim() === "";
+        });
+
+        async function sendMessage() {
+            const rawText = messageInput.value.trim();
+            if(!rawText || !activeReceiverId) return;
+
+            messageInput.value = "";
+            sendBtn.disabled = true;
+
+            try {
+                await addDoc(collection(db, "messages"), {
+                    senderId: currentUserId,
+                    receiverId: activeReceiverId,
+                    text: rawText,
+                    timestamp: new Date()
+                });
+            } catch (err) {
+                console.error("Message injection failed: ", err);
+                alert("Message transmission error!");
+            } finally {
+                messageInput.focus();
+            }
+        }
+
+        sendBtn.addEventListener("click", sendMessage);
+        messageInput.addEventListener("keypress", (e) => { if (e.key === "Enter") sendMessage(); });
+
+        // --- MOBILE CHAT BACK BUTTON BEHAVIOR ---
+        document.getElementById("mobile-back-btn").addEventListener("click", () => {
+            document.getElementById("users-panel").classList.remove("hidden-mobile");
+            document.getElementById("chat-panel").classList.remove("active-mobile");
+            if(unsubscribeChat) {
+                unsubscribeChat();
+                unsubscribeChat = null;
+            }
+            activeReceiverId = null;
+            document.querySelectorAll('.user-chat-row').forEach(r => r.classList.remove('active-chat'));
+        });
+
+        // Initialize Core System Modules
+        syncNavbarAvatars();
+        loadUsersList();
+    </script>
 </body>
 </html>
