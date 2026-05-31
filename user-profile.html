@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>my_username • Instagram Clone</title>
+    <title>Instagram Profile</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* CSS Reset & Variables */
@@ -17,15 +17,16 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { background-color: var(--bg-color); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: var(--text-main); }
 
-        /* Top Navigation Placeholder */
-        .navbar { height: 60px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; background: white; margin-bottom: 30px; }
+        /* Top Navigation */
+        .navbar { height: 60px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; background: white; margin-bottom: 30px; position: sticky; top: 0; z-index: 100; }
+        .navbar a { text-decoration: none; color: var(--text-main); font-weight: 600; font-size: 18px; }
         
         /* Main Container */
         .container { max-width: 935px; margin: 0 auto; padding: 0 20px; }
 
         /* Header Section */
         .profile-header { display: flex; align-items: center; gap: 80px; margin-bottom: 40px; }
-        .avatar-section { width: 150px; height: 150px; border-radius: 50%; border: 1px solid var(--border-color); overflow: hidden; padding: 2px; }
+        .avatar-section { width: 150px; height: 150px; border-radius: 50%; border: 1px solid var(--border-color); overflow: hidden; padding: 2px; background: #fff; }
         .avatar-section img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
         
         .info-section { flex: 1; }
@@ -37,6 +38,7 @@
         .stats-row b { font-weight: 600; }
         
         .bio-info { font-size: 16px; line-height: 1.4; }
+        .bio-info .full-name { font-weight: 600; display: block; margin-bottom: 2px; }
         
         /* Grid Section */
         .tabs { border-top: 1px solid var(--border-color); display: flex; justify-content: center; gap: 60px; margin-bottom: 20px; }
@@ -55,32 +57,37 @@
 
         /* Responsive */
         @media (max-width: 768px) {
-            .profile-header { gap: 30px; }
+            .profile-header { gap: 30px; margin-bottom: 20px; }
+            .avatar-section { width: 90px; height: 90px; }
+            .username { font-size: 22px; }
             .post-grid { gap: 3px; }
+            .stats-row { gap: 20px; font-size: 14px; }
         }
     </style>
 </head>
 <body>
 
-    <nav class="navbar"><h3>Instagram Profile</h3></nav>
+    <nav class="navbar"><a href="home.html"><i class="fa-solid fa-chevron-left" style="margin-right: 10px;"></i> Instagram Profile</a></nav>
 
     <main class="container">
         <section class="profile-header">
-            <div class="avatar-section"><img src="https://picsum.photos/400" alt="Profile"></div>
+            <div class="avatar-section">
+                <img src="https://picsum.photos/150/150?random=99" alt="Profile Picture" id="profile-avatar">
+            </div>
             <div class="info-section">
                 <div class="username-row">
-                    <h2 class="username">my_username</h2>
-                    <button class="btn-edit">Edit Profile</button>
+                    <h2 class="username" id="profile-username">Loading...</h2>
+                    <button class="btn-edit" id="profile-action-btn">Follow</button>
                     <i class="fa-solid fa-gear" style="font-size: 22px; cursor: pointer;"></i>
                 </div>
                 <div class="stats-row">
-                    <div><b>12</b> posts</div>
-                    <div><b>1.2M</b> followers</div>
-                    <div><b>150</b> following</div>
+                    <div><b id="post-count">0</b> posts</div>
+                    <div><b>0</b> followers</div>
+                    <div><b>0</b> following</div>
                 </div>
                 <div class="bio-info">
-                    <b>Professional Developer 💻</b>
-                    <p>Creating seamless digital experiences.<br>Firebase | JavaScript | CSS Master.<br>Keep building! 🚀</p>
+                    <span class="full-name" id="profile-fullname">Loading Name...</span>
+                    <p id="profile-bio">Loading bio information...</p>
                 </div>
             </div>
         </section>
@@ -91,17 +98,138 @@
             <div class="tab-item">TAGGED</div>
         </div>
 
-        <div class="post-grid">
-            <div class="post-item"><img src="https://picsum.photos/600/600?random=1"><div class="overlay"><span><i class="fa-solid fa-heart"></i> 5k</span><span><i class="fa-solid fa-comment"></i> 100</span></div></div>
-            <div class="post-item"><img src="https://picsum.photos/600/600?random=2"><div class="overlay"><span><i class="fa-solid fa-heart"></i> 3k</span><span><i class="fa-solid fa-comment"></i> 80</span></div></div>
-            <div class="post-item"><img src="https://picsum.photos/600/600?random=3"><div class="overlay"><span><i class="fa-solid fa-heart"></i> 2k</span><span><i class="fa-solid fa-comment"></i> 50</span></div></div>
-            <div class="post-item"><img src="https://picsum.photos/600/600?random=4"><div class="overlay"><span><i class="fa-solid fa-heart"></i> 6k</span><span><i class="fa-solid fa-comment"></i> 200</span></div></div>
-            <div class="post-item"><img src="https://picsum.photos/600/600?random=5"><div class="overlay"><span><i class="fa-solid fa-heart"></i> 1k</span><span><i class="fa-solid fa-comment"></i> 30</span></div></div>
-            <div class="post-item"><img src="https://picsum.photos/600/600?random=6"><div class="overlay"><span><i class="fa-solid fa-heart"></i> 8k</span><span><i class="fa-solid fa-comment"></i> 500</span></div></div>
-            <div class="post-item"><img src="https://picsum.photos/600/600?random=7"><div class="overlay"><span><i class="fa-solid fa-heart"></i> 4k</span><span><i class="fa-solid fa-comment"></i> 90</span></div></div>
-            <div class="post-item"><img src="https://picsum.photos/600/600?random=8"><div class="overlay"><span><i class="fa-solid fa-heart"></i> 9k</span><span><i class="fa-solid fa-comment"></i> 700</span></div></div>
-            <div class="post-item"><img src="https://picsum.photos/600/600?random=9"><div class="overlay"><span><i class="fa-solid fa-heart"></i> 2k</span><span><i class="fa-solid fa-comment"></i> 40</span></div></div>
+        <div class="post-grid" id="user-posts-grid">
+            <div style="grid-column: span 3; text-align: center; padding: 50px; color: var(--text-muted);">
+                <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 24px; margin-bottom: 10px;"></i><br>Loading posts...
+            </div>
         </div>
     </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, collection, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+
+        // Same Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyBrqMn7FrFW3jslaDNM0ui-VW4w6K_3Nmk",
+            authDomain: "insta-clone-863ae.firebaseapp.com",
+            projectId: "insta-clone-863ae",
+            storageBucket: "insta-clone-863ae.firebasestorage.app",
+            messagingSenderId: "599343109250",
+            appId: "1:599343109250:web:1306ec63908ba21c54509b"
+        };
+        
+        const db = getFirestore(initializeApp(firebaseConfig));
+
+        // 1. URL se target user ki ID auto-extract karna
+        const urlParams = new URLSearchParams(window.location.search);
+        let targetUsername = urlParams.get('id'); 
+        const activeUser = localStorage.getItem("active_user");
+
+        // Fallback: Agar bina ID ke direct koi page khole, toh use active logged-in user ki profile dikhao
+        if (!targetUsername) {
+            targetUsername = activeUser;
+        }
+
+        async function fetchUserProfileData() {
+            if (!targetUsername) {
+                window.location.href = "login.html";
+                return;
+            }
+
+            try {
+                // 2. Target User ki metadata doc read karna (Name, ProfilePic, Bio)
+                const userDocRef = doc(db, "users", targetUsername);
+                const userDocSnap = await getDoc(userDocRef);
+
+                if (userDocSnap.exists()) {
+                    const userData = userDocSnap.data();
+                    
+                    document.getElementById("profile-username").innerText = userData.username || targetUsername;
+                    document.getElementById("profile-fullname").innerText = userData.name || "Instagram User";
+                    document.getElementById("profile-bio").innerHTML = userData.bio ? userData.bio.replace(/\n/g, '<br>') : "Welcome to my profile! 🌟";
+                    document.getElementById("profile-avatar").src = userData.profilePic || "https://picsum.photos/150/150?random=99";
+                    document.title = `${userData.username || targetUsername} • Instagram Profile`;
+                } else {
+                    // Agar user database me bilkul naya hai aur details set nahi ki
+                    document.getElementById("profile-username").innerText = targetUsername;
+                    document.getElementById("profile-fullname").innerText = "Instagram User";
+                    document.getElementById("profile-bio").innerText = "No bio available.";
+                }
+
+                // Agar apni khud ki profile dekh rhe ho toh Edit profile ka button dikhega
+                const actionBtn = document.getElementById("profile-action-btn");
+                if (targetUsername === activeUser) {
+                    actionBtn.innerText = "Edit Profile";
+                    actionBtn.onclick = () => window.location.href = "edit-profile.html"; 
+                } else {
+                    actionBtn.innerText = "Follow";
+                    actionBtn.style.background = "#0095f6";
+                    actionBtn.style.color = "white";
+                }
+
+                // 3. THE FIX: Filter query jo sirf target user ke posts fetch karegi
+                await loadTargetUserPosts();
+
+            } catch (err) {
+                console.error("Error loading user profile system: ", err);
+            }
+        }
+
+        async function loadTargetUserPosts() {
+            const gridContainer = document.getElementById("user-posts-grid");
+            
+            try {
+                // Posts collection se query bana rhe hain jisme sirf is username ka matched data mile
+                const postsQuery = query(
+                    collection(db, "posts"),
+                    where("username", "==", targetUsername),
+                    orderBy("timestamp", "desc")
+                );
+
+                const querySnapshot = await getDocs(postsQuery);
+                gridContainer.innerHTML = "";
+                let postCounter = 0;
+
+                querySnapshot.forEach((postDoc) => {
+                    const postData = postDoc.data();
+                    postCounter++;
+
+                    // Ek ek post card grid layout mein append hoga
+                    const postItem = document.createElement("div");
+                    postItem.className = "post-item";
+                    postItem.innerHTML = `
+                        <img src="${postData.postImg}" alt="User Post Graphic">
+                        <div class="overlay">
+                            <span><i class="fa-solid fa-heart"></i> ${postData.likesCount || 0}</span>
+                            <span><i class="fa-solid fa-comment"></i> Live</span>
+                        </div>
+                    `;
+                    gridContainer.appendChild(postItem);
+                });
+
+                // Total post count updates in real-time
+                document.getElementById("post-count").innerText = postCounter;
+
+                // Agar unhone abhi tak kuch post nahi kiya hai toh safe blank slate placeholder dikhao
+                if (postCounter === 0) {
+                    gridContainer.innerHTML = `
+                        <div style="grid-column: span 3; text-align: center; padding: 60px 20px; color: var(--text-muted);">
+                            <i class="fa-solid fa-camera" style="font-size: 40px; margin-bottom: 15px; color: #ccc;"></i><br>
+                            <strong style="color: #262626; font-size: 18px; display: block; margin-bottom: 5px;">No Posts Yet</strong>
+                            When this user shares photos, you'll see them right here.
+                        </div>`;
+                }
+
+            } catch (error) {
+                console.error("Error filtering target posts: ", error);
+                // Fallback agar indexing issue ho tab bhi safe filter trigger back
+                gridContainer.innerHTML = `<div style="grid-column: span 3; text-align:center; padding:20px; color:red;">Failed to fetch specific user grid layout pipeline.</div>`;
+            }
+        }
+
+        // Script initial execute loop
+        fetchUserProfileData();
+    </script>
 </body>
 </html>
