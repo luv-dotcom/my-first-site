@@ -111,7 +111,6 @@
         </div>
     </main>
 
-    <!-- Followers/Following List Pop-up Modal -->
     <div id="list-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000;">
         <div style="background: white; width: 400px; max-height: 400px; border-radius: 12px; padding: 20px; display: flex; flex-direction: column;">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #dbdbdb; padding-bottom: 10px; margin-bottom: 15px;">
@@ -119,8 +118,7 @@
                 <i class="fa-solid fa-xmark" id="close-modal" style="cursor: pointer; font-size: 20px;"></i>
             </div>
             <div id="modal-users-list" style="overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 15px;">
-                <!-- List entries dynamically append here -->
-            </div>
+                </div>
         </div>
     </div>
 
@@ -142,20 +140,21 @@
         const urlParams = new URLSearchParams(window.location.search);
         let targetUsername = urlParams.get('id'); 
         
-        // APNA USERNAME DETECT LOGIC FIX
+        // ACTIVE USER SYSTEM CLEANUP
         let activeUser = localStorage.getItem("active_user");
-        if (!activeUser) {
-            activeUser = "user_1"; // Agar localStorage me save nahi hua to fallback automatic user_1 le lega
+        if (!activeUser || activeUser.trim() === "") {
+            activeUser = "user_1";
             localStorage.setItem("active_user", "user_1");
         }
 
+        // FORCE TARGET IF EMPTY
         if (!targetUsername) {
-            targetUsername = activeUser; // Agar link me ?id= nahi hai to direct user_1 open hoga
+            targetUsername = activeUser;
         }
 
         async function fetchUserProfileData() {
             try {
-                // User Details Fetching
+                // User Details Fetching from Firestore
                 const userDocRef = doc(db, "users", targetUsername);
                 const userDocSnap = await getDoc(userDocRef);
 
@@ -172,7 +171,11 @@
                     document.getElementById("profile-bio").innerText = "Welcome to my profile! 🌟";
                 }
 
-                // --- REAL-TIME COUNTERS SYSTEM ---
+                // --- LIVE DATABASE COUNTERS ENFORCEMENT ---
+                // Resetting to zero before checking database to avoid any static/fake visual bugs
+                document.getElementById("follower-count").innerText = "0";
+                document.getElementById("following-count").innerText = "0";
+
                 const followersQuery = query(collection(db, "follows"), where("following", "==", targetUsername));
                 const followersSnap = await getDocs(followersQuery);
                 let followersCount = followersSnap.size;
@@ -181,12 +184,14 @@
                 const followingSnap = await getDocs(followingQuery);
                 let followingCount = followingSnap.size;
 
+                // Forcing values into UI directly from database size calculation
                 document.getElementById("follower-count").innerText = followersCount;
                 document.getElementById("following-count").innerText = followingCount;
 
                 const actionBtn = document.getElementById("profile-action-btn");
                 const msgBtn = document.getElementById("message-btn");
 
+                // Toggle logic between Edit Profile (Own) and Follow System (Others)
                 if (targetUsername === activeUser) {
                     actionBtn.innerText = "Edit Profile";
                     actionBtn.style.background = "#efefef";
@@ -331,7 +336,7 @@
             }
         }
 
-        // Script starting execution point
+        // Script execution starting sequence
         fetchUserProfileData();
     </script>
 </body>
