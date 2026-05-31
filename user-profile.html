@@ -35,7 +35,7 @@
         .btn-edit { background: #efefef; border: none; padding: 7px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; }
         
         .stats-row { display: flex; gap: 40px; margin-bottom: 20px; font-size: 16px; }
-        .stats-row div { cursor: pointer; } /* Clickable counters */
+        .stats-row div { cursor: pointer; } 
         .stats-row b { font-weight: 600; }
         
         .bio-info { font-size: 16px; line-height: 1.4; }
@@ -137,24 +137,26 @@
         
         const db = getFirestore(initializeApp(firebaseConfig));
 
-        // FIXED: URL parameters now matches 'username' instead of 'id' to sync with home.html
         const urlParams = new URLSearchParams(window.location.search);
         let targetUsername = urlParams.get('username'); 
         
-        // ACTIVE USER SYSTEM CLEANUP
         let activeUser = localStorage.getItem("active_user");
         if (!activeUser || activeUser.trim() === "") {
             activeUser = "user_1";
             localStorage.setItem("active_user", "user_1");
         }
 
-        // FORCE TARGET IF EMPTY
         if (!targetUsername) {
             targetUsername = activeUser;
         }
 
         async function fetchUserProfileData() {
             try {
+                // --- ENFORCE ABSOLUTE ZERO COUNTERS RESET BEFORE FETCH ---
+                document.getElementById("follower-count").innerText = "0";
+                document.getElementById("following-count").innerText = "0";
+                document.getElementById("post-count").innerText = "0";
+
                 // User Details Fetching from Firestore
                 const userDocRef = doc(db, "users", targetUsername);
                 const userDocSnap = await getDoc(userDocRef);
@@ -167,14 +169,13 @@
                     document.getElementById("profile-avatar").src = userData.profilePic || "https://picsum.photos/150/150?random=99";
                     document.title = `${userData.username || targetUsername} • Instagram Profile`;
                 } else {
+                    // FIXED: Resetting all content safely when user document doesn't exist in DB
                     document.getElementById("profile-username").innerText = targetUsername;
                     document.getElementById("profile-fullname").innerText = "Instagram User";
                     document.getElementById("profile-bio").innerText = "Welcome to my profile! 🌟";
+                    document.getElementById("profile-avatar").src = "https://picsum.photos/150/150?random=99";
+                    document.title = `${targetUsername} • Instagram Profile`;
                 }
-
-                // --- LIVE DATABASE COUNTERS ENFORCEMENT ---
-                document.getElementById("follower-count").innerText = "0";
-                document.getElementById("following-count").innerText = "0";
 
                 const followersQuery = query(collection(db, "follows"), where("following", "==", targetUsername));
                 const followersSnap = await getDocs(followersQuery);
@@ -190,7 +191,6 @@
                 const actionBtn = document.getElementById("profile-action-btn");
                 const msgBtn = document.getElementById("message-btn");
 
-                // Toggle logic between Edit Profile (Own) and Follow System (Others)
                 if (targetUsername === activeUser) {
                     actionBtn.innerText = "Edit Profile";
                     actionBtn.style.background = "#efefef";
@@ -335,7 +335,6 @@
             }
         }
 
-        // Script execution starting sequence
         fetchUserProfileData();
     </script>
 </body>
