@@ -138,7 +138,6 @@
                 return;
             }
 
-            // --- STEP 1: CHECK ACC EXISTENCE ---
             if (!isEmailVerified) {
                 actionBtn.disabled = true;
                 actionBtn.innerText = "Checking email...";
@@ -163,7 +162,6 @@
                     actionBtn.disabled = false;
                 }
             } 
-            // --- STEP 2: REGISTER NEW USER ---
             else {
                 const username = usernameInput.value.trim().toLowerCase();
                 const name = fullnameInput.value.trim();
@@ -184,7 +182,6 @@
                 actionBtn.innerText = "Creating Account...";
 
                 try {
-                    // Check if unique username document ID path already exists
                     const userDocSnap = await getDoc(doc(db, "users", username));
                     if (userDocSnap.exists()) {
                         showStatus("❌ Username handle already taken!", "error");
@@ -197,12 +194,11 @@
                         profilePic = `https://picsum.photos/150/150?random=${Math.floor(Math.random() * 100)}`;
                     }
 
-                    // Save Data
                     await setDoc(doc(db, "users", username), {
                         username: username,
                         email: email,
                         password: password,
-                        name: name,
+                        fullName: name, // Fixed key name for dynamic sync compatibility
                         bio: bio,
                         gender: gender,
                         profilePic: profilePic
