@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Instagram</title>
     <link href="https://fonts.googleapis.com/css2?family=Grand+Hotel&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <!-- 🛠️ FIXED: Standard Font Awesome 6.5.1 CDN (With Solid + Regular support) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    
     <style>
         :root { 
             --bg-color: #fafafa; 
@@ -16,7 +19,6 @@
             --story-ring: linear-gradient(45deg, #fbc531, #c23616, #9c88ff); 
         }
         
-        /* 🛠️ GLOBAL BOX RESET: Prevents extra paddings from breaking right side width */
         *, *::before, *::after { 
             margin: 0; 
             padding: 0; 
@@ -24,11 +26,10 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
         }
         
-        /* 🛠️ Main Screen Protection Limits */
         html, body {
             width: 100% !important;
             max-width: 100% !important;
-            overflow-x: hidden !important; /* Locks left/right screen spill */
+            overflow-x: hidden !important;
             -webkit-text-size-adjust: 100%;
         }
         
@@ -46,15 +47,12 @@
         .nav-container { width: 100%; max-width: 975px; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; gap: 15px; }
         .logo-text { font-family: 'Grand Hotel', cursive; font-size: 30px; cursor: pointer; min-width: 100px; }
         
-        /* Search Box Layout */
         .search-engine-box { position: relative; width: 240px; max-width: 100%; }
         
-        /* Desktop Icons */
         .nav-icons { display: flex; gap: 22px; align-items: center; }
         .nav-icons i { font-size: 22px; cursor: pointer; }
         .nav-profile-pic { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 1px solid black; }
         
-        /* Mobile Header Right Controls */
         .mobile-header-right { display: none; align-items: center; gap: 18px; }
         .mobile-header-right i { font-size: 22px; cursor: pointer; color: var(--text-main); }
 
@@ -89,9 +87,12 @@
         .post-image-box img { width: 100%; height: 100%; object-fit: cover; }
         .post-controls { padding: 14px 14px 0 14px; display: flex; justify-content: space-between; align-items: center; }
         .left-controls { display: flex; gap: 16px; }
-        .post-controls i { font-size: 24px; cursor: pointer; transition: transform 0.1s ease; }
+        .post-controls i { font-size: 24px; cursor: pointer; transition: transform 0.1s ease; color: var(--text-main); }
         .post-controls i:hover { transform: scale(1.1); }
-        .fa-heart:hover, .liked { color: #ed4956 !important; }
+        
+        /* 🛠️ Like Heart Special Color Code */
+        .fa-heart.liked { color: #ed4956 !important; }
+        
         .post-body-content { padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; font-size: 14px; }
         .comments-container { padding: 0 14px 10px 14px; font-size: 13px; display: flex; flex-direction: column; gap: 4px; }
         .single-comment-row { line-height: 16px; }
@@ -130,7 +131,7 @@
         .story-viewer-header img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid white; }
         .story-close-btn { position: absolute; top: 25px; right: 15px; color: white; font-size: 22px; cursor: pointer; background: none; border: none; }
 
-        /* --- 📱 PURE MOBILE RESPONSIVE QUERIES --- */
+        /* --- RESPONSIVE QUERIES --- */
         @media (max-width: 1000px) { 
             .desktop-suggestions { display: none; } 
             .main-workspace { justify-content: center; } 
@@ -142,7 +143,6 @@
             .bottom-navbar { display: flex !important; }
              
             .search-engine-box { width: 140px !important; }
-            /* 🛠️ Dynamic padding bounds prevent bottom/top bars overlapping text */
             .main-workspace { margin-top: 10px; padding: 0; width: 100% !important; } 
             .stories-wrapper { border: none; border-bottom: 1px solid var(--border-color); border-radius: 0; } 
             .post-card { border-left: none; border-right: none; border-radius: 0; width: 100% !important; } 
@@ -151,6 +151,7 @@
 </head>
 <body>
 
+    <!-- TOP NAVBAR -->
     <nav class="top-navbar">
         <div class="nav-container">
             <div class="logo"><h1 class="logo-text" onclick="window.location.reload()">Instagram</h1></div>
@@ -161,6 +162,7 @@
                 <div id="search-results-dropdown" style="position: absolute; top: 40px; left: 0; width: 100%; background: white; border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: none; max-height: 250px; overflow-y: auto; z-index: 2000; padding: 6px 0;"></div>
             </div>
 
+            <!-- 🛠️ FIXED: Standard Font Awesome 6 Icons for Header -->
             <div class="nav-icons">
                 <a href="home.html"><i class="fa-solid fa-house"></i></a>
                 <a href="messages.html"><i class="fa-solid fa-paper-plane"></i></a>
@@ -179,6 +181,7 @@
 
     <main class="main-workspace">
         <section class="feed-section">
+            <!-- STORIES -->
             <div class="stories-wrapper">
                 <div class="story-node" id="my-story-node">
                     <div class="story-ring-box">
@@ -194,6 +197,7 @@
                 <div class="story-node"><div class="story-ring-box"><img src="https://picsum.photos/100/100?random=8" alt="user"></div><span class="story-username">travel_geek</span></div>
             </div>
 
+            <!-- FEED CONTAINER -->
             <div id="dynamic-posts-container" style="display: flex; flex-direction: column; gap: 24px; width: 100%;">
                 <div style="padding: 40px; text-align: center; color: var(--text-muted); font-size: 14px;">
                     <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 24px; margin-bottom: 10px;"></i><br>Syncing global feed content...
@@ -201,6 +205,7 @@
             </div>
         </section>
 
+        <!-- SIDEBAR -->
         <aside class="desktop-suggestions">
             <div class="self-profile-row">
                 <div class="self-meta">
@@ -219,6 +224,7 @@
         </aside>
     </main>
 
+    <!-- STORY MODAL -->
     <div class="story-viewer-modal" id="story-modal">
         <div class="story-content-box">
             <div class="story-top-bars"><div class="story-progress" id="story-progress-bar"></div></div>
@@ -231,14 +237,17 @@
         </div>
     </div>
 
+    <!-- BOTTOM NAVBAR -->
     <nav class="bottom-navbar">
         <a href="home.html"><i class="fa-solid fa-house"></i></a>
         <a href="search.html"><i class="fa-solid fa-magnifying-glass"></i></a>
         <a href="create.html"><i class="fa-regular fa-square-plus"></i></a>
+        <!-- 🛠️ FIXED: Native Font Awesome 6 Reel Icon alternative -->
         <a href="reels.html"><i class="fa-solid fa-film"></i></a>
         <a href="profile.html"><img src="https://picsum.photos/150/150?random=1" class="bottom-profile-pic" id="bottom-nav-avatar"></a>
     </nav>
 
+    <!-- FIREBASE AND CLIENT INTERACTION -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
         import { getFirestore, doc, getDoc, collection, addDoc, onSnapshot, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
@@ -367,7 +376,7 @@
                 const postUserAvatar = postData.profilePic || "https://picsum.photos/150/150?random=99";
                 const postAuthor = postData.userId || "anonymous";
 
-                // 🛠️ FIXED: Changed dynamic icons class names to support Font Awesome 6
+                // 🛠️ FIXED: Changed innerHTML post buttons to clear Font Awesome 6 compatible classes
                 article.innerHTML = `
                     <div class="post-header">
                         <div class="post-user-meta">
@@ -393,7 +402,7 @@
                     <div class="post-body-content">
                         <span class="likes-count">${postData.likesCount || 0} likes</span>
                         <p class="caption-line"><span class="bold-user">${postAuthor}</span>${postData.caption || ''}</p>
-                        <div class="post-time-stamp">Recent Activity Pipeline</div>
+                        <div class="post-time-stamp" style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; margin-top: 5px;">Recent Activity Pipeline</div>
                     </div>
                     <div class="comments-container" id="comments-box-${postId}"></div>
                     <div class="comment-input-area">
@@ -461,10 +470,15 @@
                 }
             }
 
+            // 🛠️ FIXED: Proper Toggle system for Font Awesome 6 Icons
             if (e.target.classList.contains("like-toggle-btn")) {
-                e.target.classList.toggle("fa-regular");
-                e.target.classList.toggle("fa-solid");
-                e.target.classList.toggle("liked");
+                if (e.target.classList.contains("fa-regular")) {
+                    e.target.classList.remove("fa-regular");
+                    e.target.classList.add("fa-solid", "liked");
+                } else {
+                    e.target.classList.remove("fa-solid", "liked");
+                    e.target.classList.add("fa-regular");
+                }
             }
         });
 
