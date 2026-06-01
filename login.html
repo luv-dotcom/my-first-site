@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login • Instagram</title>
+<link href="https://fonts.googleapis.com/css2?family=Grand+Hotel&display=swap" rel="stylesheet">
+
+<style>
+:root{
+    --bg-color:#121212;
+    --border-color:#262626;
+    --text-main:#ffffff;
+    --text-muted:#a8a8a8;
+    --card-bg:#000000;
+    --link-color:#0095f6;
+    --error-color:#ed4956;
+}
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+}
+body{
+    background-color:var(--bg-color);
+    color:var(--text-main);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    min-height:100vh;
+    padding:20px;
+}
+.auth-container{
+    width:100%;
+    max-width:350px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+.auth-card{
+    background:var(--card-bg);
+    border:1px solid var(--border-color);
+    border-radius:4px;
+    padding:40px 30px 24px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+}
+.logo-text{
+    font-family:'Grand Hotel',cursive;
+    font-size:52px;
+    font-weight:400;
+    margin-bottom:30px;
+}
+form{
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+}
+.input-box input{
+    width:100%;
+    padding:11px 8px;
+    background:#121212;
+    border:1px solid var(--border-color);
+    border-radius:4px;
+    font-size:12px;
+    outline:none;
+    color:white;
+}
+.input-box input:focus{
+    border-color:#555;
+}
+.auth-btn{
+    background:var(--link-color);
+    color:white;
+    border:none;
+    border-radius:8px;
+    padding:8px;
+    font-size:14px;
+    font-weight:700;
+    cursor:pointer;
+    margin-top:8px;
+}
+.auth-btn:disabled{
+    opacity:.6;
+    cursor:default;
+}
+.forgot-link{
+    color:#e0f1ff;
+    text-decoration:none;
+    font-size:12px;
+    margin-top:18px;
+}
+.msg-box{
+    margin-top:15px;
+    font-size:14px;
+    color:var(--error-color);
+    display:none;
+    line-height:1.4;
+}
+.redirect-card{
+    background:var(--card-bg);
+    border:1px solid var(--border-color);
+    border-radius:4px;
+    padding:20px;
+    text-align:center;
+    font-size:14px;
+}
+.redirect-card a{
+    color:var(--link-color);
+    font-weight:600;
+    text-decoration:none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="auth-container">
+    <div class="auth-card">
+        <h1 class="logo-text">Instagram</h1>
+
+        <form id="login-form" onsubmit="return false;">
+            <div class="input-box">
+                <input type="text" id="login-identity" placeholder="Phone number, username, or email" autocomplete="username" required>
+            </div>
+
+            <div class="input-box">
+                <input type="password" id="login-password" placeholder="Password" autocomplete="current-password" required>
+            </div>
+
+            <button type="button" class="auth-btn" id="login-btn">Log in</button>
+        </form>
+
+        <div id="error-msg" class="msg-box"></div>
+
+        <a href="#" class="forgot-link">Forgot password?</a>
+    </div>
+
+    <div class="redirect-card">
+        Don't have an account? <a href="signup.html">Sign up</a>
+    </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBrqMn7FrFW3jslaDNM0ui-VW4w6K_3Nmk",
+    authDomain: "insta-clone-863ae.firebaseapp.com",
+    projectId: "insta-clone-863ae",
+    storageBucket: "insta-clone-863ae.firebasestorage.app",
+    messagingSenderId: "599343109250",
+    appId: "1:599343109250:web:1306ec63908ba21c54509b"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const loginBtn = document.getElementById("login-btn");
+const identityInput = document.getElementById("login-identity");
+const passwordInput = document.getElementById("login-password");
+const errorMsg = document.getElementById("error-msg");
+
+loginBtn.addEventListener("click", loginUser);
+
+passwordInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+        e.preventDefault();
+        loginUser();
+    }
+});
+
+identityInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+        e.preventDefault();
+        loginUser();
+    }
+});
+
+async function loginUser() {
+    const identity = identityInput.value.trim();
+    const identityLower = identity.toLowerCase();
+    const password = passwordInput.value.trim();
+
+    hideError();
+
+    if (!identity || !password) {
+        showError("Please fill in all fields.");
+        return;
+    }
+
+    loginBtn.disabled = true;
+    loginBtn.innerText = "Logging in...";
+
+    try {
+        const usersRef = collection(db, "users");
+
+        let foundUser = null;
+
+        const emailQuery = query(
+            usersRef,
+            where("email", "==", identityLower),
+            where("password", "==", password)
+        );
+
+        const emailSnap = await getDocs(emailQuery);
+
+        if (!emailSnap.empty) {
+            foundUser = emailSnap.docs[0].data();
+        }
+
+        if (!foundUser) {
+            const usernameQuery = query(
+                usersRef,
+                where("username", "==", identity),
+                where("password", "==", password)
+            );
+
+            const usernameSnap = await getDocs(usernameQuery);
+
+            if (!usernameSnap.empty) {
+                foundUser = usernameSnap.docs[0].data();
+            }
+        }
+
+        if (!foundUser) {
+            const usernameLowerQuery = query(
+                usersRef,
+                where("username", "==", identityLower),
+                where("password", "==", password)
+            );
+
+            const usernameLowerSnap = await getDocs(usernameLowerQuery);
+
+            if (!usernameLowerSnap.empty) {
+                foundUser = usernameLowerSnap.docs[0].data();
+            }
+        }
+
+        if (foundUser && foundUser.username) {
+            localStorage.setItem("active_user", foundUser.username);
+            window.location.href = "home.html";
+        } else {
+            showError("Sorry, your username, email, or password was incorrect.");
+            loginBtn.disabled = false;
+            loginBtn.innerText = "Log in";
+        }
+    } catch (err) {
+        console.error(err);
+        showError("Server error. Try again.");
+        loginBtn.disabled = false;
+        loginBtn.innerText = "Log in";
+    }
+}
+
+function showError(text) {
+    errorMsg.innerText = text;
+    errorMsg.style.display = "block";
+}
+
+function hideError() {
+    errorMsg.innerText = "";
+    errorMsg.style.display = "none";
+}
+</script>
+
+</body>
+</html>
