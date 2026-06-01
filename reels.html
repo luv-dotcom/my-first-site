@@ -17,11 +17,15 @@ button,input,textarea{font:inherit}button{cursor:pointer;border:0}
 .reels-feed{width:100%;height:100%;overflow-y:auto;scroll-snap-type:y mandatory;scrollbar-width:none}
 .reels-feed::-webkit-scrollbar{display:none}
 .reel{position:relative;width:100%;height:100dvh;scroll-snap-align:start;background:#000;display:flex;align-items:center;justify-content:center;overflow:hidden}
-.reel video{width:100%;height:100%;object-fit:cover}
+.reel video{width:100%;height:100%;object-fit:cover;background:#000}
 .reel::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 55%,rgba(0,0,0,.72))}
+.tap-heart{position:absolute;z-index:8;font-size:92px;color:#fff;text-shadow:0 4px 18px rgba(0,0,0,.55);opacity:0;transform:scale(.55);pointer-events:none}
+.tap-heart.show{animation:pop-heart .72s ease forwards}
+@keyframes pop-heart{0%{opacity:0;transform:scale(.5)}18%{opacity:1;transform:scale(1.08)}60%{opacity:.95;transform:scale(.96)}100%{opacity:0;transform:scale(1.18)}}
 .reel-info{position:absolute;left:14px;right:82px;bottom:72px;z-index:5;display:flex;flex-direction:column;gap:9px}
 .userline{display:flex;align-items:center;gap:10px;font-weight:800}
 .userline img{width:36px;height:36px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,.5)}
+.follow-btn{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.55);border-radius:8px;padding:5px 9px;font-size:12px;font-weight:800}
 .caption{font-size:14px;line-height:1.35;overflow-wrap:anywhere}
 .music{display:flex;align-items:center;gap:6px;color:#eee;font-size:13px}
 .actions{position:absolute;right:10px;bottom:82px;z-index:6;display:flex;flex-direction:column;gap:17px;align-items:center}
@@ -40,12 +44,15 @@ button,input,textarea{font:inherit}button{cursor:pointer;border:0}
 .field{display:flex;flex-direction:column;gap:6px}
 .field label{font-size:12px;color:var(--muted);font-weight:800}
 .field input,.field textarea{background:#0b0b0b;color:white;border:1px solid #333;border-radius:10px;padding:11px;outline:none}
+.search{background:#0b0b0b;color:white;border:1px solid #333;border-radius:10px;padding:11px;outline:none;width:100%}
 .field textarea{min-height:80px;resize:vertical}
 .user-row{display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;cursor:pointer}
 .user-row:hover{background:#252525}
 .user-row img{width:38px;height:38px;border-radius:50%;object-fit:cover}
-.comment-row{font-size:14px;line-height:1.35}
+.comment-row{font-size:14px;line-height:1.35;display:flex;gap:10px}
+.comment-row img{width:30px;height:30px;border-radius:50%;object-fit:cover;background:#222;flex-shrink:0}
 .comment-row b{margin-right:6px}
+.comment-time{color:var(--muted);font-size:11px;margin-top:3px}
 .comment-input{display:flex;gap:8px;border-top:1px solid #303030;padding:12px}
 .comment-input input{flex:1;background:#0b0b0b;color:white;border:1px solid #333;border-radius:999px;padding:10px 12px;outline:none}
 .toast{position:fixed;left:50%;bottom:74px;transform:translateX(-50%) translateY(18px);background:rgba(255,255,255,.92);color:#000;padding:10px 14px;border-radius:999px;font-size:13px;font-weight:800;opacity:0;transition:.25s;z-index:200}
@@ -85,6 +92,7 @@ button,input,textarea{font:inherit}button{cursor:pointer;border:0}
     <div class="sheet-head"><h3>Share</h3><button class="close" data-close="share-modal">&times;</button></div>
     <div class="sheet-body">
       <button class="primary" id="copy-link-btn">Copy reel link</button>
+      <input class="search" id="share-search" placeholder="Search users">
       <div style="font-weight:800;">Send to</div>
       <div id="share-users-list"></div>
     </div>
@@ -106,7 +114,7 @@ button,input,textarea{font:inherit}button{cursor:pointer;border:0}
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, onSnapshot, query, orderBy, doc, updateDoc, arrayUnion, arrayRemove, increment, setDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, onSnapshot, query, orderBy, doc, updateDoc, arrayUnion, arrayRemove, increment, setDoc, runTransaction, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-storage.js";
 
 const firebaseConfig={apiKey:"AIzaSyBrqMn7FrFW3jslaDNM0ui-VW4w6K_3Nmk",authDomain:"insta-clone-863ae.firebaseapp.com",projectId:"insta-clone-863ae",storageBucket:"insta-clone-863ae.firebasestorage.app",messagingSenderId:"599343109250",appId:"1:599343109250:web:1306ec63908ba21c54509b"};
@@ -123,31 +131,46 @@ let selectedFile=null;
 let reels=[];
 let activeReel=null;
 let allUsers=[];
+let userMap={};
+let commentsUnsub=null;
+let reelObserver=null;
+let viewedInSession=new Set();
 
 function toast(t){$("toast").innerText=t;$("toast").classList.add("show");setTimeout(()=>$("toast").classList.remove("show"),1500)}
 function esc(v){return String(v||"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
 function openModal(id){$(id).classList.add("open")}
-function closeModal(id){$(id).classList.remove("open")}
+function closeModal(id){$(id).classList.remove("open");if(id==="comments-modal"&&commentsUnsub){commentsUnsub();commentsUnsub=null}}
+function countLabel(n){const x=Number(n||0);if(x>=1000000)return`${(x/1000000).toFixed(x>=10000000?0:1)}M`;if(x>=1000)return`${(x/1000).toFixed(x>=10000?0:1)}K`;return String(x)}
+function timeAgo(ts){try{const d=ts&&ts.toDate?ts.toDate():new Date(ts);const s=Math.max(0,Math.floor((Date.now()-d.getTime())/1000));if(s<60)return"now";const m=Math.floor(s/60);if(m<60)return`${m}m`;const h=Math.floor(m/60);if(h<24)return`${h}h`;return`${Math.floor(h/24)}d`}catch(e){return""}}
 document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>closeModal(b.dataset.close));
-document.querySelectorAll(".modal").forEach(m=>m.addEventListener("click",e=>{if(e.target===m)m.classList.remove("open")}));
+document.querySelectorAll(".modal").forEach(m=>m.addEventListener("click",e=>{if(e.target===m)closeModal(m.id)}));
 
 async function loadMe(){
   const users=await getDocs(collection(db,"users"));
   allUsers=[];
+  userMap={};
   users.forEach(u=>{
     const d=u.data(), name=d.username||u.id;
-    if(name===currentUser) currentProfilePic=d.profilePic||currentProfilePic;
-    if(name!==currentUser) allUsers.push({id:name,profilePic:d.profilePic||"https://picsum.photos/100/100?random=9"});
+    const profilePic=d.profilePic||"https://picsum.photos/100/100?random=9";
+    userMap[name]={id:name,profilePic};
+    if(name===currentUser) currentProfilePic=profilePic;
+    if(name!==currentUser) allUsers.push({id:name,profilePic});
   });
 }
 
 function renderShareUsers(){
+  const search=$("share-search").value.trim().toLowerCase();
   $("share-users-list").innerHTML="";
-  allUsers.forEach(u=>{
+  const users=allUsers.filter(u=>u.id.toLowerCase().includes(search));
+  if(users.length===0){
+    $("share-users-list").innerHTML=`<div style="color:var(--muted);padding:12px;">No users found</div>`;
+    return;
+  }
+  users.forEach(u=>{
     const row=document.createElement("div");
     row.className="user-row";
     row.innerHTML=`<img src="${esc(u.profilePic)}"><div><b>${esc(u.id)}</b><div style="color:var(--muted);font-size:12px;">Send reel in chat</div></div>`;
-    row.onclick=()=>shareReelToChat(u.id);
+    row.onclick=()=>shareReelToChat(u.id,row);
     $("share-users-list").appendChild(row);
   });
 }
@@ -178,51 +201,111 @@ function renderReels(){
     el.innerHTML=`
       <video src="${esc(r.videoUrl)}" playsinline loop></video>
       <div class="reel-info">
-        <div class="userline" onclick="location.href='user-profile.html?username=${encodeURIComponent(r.userId||"")}'">
-          <img src="${esc(r.profilePic||currentProfilePic)}"><span>${esc(r.userId||"user")}</span>
+        <div class="userline" data-profile>
+          <img src="${esc(r.profilePic||userMap[r.userId||""]?.profilePic||currentProfilePic)}"><span>${esc(r.userId||"user")}</span>
+          ${(r.userId||"")===currentUser?"":`<button class="follow-btn" data-follow>Follow</button>`}
         </div>
         <div class="caption">${esc(r.caption||"")}</div>
         <div class="music"><span class="material-icons" style="font-size:16px">music_note</span>${esc(r.music||"Original audio")}</div>
       </div>
       <div class="actions">
-        <button class="action ${liked?"liked":""}" data-action="like"><span class="material-icons">favorite</span><span>${r.likesCount||0}</span></button>
-        <button class="action" data-action="comment"><span class="material-icons">chat_bubble</span><span>${r.commentsCount||0}</span></button>
+        <button class="action ${liked?"liked":""}" data-action="like"><span class="material-icons">favorite</span><span>${countLabel(r.likesCount)}</span></button>
+        <button class="action" data-action="comment"><span class="material-icons">chat_bubble</span><span>${countLabel(r.commentsCount)}</span></button>
         <button class="action" data-action="share"><span class="material-icons">send</span><span>Share</span></button>
         <button class="action ${saved?"saved":""}" data-action="save"><span class="material-icons">${saved?"bookmark":"bookmark_border"}</span><span>Save</span></button>
         <button class="action" data-action="story"><span class="material-icons">add_circle</span><span>Story</span></button>
       </div>`;
+    el.insertAdjacentHTML("beforeend",`<span class="material-icons tap-heart">favorite</span>`);
+    el.querySelector("[data-profile]").onclick=e=>{
+      if(e.target.closest("[data-follow]"))return;
+      location.href=`user-profile.html?username=${encodeURIComponent(r.userId||"")}`;
+    };
+    const followBtn=el.querySelector("[data-follow]");
+    if(followBtn)followBtn.onclick=()=>toggleFollow(r.userId,followBtn);
     el.querySelectorAll("[data-action]").forEach(btn=>btn.onclick=()=>handleAction(btn.dataset.action,r));
+    wireVideoGestures(el,r);
     feed.appendChild(el);
   });
   observeVideos();
 }
 
 function observeVideos(){
-  const obs=new IntersectionObserver(entries=>{
+  if(reelObserver)reelObserver.disconnect();
+  reelObserver=new IntersectionObserver(entries=>{
     entries.forEach(e=>{
       const v=e.target.querySelector("video");
       if(!v)return;
-      if(e.isIntersecting){v.play().catch(()=>{});activeReel=reels.find(r=>`reel-${r.id}`===e.target.id)}
+      if(e.isIntersecting){
+        document.querySelectorAll(".reel video").forEach(other=>{if(other!==v)other.pause()});
+        v.play().catch(()=>{});
+        activeReel=reels.find(r=>`reel-${r.id}`===e.target.id);
+        if(activeReel)markViewed(activeReel);
+      }
       else v.pause();
     });
   },{threshold:.65});
-  document.querySelectorAll(".reel").forEach(r=>obs.observe(r));
+  document.querySelectorAll(".reel").forEach(r=>reelObserver.observe(r));
+}
+
+function wireVideoGestures(el,r){
+  const video=el.querySelector("video");
+  let lastTap=0;
+  video.addEventListener("click",async()=>{
+    const now=Date.now();
+    if(now-lastTap<290){
+      const heart=el.querySelector(".tap-heart");
+      heart.classList.remove("show");
+      void heart.offsetWidth;
+      heart.classList.add("show");
+      if(!(r.likedBy||[]).includes(currentUser))await toggleLike(r);
+    }else{
+      if(video.paused)video.play().catch(()=>{});
+      else video.pause();
+    }
+    lastTap=now;
+  });
+}
+
+async function markViewed(r){
+  if(viewedInSession.has(r.id))return;
+  viewedInSession.add(r.id);
+  try{
+    const reelRef=doc(db,"reels",r.id);
+    await runTransaction(db,async(tx)=>{
+      const snap=await tx.get(reelRef);
+      if(!snap.exists())return;
+      const data=snap.data();
+      const viewedBy=Array.isArray(data.viewedBy)?data.viewedBy:[];
+      if(viewedBy.includes(currentUser))return;
+      tx.update(reelRef,{viewedBy:arrayUnion(currentUser),viewsCount:increment(1)});
+    });
+  }catch(e){
+    console.warn("View count failed",e);
+  }
 }
 
 async function handleAction(action,r){
   activeReel=r;
   if(action==="like") return toggleLike(r);
   if(action==="comment") return openComments(r);
-  if(action==="share"){renderShareUsers();openModal("share-modal");return}
+  if(action==="share"){await loadMe();renderShareUsers();openModal("share-modal");return}
   if(action==="save") return toggleSave(r);
   if(action==="story") return addReelToStory(r);
 }
 
 async function toggleLike(r){
-  const liked=(r.likedBy||[]).includes(currentUser);
-  await updateDoc(doc(db,"reels",r.id),{
-    likedBy:liked?arrayRemove(currentUser):arrayUnion(currentUser),
-    likesCount:increment(liked?-1:1)
+  const reelRef=doc(db,"reels",r.id);
+  await runTransaction(db,async(tx)=>{
+    const snap=await tx.get(reelRef);
+    if(!snap.exists())return;
+    const data=snap.data();
+    const likedBy=Array.isArray(data.likedBy)?data.likedBy:[];
+    const liked=likedBy.includes(currentUser);
+    const nextCount=Math.max(0,Number(data.likesCount||0)+(liked?-1:1));
+    tx.update(reelRef,{
+      likedBy:liked?arrayRemove(currentUser):arrayUnion(currentUser),
+      likesCount:nextCount
+    });
   });
 }
 
@@ -243,15 +326,34 @@ async function addReelToStory(r){
     music:r.music||"Original audio",
     reelId:r.id,
     isHighlight:false,
-    createdAt:new Date(),
+    createdAt:serverTimestamp(),
     expiresAt:new Date(Date.now()+24*60*60*1000)
   });
   toast("Added to story");
 }
 
-async function shareReelToChat(targetUser){
+async function toggleFollow(targetUser,btn){
+  if(!targetUser||targetUser===currentUser)return;
+  btn.disabled=true;
+  try{
+    await setDoc(doc(db,"follows",`${currentUser}_${targetUser}`),{
+      follower:currentUser,
+      following:targetUser,
+      timestamp:serverTimestamp()
+    },{merge:true});
+    btn.innerText="Following";
+    toast("Following");
+  }catch(e){
+    console.error(e);
+    toast("Follow failed");
+  }
+  btn.disabled=false;
+}
+
+async function shareReelToChat(targetUser,row){
   if(!activeReel)return;
   const roomId=[currentUser,targetUser].sort().join("_chat_room_");
+  if(row)row.style.opacity=".55";
   const payload={
     sender:currentUser,
     receiver:targetUser,
@@ -263,10 +365,10 @@ async function shareReelToChat(targetUser){
     title:"Reel",
     caption:activeReel.caption||"",
     status:"sent",
-    deliveredAt:new Date(),
+    deliveredAt:serverTimestamp(),
     seenBy:[currentUser],
     seenAt:null,
-    timestamp:new Date()
+    timestamp:serverTimestamp()
   };
   await addDoc(collection(db,"chats",roomId,"messages"),payload);
   await setDoc(doc(db,"chats",roomId),{
@@ -275,10 +377,10 @@ async function shareReelToChat(targetUser){
     lastMessageSender:currentUser,
     isRead:false,
     readBy:[currentUser],
-    timestamp:new Date()
+    timestamp:serverTimestamp()
   },{merge:true});
-  closeModal("share-modal");
-  toast("Sent in chat");
+  if(row)row.style.opacity="1";
+  toast(`Sent to ${targetUser}`);
 }
 
 $("copy-link-btn").onclick=async()=>{
@@ -287,34 +389,44 @@ $("copy-link-btn").onclick=async()=>{
   await navigator.clipboard.writeText(link);
   toast("Link copied");
 };
+$("share-search").oninput=renderShareUsers;
 
 async function openComments(r){
   activeReel=r;
   openModal("comments-modal");
   $("comments-list").innerHTML=`<div style="color:var(--muted)">Loading...</div>`;
-  const snap=await getDocs(query(collection(db,"reelComments"),orderBy("timestamp","asc")));
-  $("comments-list").innerHTML="";
-  let count=0;
-  snap.forEach(c=>{
-    const d=c.data();
-    if(d.reelId===r.id){
-      count++;
-      const row=document.createElement("div");
-      row.className="comment-row";
-      row.innerHTML=`<b>${esc(d.commentedBy||"user")}</b>${esc(d.text||"")}`;
-      $("comments-list").appendChild(row);
-    }
+  if(commentsUnsub)commentsUnsub();
+  const q=query(collection(db,"reelComments"),orderBy("timestamp","asc"));
+  commentsUnsub=onSnapshot(q,snap=>{
+    if(!activeReel||activeReel.id!==r.id)return;
+    $("comments-list").innerHTML="";
+    let count=0;
+    snap.forEach(c=>{
+      const d=c.data();
+      if(d.reelId===r.id){
+        count++;
+        const pic=d.profilePic||userMap[d.commentedBy||""]?.profilePic||"https://picsum.photos/80/80?random=8";
+        const row=document.createElement("div");
+        row.className="comment-row";
+        row.innerHTML=`<img src="${esc(pic)}"><div><div><b>${esc(d.commentedBy||"user")}</b>${esc(d.text||"")}</div><div class="comment-time">${timeAgo(d.timestamp)}</div></div>`;
+        $("comments-list").appendChild(row);
+      }
+    });
+    if(count===0)$("comments-list").innerHTML=`<div style="color:var(--muted);text-align:center;padding:20px;">No comments yet.</div>`;
   });
-  if(count===0)$("comments-list").innerHTML=`<div style="color:var(--muted);text-align:center;padding:20px;">No comments yet.</div>`;
 }
 
 $("post-comment").onclick=async()=>{
   const text=$("comment-text").value.trim();
   if(!text||!activeReel)return;
+  $("post-comment").disabled=true;
   $("comment-text").value="";
-  await addDoc(collection(db,"reelComments"),{reelId:activeReel.id,text,commentedBy:currentUser,timestamp:new Date()});
-  await updateDoc(doc(db,"reels",activeReel.id),{commentsCount:increment(1)});
-  openComments(activeReel);
+  try{
+    await addDoc(collection(db,"reelComments"),{reelId:activeReel.id,text,commentedBy:currentUser,profilePic:currentProfilePic,timestamp:serverTimestamp()});
+    await updateDoc(doc(db,"reels",activeReel.id),{commentsCount:increment(1)});
+  }finally{
+    $("post-comment").disabled=false;
+  }
 };
 
 $("open-create").onclick=()=>openModal("create-modal");
@@ -325,7 +437,7 @@ $("upload-reel").onclick=async()=>{
   if(!selectedFile){toast("Choose video first");return}
   $("upload-reel").disabled=true;$("upload-reel").innerText="Uploading...";
   try{
-    const safe=selectedFile.name.replaceAll(" ","_");
+    const safe=selectedFile.name.replace(/[^\w.-]+/g,"_");
     const storageRef=ref(storage,`reels/${currentUser}/${Date.now()}_${safe}`);
     await uploadBytes(storageRef,selectedFile);
     const videoUrl=await getDownloadURL(storageRef);
@@ -338,9 +450,11 @@ $("upload-reel").onclick=async()=>{
       music:$("reel-music").value.trim()||"Original audio",
       likesCount:0,
       commentsCount:0,
+      viewsCount:0,
       likedBy:[],
       savedBy:[],
-      timestamp:new Date()
+      viewedBy:[],
+      timestamp:serverTimestamp()
     });
     closeModal("create-modal");
     selectedFile=null;
