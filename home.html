@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Instagram</title>
     <link href="https://fonts.googleapis.com/css2?family=Grand+Hotel&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         :root { 
             --bg-color: #fafafa; 
@@ -135,12 +135,12 @@
             .desktop-suggestions { display: none; } 
             .main-workspace { justify-content: center; } 
         }
-        
+         
         @media (max-width: 768px) { 
             .top-navbar .nav-icons { display: none !important; }
             .mobile-header-right { display: flex !important; }
             .bottom-navbar { display: flex !important; }
-            
+             
             .search-engine-box { width: 140px !important; }
             /* 🛠️ Dynamic padding bounds prevent bottom/top bars overlapping text */
             .main-workspace { margin-top: 10px; padding: 0; width: 100% !important; } 
@@ -154,7 +154,7 @@
     <nav class="top-navbar">
         <div class="nav-container">
             <div class="logo"><h1 class="logo-text" onclick="window.location.reload()">Instagram</h1></div>
-            
+             
             <div class="search-engine-box">
                 <input type="text" id="global-search-input" placeholder="Search users..." style="width: 100%; padding: 6px 12px 6px 32px; border: 1px solid var(--border-color); border-radius: 8px; background: #efefef; outline: none; font-size: 14px;">
                 <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 12px; color: var(--text-muted);"></i>
@@ -163,7 +163,7 @@
 
             <div class="nav-icons">
                 <a href="home.html"><i class="fa-solid fa-house"></i></a>
-                <a href="messages.html"><i class="fa-regular fa-paper-plane"></i></a>
+                <a href="messages.html"><i class="fa-solid fa-paper-plane"></i></a>
                 <a href="create.html"><i class="fa-regular fa-square-plus"></i></a>
                 <a href="explore.html"><i class="fa-regular fa-compass"></i></a>
                 <a href="notifications.html"><i class="fa-regular fa-heart"></i></a>
@@ -172,7 +172,7 @@
 
             <div class="mobile-header-right">
                 <a href="notifications.html"><i class="fa-regular fa-heart"></i></a>
-                <a href="messages.html"><i class="fa-regular fa-paper-plane"></i></a>
+                <a href="messages.html"><i class="fa-solid fa-paper-plane"></i></a>
             </div>
         </div>
     </nav>
@@ -187,7 +187,7 @@
                     <div class="add-story-plus" id="story-plus-icon"><i class="fa-solid fa-plus"></i></div>
                     <span class="story-username">Your Story</span>
                 </div>
-                
+                 
                 <div class="story-node"><div class="story-ring-box"><img src="https://picsum.photos/100/100?random=5" alt="user"></div><span class="story-username">rohit_sharma</span></div>
                 <div class="story-node"><div class="story-ring-box"><img src="https://picsum.photos/100/100?random=6" alt="user"></div><span class="story-username">virat.kohli</span></div>
                 <div class="story-node"><div class="story-ring-box"><img src="https://picsum.photos/100/100?random=7" alt="user"></div><span class="story-username">tech_insider</span></div>
@@ -235,7 +235,7 @@
         <a href="home.html"><i class="fa-solid fa-house"></i></a>
         <a href="search.html"><i class="fa-solid fa-magnifying-glass"></i></a>
         <a href="create.html"><i class="fa-regular fa-square-plus"></i></a>
-        <a href="reels.html"><i class="fa-solid fa-clapperboard"></i></a>
+        <a href="reels.html"><i class="fa-solid fa-film"></i></a>
         <a href="profile.html"><img src="https://picsum.photos/150/150?random=1" class="bottom-profile-pic" id="bottom-nav-avatar"></a>
     </nav>
 
@@ -367,6 +367,7 @@
                 const postUserAvatar = postData.profilePic || "https://picsum.photos/150/150?random=99";
                 const postAuthor = postData.userId || "anonymous";
 
+                // 🛠️ FIXED: Changed dynamic icons class names to support Font Awesome 6
                 article.innerHTML = `
                     <div class="post-header">
                         <div class="post-user-meta">
@@ -385,7 +386,7 @@
                         <div class="left-controls">
                             <i class="fa-regular fa-heart like-toggle-btn"></i>
                             <i class="fa-regular fa-comment basic-focus-trigger"></i>
-                            <i class="fa-regular fa-paper-plane"></i>
+                            <i class="fa-solid fa-paper-plane"></i>
                         </div>
                         <i class="fa-regular fa-bookmark"></i>
                     </div>
