@@ -1,1 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Instagram Reels</title>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+:root{--bg:#000;--panel:#121212;--soft:#1f1f1f;--border:#2d2d2d;--text:#fff;--muted:#a8a8a8;--blue:#0095f6;--red:#ed4956}
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+html,body{width:100%;height:100%;height:100dvh;background:#000;color:#fff;overflow:hidden}
+button,input,textarea{font:inherit}button{cursor:pointer;border:0}
+.page{width:100%;height:100dvh;display:flex;background:#000}
+.topbar{position:fixed;top:0;left:0;right:0;height:54px;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:0 14px;background:linear-gradient(rgba(0,0,0,.65),transparent)}
+.topbar a,.icon-btn{color:white;text-decoration:none;background:rgba(0,0,0,.35);width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.top-title{font-size:18px;font-weight:800;text-shadow:0 1px 8px #000}
+.reels-feed{width:100%;height:100%;overflow-y:auto;scroll-snap-type:y mandatory;scrollbar-width:none}
+.reels-feed::-webkit-scrollbar{display:none}
+.reel{position:relative;width:100%;height:100dvh;scroll-snap-align:start;background:#000;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.reel video{width:100%;height:100%;object-fit:cover}
+.reel::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 55%,rgba(0,0,0,.72))}
+.reel-info{position:absolute;left:14px;right:82px;bottom:72px;z-index:5;display:flex;flex-direction:column;gap:9px}
+.userline{display:flex;align-items:center;gap:10px;font-weight:800}
+.userline img{width:36px;height:36px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,.5)}
+.caption{font-size:14px;line-height:1.35;overflow-wrap:anywhere}
+.music{display:flex;align-items:center;gap:6px;color:#eee;font-size:13px}
+.actions{position:absolute;right:10px;bottom:82px;z-index:6;display:flex;flex-direction:column;gap:17px;align-items:center}
+.action{background:transparent;color:white;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;font-weight:700}
+.action .material-icons{font-size:30px;text-shadow:0 2px 8px #000}
+.liked .material-icons{color:var(--red)}
+.saved .material-icons{color:white}
+.empty{height:100dvh;display:flex;align-items:center;justify-content:center;flex-direction:column;color:var(--muted);gap:12px;text-align:center;padding:24px}
+.primary{background:var(--blue);color:white;padding:11px 16px;border-radius:10px;font-weight:800}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:flex-end;justify-content:center;z-index:100;padding:12px}
+.modal.open{display:flex}
+.sheet{width:min(460px,100%);max-height:82vh;background:#181818;border:1px solid #333;border-radius:18px 18px 12px 12px;overflow:hidden;display:flex;flex-direction:column}
+.sheet-head{height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;border-bottom:1px solid #303030}
+.sheet-body{padding:14px;overflow-y:auto;display:flex;flex-direction:column;gap:12px}
+.close{background:transparent;color:white;font-size:22px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:12px;color:var(--muted);font-weight:800}
+.field input,.field textarea{background:#0b0b0b;color:white;border:1px solid #333;border-radius:10px;padding:11px;outline:none}
+.field textarea{min-height:80px;resize:vertical}
+.user-row{display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;cursor:pointer}
+.user-row:hover{background:#252525}
+.user-row img{width:38px;height:38px;border-radius:50%;object-fit:cover}
+.comment-row{font-size:14px;line-height:1.35}
+.comment-row b{margin-right:6px}
+.comment-input{display:flex;gap:8px;border-top:1px solid #303030;padding:12px}
+.comment-input input{flex:1;background:#0b0b0b;color:white;border:1px solid #333;border-radius:999px;padding:10px 12px;outline:none}
+.toast{position:fixed;left:50%;bottom:74px;transform:translateX(-50%) translateY(18px);background:rgba(255,255,255,.92);color:#000;padding:10px 14px;border-radius:999px;font-size:13px;font-weight:800;opacity:0;transition:.25s;z-index:200}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media(min-width:760px){.reels-feed{max-width:430px;margin:0 auto;border-left:1px solid #222;border-right:1px solid #222}.topbar{max-width:430px;left:50%;transform:translateX(-50%)}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <a href="home.html"><span class="material-icons">arrow_back</span></a>
+  <div class="top-title">Reels</div>
+  <button class="icon-btn" id="open-create"><span class="material-icons">add</span></button>
+</div>
 
+<main class="page">
+  <section class="reels-feed" id="reels-feed">
+    <div class="empty"><strong>Loading reels...</strong></div>
+  </section>
+</main>
+
+<div class="modal" id="create-modal">
+  <div class="sheet">
+    <div class="sheet-head"><h3>Create reel</h3><button class="close" data-close="create-modal">&times;</button></div>
+    <div class="sheet-body">
+      <input type="file" id="reel-file" accept="video/*" style="display:none">
+      <button class="primary" id="choose-video">Choose video</button>
+      <div id="chosen-file" style="color:var(--muted);font-size:13px;">No video selected</div>
+      <div class="field"><label>Caption</label><textarea id="reel-caption" placeholder="Write a caption..."></textarea></div>
+      <div class="field"><label>Music / audio name</label><input id="reel-music" placeholder="Original audio"></div>
+      <button class="primary" id="upload-reel">Upload Reel</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="share-modal">
+  <div class="sheet">
+    <div class="sheet-head"><h3>Share</h3><button class="close" data-close="share-modal">&times;</button></div>
+    <div class="sheet-body">
+      <button class="primary" id="copy-link-btn">Copy reel link</button>
+      <div style="font-weight:800;">Send to</div>
+      <div id="share-users-list"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="comments-modal">
+  <div class="sheet">
+    <div class="sheet-head"><h3>Comments</h3><button class="close" data-close="comments-modal">&times;</button></div>
+    <div class="sheet-body" id="comments-list"></div>
+    <div class="comment-input">
+      <input id="comment-text" placeholder="Add a comment...">
+      <button class="primary" id="post-comment">Post</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">Done</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, onSnapshot, query, orderBy, doc, updateDoc, arrayUnion, arrayRemove, increment, setDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-storage.js";
+
+const firebaseConfig={apiKey:"AIzaSyBrqMn7FrFW3jslaDNM0ui-VW4w6K_3Nmk",authDomain:"insta-clone-863ae.firebaseapp.com",projectId:"insta-clone-863ae",storageBucket:"insta-clone-863ae.firebasestorage.app",messagingSenderId:"599343109250",appId:"1:599343109250:web:1306ec63908ba21c54509b"};
+const app=initializeApp(firebaseConfig);
+const db=getFirestore(app);
+const storage=getStorage(app);
+
+const $=id=>document.getElementById(id);
+const currentUser=localStorage.getItem("active_user");
+if(!currentUser) window.location.href="login.html";
+
+let currentProfilePic="https://picsum.photos/150/150?random=1";
+let selectedFile=null;
+let reels=[];
+let activeReel=null;
+let allUsers=[];
+
+function toast(t){$("toast").innerText=t;$("toast").classList.add("show");setTimeout(()=>$("toast").classList.remove("show"),1500)}
+function esc(v){return String(v||"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
+function openModal(id){$(id).classList.add("open")}
+function closeModal(id){$(id).classList.remove("open")}
+document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>closeModal(b.dataset.close));
+document.querySelectorAll(".modal").forEach(m=>m.addEventListener("click",e=>{if(e.target===m)m.classList.remove("open")}));
+
+async function loadMe(){
+  const users=await getDocs(collection(db,"users"));
+  allUsers=[];
+  users.forEach(u=>{
+    const d=u.data(), name=d.username||u.id;
+    if(name===currentUser) currentProfilePic=d.profilePic||currentProfilePic;
+    if(name!==currentUser) allUsers.push({id:name,profilePic:d.profilePic||"https://picsum.photos/100/100?random=9"});
+  });
+}
+
+function renderShareUsers(){
+  $("share-users-list").innerHTML="";
+  allUsers.forEach(u=>{
+    const row=document.createElement("div");
+    row.className="user-row";
+    row.innerHTML=`<img src="${esc(u.profilePic)}"><div><b>${esc(u.id)}</b><div style="color:var(--muted);font-size:12px;">Send reel in chat</div></div>`;
+    row.onclick=()=>shareReelToChat(u.id);
+    $("share-users-list").appendChild(row);
+  });
+}
+
+function listenReels(){
+  const q=query(collection(db,"reels"),orderBy("timestamp","desc"));
+  onSnapshot(q,snap=>{
+    reels=[];
+    snap.forEach(d=>reels.push({id:d.id,...d.data()}));
+    renderReels();
+    openReelFromUrl();
+  });
+}
+
+function renderReels(){
+  const feed=$("reels-feed");
+  feed.innerHTML="";
+  if(reels.length===0){
+    feed.innerHTML=`<div class="empty"><strong>No reels yet</strong><span>Upload your first reel.</span><button class="primary" onclick="document.getElementById('open-create').click()">Create Reel</button></div>`;
+    return;
+  }
+  reels.forEach(r=>{
+    const liked=(r.likedBy||[]).includes(currentUser);
+    const saved=(r.savedBy||[]).includes(currentUser);
+    const el=document.createElement("article");
+    el.className="reel";
+    el.id=`reel-${r.id}`;
+    el.innerHTML=`
+      <video src="${esc(r.videoUrl)}" playsinline loop></video>
+      <div class="reel-info">
+        <div class="userline" onclick="location.href='user-profile.html?username=${encodeURIComponent(r.userId||"")}'">
+          <img src="${esc(r.profilePic||currentProfilePic)}"><span>${esc(r.userId||"user")}</span>
+        </div>
+        <div class="caption">${esc(r.caption||"")}</div>
+        <div class="music"><span class="material-icons" style="font-size:16px">music_note</span>${esc(r.music||"Original audio")}</div>
+      </div>
+      <div class="actions">
+        <button class="action ${liked?"liked":""}" data-action="like"><span class="material-icons">favorite</span><span>${r.likesCount||0}</span></button>
+        <button class="action" data-action="comment"><span class="material-icons">chat_bubble</span><span>${r.commentsCount||0}</span></button>
+        <button class="action" data-action="share"><span class="material-icons">send</span><span>Share</span></button>
+        <button class="action ${saved?"saved":""}" data-action="save"><span class="material-icons">${saved?"bookmark":"bookmark_border"}</span><span>Save</span></button>
+        <button class="action" data-action="story"><span class="material-icons">add_circle</span><span>Story</span></button>
+      </div>`;
+    el.querySelectorAll("[data-action]").forEach(btn=>btn.onclick=()=>handleAction(btn.dataset.action,r));
+    feed.appendChild(el);
+  });
+  observeVideos();
+}
+
+function observeVideos(){
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      const v=e.target.querySelector("video");
+      if(!v)return;
+      if(e.isIntersecting){v.play().catch(()=>{});activeReel=reels.find(r=>`reel-${r.id}`===e.target.id)}
+      else v.pause();
+    });
+  },{threshold:.65});
+  document.querySelectorAll(".reel").forEach(r=>obs.observe(r));
+}
+
+async function handleAction(action,r){
+  activeReel=r;
+  if(action==="like") return toggleLike(r);
+  if(action==="comment") return openComments(r);
+  if(action==="share"){renderShareUsers();openModal("share-modal");return}
+  if(action==="save") return toggleSave(r);
+  if(action==="story") return addReelToStory(r);
+}
+
+async function toggleLike(r){
+  const liked=(r.likedBy||[]).includes(currentUser);
+  await updateDoc(doc(db,"reels",r.id),{
+    likedBy:liked?arrayRemove(currentUser):arrayUnion(currentUser),
+    likesCount:increment(liked?-1:1)
+  });
+}
+
+async function toggleSave(r){
+  const saved=(r.savedBy||[]).includes(currentUser);
+  await updateDoc(doc(db,"reels",r.id),{savedBy:saved?arrayRemove(currentUser):arrayUnion(currentUser)});
+  toast(saved?"Removed":"Saved");
+}
+
+async function addReelToStory(r){
+  await addDoc(collection(db,"stories"),{
+    userId:currentUser,
+    profilePic:currentProfilePic,
+    mediaUrl:r.videoUrl,
+    mediaType:"video",
+    text:r.caption||"",
+    mention:"",
+    music:r.music||"Original audio",
+    reelId:r.id,
+    isHighlight:false,
+    createdAt:new Date(),
+    expiresAt:new Date(Date.now()+24*60*60*1000)
+  });
+  toast("Added to story");
+}
+
+async function shareReelToChat(targetUser){
+  if(!activeReel)return;
+  const roomId=[currentUser,targetUser].sort().join("_chat_room_");
+  const payload={
+    sender:currentUser,
+    receiver:targetUser,
+    type:"reel",
+    text:"Shared a reel",
+    reelId:activeReel.id,
+    reelUrl:activeReel.videoUrl,
+    thumbnailUrl:activeReel.thumbnailUrl||activeReel.videoUrl,
+    title:"Reel",
+    caption:activeReel.caption||"",
+    status:"sent",
+    deliveredAt:new Date(),
+    seenBy:[currentUser],
+    seenAt:null,
+    timestamp:new Date()
+  };
+  await addDoc(collection(db,"chats",roomId,"messages"),payload);
+  await setDoc(doc(db,"chats",roomId),{
+    lastMessageText:"Shared a reel",
+    lastMessageType:"reel",
+    lastMessageSender:currentUser,
+    isRead:false,
+    readBy:[currentUser],
+    timestamp:new Date()
+  },{merge:true});
+  closeModal("share-modal");
+  toast("Sent in chat");
+}
+
+$("copy-link-btn").onclick=async()=>{
+  if(!activeReel)return;
+  const link=`${location.origin}${location.pathname}?reel=${encodeURIComponent(activeReel.id)}`;
+  await navigator.clipboard.writeText(link);
+  toast("Link copied");
+};
+
+async function openComments(r){
+  activeReel=r;
+  openModal("comments-modal");
+  $("comments-list").innerHTML=`<div style="color:var(--muted)">Loading...</div>`;
+  const snap=await getDocs(query(collection(db,"reelComments"),orderBy("timestamp","asc")));
+  $("comments-list").innerHTML="";
+  let count=0;
+  snap.forEach(c=>{
+    const d=c.data();
+    if(d.reelId===r.id){
+      count++;
+      const row=document.createElement("div");
+      row.className="comment-row";
+      row.innerHTML=`<b>${esc(d.commentedBy||"user")}</b>${esc(d.text||"")}`;
+      $("comments-list").appendChild(row);
+    }
+  });
+  if(count===0)$("comments-list").innerHTML=`<div style="color:var(--muted);text-align:center;padding:20px;">No comments yet.</div>`;
+}
+
+$("post-comment").onclick=async()=>{
+  const text=$("comment-text").value.trim();
+  if(!text||!activeReel)return;
+  $("comment-text").value="";
+  await addDoc(collection(db,"reelComments"),{reelId:activeReel.id,text,commentedBy:currentUser,timestamp:new Date()});
+  await updateDoc(doc(db,"reels",activeReel.id),{commentsCount:increment(1)});
+  openComments(activeReel);
+};
+
+$("open-create").onclick=()=>openModal("create-modal");
+$("choose-video").onclick=()=>$("reel-file").click();
+$("reel-file").onchange=()=>{selectedFile=$("reel-file").files[0];$("chosen-file").innerText=selectedFile?selectedFile.name:"No video selected"};
+
+$("upload-reel").onclick=async()=>{
+  if(!selectedFile){toast("Choose video first");return}
+  $("upload-reel").disabled=true;$("upload-reel").innerText="Uploading...";
+  try{
+    const safe=selectedFile.name.replaceAll(" ","_");
+    const storageRef=ref(storage,`reels/${currentUser}/${Date.now()}_${safe}`);
+    await uploadBytes(storageRef,selectedFile);
+    const videoUrl=await getDownloadURL(storageRef);
+    await addDoc(collection(db,"reels"),{
+      userId:currentUser,
+      profilePic:currentProfilePic,
+      videoUrl,
+      thumbnailUrl:videoUrl,
+      caption:$("reel-caption").value.trim(),
+      music:$("reel-music").value.trim()||"Original audio",
+      likesCount:0,
+      commentsCount:0,
+      likedBy:[],
+      savedBy:[],
+      timestamp:new Date()
+    });
+    closeModal("create-modal");
+    selectedFile=null;
+    $("reel-file").value="";
+    $("chosen-file").innerText="No video selected";
+    $("reel-caption").value="";
+    $("reel-music").value="";
+    toast("Reel uploaded");
+  }catch(e){
+    console.error(e);
+    toast("Upload failed. Storage rules check karo.");
+  }finally{
+    $("upload-reel").disabled=false;$("upload-reel").innerText="Upload Reel";
+  }
+};
+
+function openReelFromUrl(){
+  const id=new URLSearchParams(location.search).get("reel");
+  if(!id)return;
+  setTimeout(()=>{
+    const el=document.getElementById(`reel-${id}`);
+    if(el)el.scrollIntoView({behavior:"smooth"});
+  },250);
+}
+
+await loadMe();
+listenReels();
+</script>
+</body>
+</html>
