@@ -1,217 +1,373 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instagram - Create Post / Story</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root { --bg-color: #fafafa; --border-color: #dbdbdb; --text-main: #262626; --card-bg: #ffffff; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-main); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-        .create-container { background: var(--card-bg); border: 1px solid var(--border-color); width: 100%; max-width: 500px; border-radius: 12px; padding: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        h2 { font-size: 24px; text-align: center; margin-bottom: 25px; font-weight: 500; }
-        .form-group { margin-bottom: 20px; display: flex; flex-direction: column; gap: 6px; }
-        label { font-size: 14px; font-weight: 600; color: #555; }
-        input, textarea, select { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; outline: none; background: white; }
-        textarea { resize: none; height: 100px; }
-        
-        .divider { display: flex; align-items: center; text-align: center; margin: 15px 0; color: #8e8e8e; font-size: 12px; font-weight: 600; text-transform: uppercase; }
-        .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid var(--border-color); }
-        .divider:not(:empty)::before { margin-right: .25em; }
-        .divider:not(:empty)::after { margin-left: .25em; }
-
-        .preview-box { width: 100%; max-height: 250px; border: 1px dashed var(--border-color); border-radius: 8px; display: none; justify-content: center; align-items: center; overflow: hidden; margin-bottom: 20px; background: #f0f0f0; }
-        .preview-box img { width: 100%; height: 100%; object-fit: contain; }
-
-        .btn-post { width: 100%; background: #0095f6; color: white; padding: 12px; font-size: 15px; font-weight: 600; border: none; border-radius: 8px; cursor: pointer; margin-top: 10px; transition: background 0.2s; }
-        .btn-post:hover { background: #1877f2; }
-        .btn-post:disabled { background: #b2dffc; cursor: not-allowed; }
-        .back-link { display: block; text-align: center; margin-top: 15px; color: #00376b; font-size: 14px; text-decoration: none; font-weight: 600; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Create - Instagram</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root{--bg:#000;--panel:#121212;--soft:#1f1f1f;--border:#2d2d2d;--text:#fff;--muted:#a8a8a8;--blue:#0095f6;--danger:#ed4956}
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+body{background:var(--bg);color:var(--text);min-height:100vh;display:flex;justify-content:center}
+.app{width:100%;max-width:520px;min-height:100vh;background:#000;display:flex;flex-direction:column}
+.topbar{height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;border-bottom:1px solid #1f1f1f;background:#050505;position:sticky;top:0;z-index:10}
+.topbar a{color:#fff;text-decoration:none;font-size:22px}
+.topbar h2{font-size:17px;font-weight:750}
+.share-btn{background:none;border:0;color:var(--blue);font-size:15px;font-weight:800;cursor:pointer}
+.share-btn:disabled{opacity:.45;cursor:default}
+.content{padding:14px;display:flex;flex-direction:column;gap:14px}
+.segment{display:grid;grid-template-columns:repeat(3,1fr);background:#151515;border:1px solid #262626;border-radius:10px;padding:4px;gap:4px}
+.segment button{border:0;background:transparent;color:var(--muted);padding:10px 6px;border-radius:8px;font-weight:800;cursor:pointer}
+.segment button.active{background:#fff;color:#000}
+.pick-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pick-btn{border:1px solid #303030;background:#161616;color:#fff;border-radius:12px;padding:14px 10px;display:flex;align-items:center;justify-content:center;gap:8px;font-weight:800;cursor:pointer}
+.preview{width:100%;aspect-ratio:4/5;background:#090909;border:1px solid #262626;border-radius:14px;overflow:hidden;display:flex;align-items:center;justify-content:center;color:var(--muted);position:relative}
+.preview img,.preview video{width:100%;height:100%;display:none;background:#000}
+.preview.cover img,.preview.cover video{object-fit:cover}
+.preview.contain img,.preview.contain video{object-fit:contain}
+.preview.has-media .empty-preview{display:none}
+.preview.has-image img{display:block}
+.preview.has-video video{display:block}
+.story-text{position:absolute;left:16px;right:16px;bottom:20px;text-align:center;font-size:26px;font-weight:850;color:white;text-shadow:0 2px 12px #000;overflow-wrap:anywhere;display:none}
+.mode-story .story-text{display:block}
+.form{display:flex;flex-direction:column;gap:10px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:12px;color:var(--muted);font-weight:800}
+.field input,.field textarea,.field select{width:100%;border:1px solid #303030;background:#111;color:#fff;border-radius:10px;padding:11px;outline:none}
+.field textarea{min-height:82px;resize:vertical}
+.editor-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.range-row{display:flex;align-items:center;gap:10px}
+.range-row input{flex:1}
+.hint{font-size:12px;color:var(--muted);line-height:1.35}
+.toast{position:fixed;left:50%;bottom:72px;transform:translateX(-50%) translateY(18px);background:rgba(255,255,255,.92);color:#000;padding:10px 14px;border-radius:999px;font-size:13px;font-weight:800;opacity:0;transition:.25s;z-index:99}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.hidden{display:none!important}
+</style>
 </head>
 <body>
-
-    <div class="create-container">
-        <h2 id="page-title">Create New Post</h2>
-        
-        <div class="form-group">
-            <label><i class="fa-solid fa-bullseye"></i> Select Type</label>
-            <select id="upload-type">
-                <option value="post">Feed Post</option>
-                <option value="story">Instagram Story</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label><i class="fa-solid fa-images"></i> Upload from Phone Gallery</label>
-            <input type="file" id="post-file-input" accept="image/*">
-        </div>
-
-        <div class="divider">OR</div>
-
-        <div class="form-group">
-            <label><i class="fa-solid fa-link"></i> Paste Image URL</label>
-            <input type="text" id="post-img-url" placeholder="Paste image link here...">
-        </div>
-        
-        <div class="preview-box" id="image-preview-container">
-            <img id="image-preview" src="" alt="Preview">
-        </div>
-
-        <div class="form-group" id="caption-area">
-            <label>Caption</label>
-            <textarea id="post-caption" placeholder="Write a caption..."></textarea>
-        </div>
-
-        <div class="form-group" id="likes-area">
-            <label>Initial Likes Count</label>
-            <input type="number" id="post-likes" value="0" min="0">
-        </div>
-
-        <button class="btn-post" id="btn-upload-post">Share Post</button>
-        <a href="profile.html" class="back-link"><i class="fa-solid fa-arrow-left"></i> Back to Profile</a>
+<div class="app">
+    <div class="topbar">
+        <a href="home.html"><i class="fa-solid fa-xmark"></i></a>
+        <h2 id="title">Create</h2>
+        <button class="share-btn" id="share-btn">Share</button>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-storage.js";
+    <div class="content">
+        <div class="segment">
+            <button id="type-post" class="active" data-type="post">Post</button>
+            <button id="type-reel" data-type="reel">Reel</button>
+            <button id="type-story" data-type="story">Story</button>
+        </div>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyBrqMn7FrFW3jslaDNM0ui-VW4w6K_3Nmk",
-            authDomain: "insta-clone-863ae.firebaseapp.com",
-            projectId: "insta-clone-863ae",
-            storageBucket: "insta-clone-863ae.firebasestorage.app",
-            messagingSenderId: "599343109250",
-            appId: "1:599343109250:web:1306ec63908ba21c54509b"
-        };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const storage = getStorage(app);
+        <div class="pick-row">
+            <button class="pick-btn" id="gallery-btn"><i class="fa-solid fa-images"></i> Gallery</button>
+            <button class="pick-btn" id="camera-btn"><i class="fa-solid fa-camera"></i> Camera</button>
+        </div>
 
-        const uploadBtn = document.getElementById("btn-upload-post");
-        const fileInput = document.getElementById("post-file-input");
-        const urlInput = document.getElementById("post-img-url");
-        const previewContainer = document.getElementById("image-preview-container");
-        const previewImg = document.getElementById("image-preview");
-        
-        const uploadType = document.getElementById("upload-type");
-        const captionArea = document.getElementById("caption-area");
-        const likesArea = document.getElementById("likes-area");
-        const pageTitle = document.getElementById("page-title");
+        <input type="file" id="gallery-input" accept="image/*,video/*" class="hidden">
+        <input type="file" id="camera-input" accept="image/*,video/*" capture="environment" class="hidden">
+        <input type="file" id="audio-input" accept="audio/*" class="hidden">
 
-        // URL query parameter se check karenge agar direct story par bheja gaya h to
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('mode') === 'story') {
-            uploadType.value = 'story';
-            toggleType('story');
+        <div class="preview contain" id="preview">
+            <div class="empty-preview">Select photo or video</div>
+            <img id="preview-img" alt="Preview">
+            <video id="preview-video" controls playsinline></video>
+            <div class="story-text" id="story-text-preview"></div>
+        </div>
+
+        <div class="form">
+            <div class="field">
+                <label>Caption</label>
+                <textarea id="caption" placeholder="Write a caption..."></textarea>
+            </div>
+
+            <div class="field" id="story-text-field">
+                <label>Story text overlay</label>
+                <input id="story-text" placeholder="Add text on story">
+            </div>
+
+            <div class="field" id="music-field">
+                <label>Music / audio name</label>
+                <input id="music-name" placeholder="Original audio">
+                <button class="pick-btn" type="button" id="audio-btn"><i class="fa-solid fa-music"></i> Choose audio file</button>
+                <div class="hint" id="audio-name">No audio selected</div>
+            </div>
+
+            <div class="editor-grid">
+                <div class="field">
+                    <label>Fit</label>
+                    <select id="fit-mode">
+                        <option value="contain">Original</option>
+                        <option value="cover">Fill screen</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Filter</label>
+                    <select id="filter-mode">
+                        <option value="none">Normal</option>
+                        <option value="bright">Bright</option>
+                        <option value="warm">Warm</option>
+                        <option value="mono">Mono</option>
+                        <option value="contrast">Contrast</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="field">
+                <label>Location</label>
+                <input id="location-input" placeholder="Add location">
+            </div>
+
+            <div class="hint" id="mode-hint">
+                Post will appear in feed. Photo or video both supported.
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast">Done</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-storage.js";
+
+const firebaseConfig={
+    apiKey:"AIzaSyBrqMn7FrFW3jslaDNM0ui-VW4w6K_3Nmk",
+    authDomain:"insta-clone-863ae.firebaseapp.com",
+    projectId:"insta-clone-863ae",
+    storageBucket:"insta-clone-863ae.firebasestorage.app",
+    messagingSenderId:"599343109250",
+    appId:"1:599343109250:web:1306ec63908ba21c54509b"
+};
+
+const app=initializeApp(firebaseConfig);
+const db=getFirestore(app);
+const storage=getStorage(app);
+
+const $=id=>document.getElementById(id);
+const currentUser=localStorage.getItem("active_user");
+if(!currentUser) window.location.href="index.html";
+
+let createType="post";
+let selectedFile=null;
+let selectedAudioFile=null;
+let mediaType="";
+let currentProfilePic="https://picsum.photos/150/150?random=1";
+
+function toast(text){
+    $("toast").innerText=text;
+    $("toast").classList.add("show");
+    setTimeout(()=>$("toast").classList.remove("show"),1600);
+}
+
+async function loadMe(){
+    const snap=await getDocs(query(collection(db,"users"),where("username","==",currentUser)));
+    if(!snap.empty){
+        const d=snap.docs[0].data();
+        currentProfilePic=d.profilePic||currentProfilePic;
+    }
+}
+
+document.querySelectorAll(".segment button").forEach(btn=>{
+    btn.onclick=()=>{
+        createType=btn.dataset.type;
+        document.querySelectorAll(".segment button").forEach(b=>b.classList.remove("active"));
+        btn.classList.add("active");
+        updateMode();
+    };
+});
+
+function updateMode(){
+    $("preview").classList.remove("mode-story");
+    $("title").innerText=createType==="post"?"New post":createType==="reel"?"New reel":"New story";
+    $("share-btn").innerText=createType==="post"?"Share":createType==="reel"?"Share reel":"Your story";
+
+    $("music-field").classList.toggle("hidden",createType==="post");
+    $("story-text-field").classList.toggle("hidden",createType!=="story");
+    $("preview").classList.toggle("mode-story",createType==="story");
+
+    if(createType==="post") $("mode-hint").innerText="Post will appear in feed. Photo or video both supported.";
+    if(createType==="reel") $("mode-hint").innerText="Reel will appear in reels. Video works best. Photo reel saves with music metadata.";
+    if(createType==="story") $("mode-hint").innerText="Story will expire after 24 hours. Photo or video supported.";
+}
+
+$("gallery-btn").onclick=()=>$("gallery-input").click();
+$("camera-btn").onclick=()=>$("camera-input").click();
+$("audio-btn").onclick=()=>$("audio-input").click();
+
+$("gallery-input").onchange=e=>handleMedia(e.target.files[0]);
+$("camera-input").onchange=e=>handleMedia(e.target.files[0]);
+
+$("audio-input").onchange=e=>{
+    selectedAudioFile=e.target.files[0]||null;
+    $("audio-name").innerText=selectedAudioFile?selectedAudioFile.name:"No audio selected";
+};
+
+function handleMedia(file){
+    if(!file)return;
+    selectedFile=file;
+    mediaType=file.type.startsWith("video/")?"video":"image";
+
+    const url=URL.createObjectURL(file);
+    const preview=$("preview");
+    preview.classList.add("has-media");
+    preview.classList.toggle("has-image",mediaType==="image");
+    preview.classList.toggle("has-video",mediaType==="video");
+
+    $("preview-img").src="";
+    $("preview-video").src="";
+
+    if(mediaType==="image") $("preview-img").src=url;
+    else $("preview-video").src=url;
+}
+
+$("fit-mode").onchange=()=>{
+    $("preview").classList.remove("cover","contain");
+    $("preview").classList.add($("fit-mode").value);
+};
+
+$("filter-mode").onchange=applyFilter;
+$("story-text").oninput=()=>{
+    $("story-text-preview").innerText=$("story-text").value.trim();
+};
+
+function applyFilter(){
+    const value=$("filter-mode").value;
+    let filter="none";
+    if(value==="bright") filter="brightness(1.18) saturate(1.08)";
+    if(value==="warm") filter="sepia(.18) saturate(1.25)";
+    if(value==="mono") filter="grayscale(1)";
+    if(value==="contrast") filter="contrast(1.25) saturate(1.1)";
+    $("preview-img").style.filter=filter;
+    $("preview-video").style.filter=filter;
+}
+
+$("share-btn").onclick=shareCreate;
+
+async function uploadFile(file,path){
+    const safe=file.name.replace(/[^\w.-]+/g,"_");
+    const fileRef=ref(storage,`${path}/${currentUser}/${Date.now()}_${safe}`);
+    await uploadBytes(fileRef,file);
+    return getDownloadURL(fileRef);
+}
+
+async function shareCreate(){
+    if(!selectedFile){
+        toast("Select photo or video first");
+        return;
+    }
+
+    $("share-btn").disabled=true;
+    $("share-btn").innerText="Uploading...";
+
+    try{
+        const mediaUrl=await uploadFile(selectedFile,createType==="post"?"posts":createType==="reel"?"reels":"stories");
+        let audioUrl="";
+        if(selectedAudioFile) audioUrl=await uploadFile(selectedAudioFile,"audio");
+
+        const caption=$("caption").value.trim();
+        const music=$("music-name").value.trim()||"Original audio";
+        const location=$("location-input").value.trim();
+        const fitMode=$("fit-mode").value;
+        const filterMode=$("filter-mode").value;
+
+        if(createType==="post"){
+            await addDoc(collection(db,"posts"),{
+                userId:currentUser,
+                username:currentUser,
+                profilePic:currentProfilePic,
+                postImg:mediaUrl,
+                mediaUrl,
+                imageUrl:mediaType==="image"?mediaUrl:"",
+                videoUrl:mediaType==="video"?mediaUrl:"",
+                mediaType,
+                caption,
+                location,
+                filterMode,
+                fitMode,
+                likes:0,
+                likesCount:0,
+                likedBy:[],
+                commentsCount:0,
+                timestamp:serverTimestamp()
+            });
+            toast("Post shared");
+            setTimeout(()=>window.location.href="profile.html",900);
         }
 
-        // Change Fields according to Post / Story selection
-        uploadType.addEventListener("change", (e) => {
-            toggleType(e.target.value);
-        });
-
-        function toggleType(type) {
-            if(type === 'story') {
-                captionArea.style.display = "none";
-                likesArea.style.display = "none";
-                pageTitle.innerText = "Add New Story";
-                uploadBtn.innerText = "Share Story";
-            } else {
-                captionArea.style.display = "flex";
-                likesArea.style.display = "flex";
-                pageTitle.innerText = "Create New Post";
-                uploadBtn.innerText = "Share Post";
-            }
+        if(createType==="reel"){
+            await addDoc(collection(db,"reels"),{
+                userId:currentUser,
+                username:currentUser,
+                profilePic:currentProfilePic,
+                videoUrl:mediaType==="video"?mediaUrl:"",
+                imageUrl:mediaType==="image"?mediaUrl:"",
+                mediaUrl,
+                thumbnailUrl:mediaUrl,
+                mediaType,
+                caption,
+                music,
+                audioUrl,
+                location,
+                filterMode,
+                fitMode,
+                likesCount:0,
+                commentsCount:0,
+                viewsCount:0,
+                likedBy:[],
+                savedBy:[],
+                viewedBy:[],
+                timestamp:serverTimestamp()
+            });
+            toast("Reel shared");
+            setTimeout(()=>window.location.href="reels.html",900);
         }
 
-        // Preview Gallery Input
-        fileInput.addEventListener("change", (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                urlInput.value = "";
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    previewImg.src = event.target.result;
-                    previewContainer.style.display = "flex";
-                }
-                reader.readAsDataURL(file);
-            }
-        });
+        if(createType==="story"){
+            await addDoc(collection(db,"stories"),{
+                userId:currentUser,
+                username:currentUser,
+                profilePic:currentProfilePic,
+                storyImg:mediaUrl,
+                mediaUrl,
+                imageUrl:mediaType==="image"?mediaUrl:"",
+                videoUrl:mediaType==="video"?mediaUrl:"",
+                mediaType,
+                text:$("story-text").value.trim(),
+                caption,
+                music,
+                audioUrl,
+                location,
+                filterMode,
+                fitMode,
+                isHighlight:false,
+                createdAt:serverTimestamp(),
+                timestamp:serverTimestamp(),
+                expiresAt:new Date(Date.now()+24*60*60*1000)
+            });
+            toast("Story shared");
+            setTimeout(()=>window.location.href="home.html",900);
+        }
+    }catch(err){
+        console.error(err);
+        alert("Upload failed. Firebase Storage rules check karo.");
+    }finally{
+        $("share-btn").disabled=false;
+        updateMode();
+    }
+}
 
-        // Preview Link Input
-        urlInput.addEventListener("input", () => {
-            if(urlInput.value.trim() !== "") {
-                fileInput.value = "";
-                previewImg.src = urlInput.value.trim();
-                previewContainer.style.display = "flex";
-            } else {
-                previewContainer.style.display = "none";
-            }
-        });
+const params=new URLSearchParams(location.search);
+if(params.get("mode")==="story"){
+    document.querySelector('[data-type="story"]').click();
+}else if(params.get("mode")==="reel"){
+    document.querySelector('[data-type="reel"]').click();
+}else{
+    updateMode();
+}
 
-        // Upload Submit Logic
-        uploadBtn.addEventListener("click", async () => {
-            const file = fileInput.files[0];
-            const imgUrl = urlInput.value.trim();
-            const caption = document.getElementById("post-caption").value.trim();
-            const likes = document.getElementById("post-likes").value;
-            const currentType = uploadType.value;
-
-            if (!file && !imgUrl) {
-                alert("Bhai photo select karo pehle!");
-                return;
-            }
-
-            uploadBtn.innerText = "Processing...";
-            uploadBtn.disabled = true;
-
-            let finalImageUrl = "";
-
-            try {
-                if (file) {
-                    uploadBtn.innerText = "Uploading Image...";
-                    const folder = currentType === 'story' ? 'story_images/' : 'post_images/';
-                    const storageRef = ref(storage, folder + Date.now() + '_' + file.name);
-                    const snapshot = await uploadBytes(storageRef, file);
-                    finalImageUrl = await getDownloadURL(snapshot.ref);
-                } else if (imgUrl) {
-                    finalImageUrl = imgUrl;
-                }
-
-                uploadBtn.innerText = "Saving to Firebase...";
-
-                if (currentType === 'story') {
-                    // Story collection mein save hoga
-                    await addDoc(collection(db, "stories"), {
-                        userId: "luv_5",
-                        storyImg: finalImageUrl,
-                        timestamp: new Date()
-                    });
-                    alert("Story successfully add ho gayi bhai! 📸✨");
-                    window.location.href = "home.html"; // Story load karke home feed dikhayega
-                } else {
-                    // Normal Post collection mein save hoga
-                    await addDoc(collection(db, "posts"), {
-                        userId: "luv_5",
-                        postImg: finalImageUrl,
-                        caption: caption,
-                        likes: Number(likes),
-                        timestamp: new Date()
-                    });
-                    alert("Post successfully share ho gayi bhai! 🎉");
-                    window.location.href = "profile.html";
-                }
-
-            } catch (error) {
-                alert("Galti hui bhai: " + error.message);
-            } finally {
-                uploadBtn.innerText = currentType === 'story' ? "Share Story" : "Share Post";
-                uploadBtn.disabled = false;
-            }
-        });
-    </script>
+await loadMe();
+</script>
 </body>
 </html>
