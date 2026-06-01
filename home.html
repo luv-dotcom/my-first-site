@@ -18,6 +18,7 @@
             --text-muted: #8e8e8e; 
             --card-bg: #ffffff; 
             --story-ring: linear-gradient(45deg, #fbc531, #c23616, #9c88ff); 
+            --link-color: #0095f6;
         }
         
         *, *::before, *::after { 
@@ -31,7 +32,6 @@
             width: 100% !important;
             max-width: 100% !important;
             overflow-x: hidden !important;
-            -webkit-text-size-adjust: 100%;
         }
         
         body { 
@@ -83,13 +83,11 @@
         .post-user-details { display: flex; flex-direction: column; }
         .post-username { font-size: 14px; font-weight: 600; cursor: pointer; }
         .post-location { font-size: 12px; color: var(--text-muted); }
-        .post-options-btn { cursor: pointer; font-size: 20px; color: var(--text-main); }
         .post-image-box { width: 100%; aspect-ratio: 1 / 1; background-color: #efefef; overflow: hidden; }
         .post-image-box img { width: 100%; height: 100%; object-fit: cover; }
         .post-controls { padding: 14px 14px 0 14px; display: flex; justify-content: space-between; align-items: center; }
         .left-controls { display: flex; gap: 16px; align-items: center; }
-        .post-controls i, .post-controls span { font-size: 26px; cursor: pointer; transition: transform 0.1s ease; color: var(--text-main); }
-        .post-controls i:hover, .post-controls span:hover { transform: scale(1.1); }
+        .post-controls i, .post-controls span { font-size: 26px; cursor: pointer; color: var(--text-main); }
         
         .liked-heart { color: #ed4956 !important; }
         
@@ -102,24 +100,30 @@
         .comment-input-area { border-top: 1px solid var(--border-color); padding: 14px; display: flex; justify-content: space-between; align-items: center; }
         .comment-input-area input { width: 90%; border: none; outline: none; font-size: 14px; background: transparent; }
         .comment-post-btn { color: #0095f6; font-weight: 600; border: none; background: none; cursor: pointer; font-size: 14px; }
-        .comment-post-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-        /* Suggestions Sidebar */
-        .desktop-suggestions { flex: 0.4; max-width: 293px; display: flex; flex-direction: column; gap: 16px; padding-top: 10px; }
-        .self-profile-row { display: flex; align-items: center; justify-content: space-between; }
-        .self-meta { display: flex; align-items: center; gap: 16px; }
-        .self-meta img { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; }
-        .logout-link { color: #0095f6; font-size: 12px; font-weight: 600; cursor: pointer; }
-        .suggestions-header { display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; color: var(--text-muted); margin-top: 10px; }
-        .see-all-btn { color: var(--text-main); cursor: pointer; font-size: 12px; }
-        .suggestion-list { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }
-        .suggested-user-row { display: flex; align-items: center; justify-content: space-between; }
-        .s-user-meta { display: flex; align-items: center; gap: 12px; }
-        .s-user-meta img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
-        .s-text-box { display: flex; flex-direction: column; }
-        .s-username { font-size: 14px; font-weight: 600; }
-        .s-reason { font-size: 12px; color: var(--text-muted); }
-        .follow-link { color: #0095f6; font-size: 12px; font-weight: 600; cursor: pointer; }
+        /* --- INSTAGRAM REAL STYLE SIDEBAR SUGGESTIONS --- */
+        .desktop-suggestions { flex: 0.4; max-width: 293px; display: flex; flex-direction: column; gap: 14px; padding-top: 10px; }
+        .self-profile-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+        .self-meta { display: flex; align-items: center; gap: 14px; }
+        .self-meta img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color); }
+        .logout-link { color: var(--link-color); font-size: 12px; font-weight: 600; cursor: pointer; }
+        
+        .suggestions-header { display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; color: var(--text-muted); }
+        .see-all-btn { color: var(--text-main); cursor: pointer; font-size: 12px; font-weight: 600; }
+        
+        .suggestion-list { display: flex; flex-direction: column; gap: 12px; }
+        .suggested-user-row { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+        .s-user-meta { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
+        .s-user-meta img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color); }
+        .s-text-box { display: flex; flex-direction: column; min-width: 0; }
+        
+        .s-username { font-size: 14px; font-weight: 600; color: var(--text-main); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .s-username:hover { text-decoration: underline; }
+        .s-fullname { font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        
+        /* Dynamic Real Follow Button Styling */
+        .follow-toggle-btn { color: var(--link-color); font-size: 12px; font-weight: 600; cursor: pointer; background: none; border: none; padding: 4px; }
+        .follow-toggle-btn.following-active { color: var(--text-main) !important; font-weight: 500; opacity: 0.7; }
 
         /* Story Viewer Modal */
         .story-viewer-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a1a; display: none; justify-content: center; align-items: center; z-index: 3000; }
@@ -130,7 +134,6 @@
         .story-viewer-header { position: absolute; top: 25px; left: 15px; display: flex; align-items: center; gap: 10px; color: white; font-size: 14px; font-weight: 600; }
         .story-viewer-header img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid white; }
         .story-close-btn { position: absolute; top: 25px; right: 15px; color: white; background: none; border: none; cursor: pointer; }
-        .story-close-btn span { font-size: 28px; }
 
         @media (max-width: 1000px) { 
             .desktop-suggestions { display: none; } 
@@ -141,11 +144,10 @@
             .top-navbar .nav-icons { display: none !important; }
             .mobile-header-right { display: flex !important; }
             .bottom-navbar { display: flex !important; }
-              
             .search-engine-box { width: 140px !important; }
-            .main-workspace { margin-top: 10px; padding: 0; width: 100% !important; } 
+            .main-workspace { margin-top: 10px; padding: 0; } 
             .stories-wrapper { border: none; border-bottom: 1px solid var(--border-color); border-radius: 0; } 
-            .post-card { border-left: none; border-right: none; border-radius: 0; width: 100% !important; } 
+            .post-card { border-left: none; border-right: none; border-radius: 0; } 
         }
     </style>
 </head>
@@ -191,7 +193,6 @@
                 <div class="story-node"><div class="story-ring-box"><img src="https://picsum.photos/100/100?random=5" alt="user"></div><span class="story-username">rohit_sharma</span></div>
                 <div class="story-node"><div class="story-ring-box"><img src="https://picsum.photos/100/100?random=6" alt="user"></div><span class="story-username">virat.kohli</span></div>
                 <div class="story-node"><div class="story-ring-box"><img src="https://picsum.photos/100/100?random=7" alt="user"></div><span class="story-username">tech_insider</span></div>
-                <div class="story-node"><div class="story-ring-box"><img src="https://picsum.photos/100/100?random=8" alt="user"></div><span class="story-username">travel_geek</span></div>
             </div>
 
             <div id="dynamic-posts-container" style="display: flex; flex-direction: column; gap: 24px; width: 100%;">
@@ -201,20 +202,27 @@
             </div>
         </section>
 
+        <!-- --- INSTAGRAM REAL SIDEBAR SYSTEM --- -->
         <aside class="desktop-suggestions">
             <div class="self-profile-row">
                 <div class="self-meta">
                     <a href="profile.html"><img src="https://picsum.photos/150/150?random=1" alt="My Profile" id="sidebar-avatar"></a>
                     <div class="s-text-box">
                         <a href="profile.html" class="s-username" id="sidebar-username">Loading...</a>
-                        <span class="s-reason" style="font-size: 14px;" id="sidebar-fullname">Loading Name...</span>
+                        <span class="s-fullname" id="sidebar-fullname">Loading Name...</span>
                     </div>
                 </div>
-                <span class="logout-link" id="logout-trigger-btn">Logout</span>
+                <span class="logout-link" id="logout-trigger-btn">Log out</span>
             </div>
-            <div class="suggestions-header"><span>Suggestions for you</span><span class="see-all-btn">See All</span></div>
-            <div class="suggestion-list">
-                <div class="suggested-user-row"><div class="s-user-meta"><img src="https://picsum.photos/100/100?random=80" alt="user"><div class="s-text-box"><span class="s-username">ms_dhoni_fan</span></div></div><span class="follow-link">Follow</span></div>
+            
+            <div class="suggestions-header">
+                <span>Suggestions for you</span>
+                <span class="see-all-btn" onclick="alert('Redirecting to all suggestions list...')">See All</span>
+            </div>
+            
+            <!-- Target element jahan automatic suggestions injection hoga -->
+            <div class="suggestion-list" id="dynamic-suggestions-box">
+                <div style="font-size:12px; color:var(--text-muted); padding:5px 0;">Loading tailored suggestions...</div>
             </div>
         </aside>
     </main>
@@ -254,14 +262,10 @@
         const db = getFirestore(initializeApp(firebaseConfig));
 
         let currentUsername = localStorage.getItem("active_user");
-        if (!currentUsername) {
-            window.location.href = "login.html";
-        }
+        if (!currentUsername) { window.location.href = "login.html"; }
 
         let currentProfilePic = "https://picsum.photos/150/150?random=1";
-        let latestStoryImg = null;
-        let storyTimer = null;
-        let isCheckingStory = true;
+        let currentUserFollowingList = [];
 
         document.getElementById("logout-trigger-btn").addEventListener("click", () => {
             localStorage.removeItem("active_user");
@@ -275,8 +279,8 @@
 
                 if (docSnap.exists()) {
                     const userData = docSnap.data();
-                    currentUsername = userData.username || currentUsername;
                     currentProfilePic = userData.profilePic || currentProfilePic;
+                    currentUserFollowingList = userData.following || [];
 
                     document.getElementById("top-nav-avatar").src = currentProfilePic;
                     document.getElementById("bottom-nav-avatar").src = currentProfilePic;
@@ -289,70 +293,100 @@
                     document.getElementById("sidebar-fullname").innerText = "Instagram User";
                 }
             } catch(err) {
-                console.log("Error syncing user data: ", err);
+                console.log("Sync failed: ", err);
             } finally {
-                await checkUserStories();
+                await loadDynamicSuggestions();
             }
         }
 
-        syncUserData();
-
-        async function checkUserStories() {
+        // 🔥 REAL INSTAGRAM SUGGESTIONS LOGIC WITH REAL FOLLOW/UNFOLLOW ENGINE
+        async function loadDynamicSuggestions() {
+            const suggestionsContainer = document.getElementById("dynamic-suggestions-box");
             try {
-                const querySnapshot = await getDocs(collection(db, "stories"));
-                let matchedStories = [];
+                const querySnapshot = await getDocs(collection(db, "users"));
+                suggestionsContainer.innerHTML = "";
+                let renderedCount = 0;
 
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    if (data.userId === currentUsername) { matchedStories.push(data); }
+                querySnapshot.forEach((userDoc) => {
+                    const uData = userDoc.data();
+                    const targetUid = userDoc.id; // Target user's document ID (username)
+                    const uName = uData.username || targetUid;
+                    const uRealName = uData.name || "Instagram User";
+                    const uPic = uData.profilePic || "https://picsum.photos/100/100?random=50";
+
+                    // Conditions: Apni ID suggestions me na aaye, aur max 5 logs render ho
+                    if (uName !== currentUsername && renderedCount < 5) {
+                        renderedCount++;
+                        
+                        const isAlreadyFollowing = currentUserFollowingList.includes(uName);
+                        const btnText = isAlreadyFollowing ? "Following" : "Follow";
+                        const btnClass = isAlreadyFollowing ? "follow-toggle-btn following-active" : "follow-toggle-btn";
+
+                        const sRow = document.createElement("div");
+                        sRow.className = "suggested-user-row";
+                        sRow.innerHTML = `
+                            <div class="s-user-meta">
+                                <a href="user-profile.html?username=${uName}">
+                                    <img src="${uPic}" alt="${uName}">
+                                </a>
+                                <div class="s-text-box">
+                                    <a href="user-profile.html?username=${uName}" class="s-username">${uName}</a>
+                                    <span class="s-fullname">${uRealName}</span>
+                                </div>
+                            </div>
+                            <button class="${btnClass}" data-target-user="${uName}">${btnText}</button>
+                        `;
+                        suggestionsContainer.appendChild(sRow);
+                    }
                 });
 
-                if (matchedStories.length > 0) {
-                    matchedStories.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
-                    latestStoryImg = matchedStories[0].storyImg;
-                    document.getElementById("story-plus-icon").style.display = "none";
-                    document.querySelector("#my-story-node .story-ring-box").style.background = "linear-gradient(45deg, #fbc531, #c23616, #9c88ff)";
-                } else {
-                    latestStoryImg = null;
-                    document.getElementById("story-plus-icon").style.display = "flex";
-                    document.querySelector("#my-story-node .story-ring-box").style.background = "#dbdbdb";
+                if (renderedCount === 0) {
+                    suggestionsContainer.innerHTML = `<div style="font-size:12px; color:var(--text-muted); padding:5px 0;">No new suggestions</div>`;
                 }
-            } catch (err) {
-                document.getElementById("story-plus-icon").style.display = "flex";
-                console.error("Story context sync error: ", err);
-            } finally {
-                isCheckingStory = false;
+            } catch(err) {
+                console.error("Suggestions retrieval crash: ", err);
+                suggestionsContainer.innerHTML = `<div style="font-size:12px; color:var(--text-muted);">Error loading suggestions</div>`;
             }
         }
 
-        document.getElementById("my-story-node").addEventListener("click", () => {
-            if (isCheckingStory) return;
-            if (latestStoryImg) {
-                const modal = document.getElementById("story-modal");
-                document.getElementById("popup-story-img").src = latestStoryImg;
-                document.getElementById("popup-story-avatar").src = currentProfilePic;
-                document.getElementById("popup-story-username").innerText = currentUsername;
-                modal.style.display = "flex";
+        // 🔥 HANDLER FOR SIDEBAR FOLLOW/UNFOLLOW CLICK REAL-TIME SYSTEM
+        document.getElementById("dynamic-suggestions-box").addEventListener("click", async (e) => {
+            if (e.target.classList.contains("follow-toggle-btn")) {
+                const targetUserStr = e.target.getAttribute("data-target-user");
+                const isFollowingNow = e.target.classList.contains("following-active");
                 
-                const bar = document.getElementById("story-progress-bar");
-                bar.style.transition = "none"; bar.style.width = "0%";
-                setTimeout(() => { bar.style.transition = "width 4s linear"; bar.style.width = "100%"; }, 20);
-                storyTimer = setTimeout(() => { closeStory(); }, 4000);
-            } else {
-                window.location.href = "create.html?mode=story";
+                const myUserDocRef = doc(db, "users", currentUsername);
+                const targetedUserDocRef = doc(db, "users", targetUserStr);
+
+                // UI Immediate feedback (Chakachak Experience)
+                if (!isFollowingNow) {
+                    e.target.innerText = "Following";
+                    e.target.classList.add("following-active");
+                    currentUserFollowingList.push(targetUserStr);
+                    
+                    // Backend Update
+                    try {
+                        await updateDoc(myUserDocRef, { following: arrayUnion(targetUserStr) });
+                        await updateDoc(targetedUserDocRef, { followers: arrayUnion(currentUsername) });
+                    } catch(ex) { console.error("Follow operation aborted: ", ex); }
+                } else {
+                    e.target.innerText = "Follow";
+                    e.target.classList.remove("following-active");
+                    currentUserFollowingList = currentUserFollowingList.filter(u => u !== targetUserStr);
+                    
+                    // Backend Update
+                    try {
+                        await updateDoc(myUserDocRef, { following: arrayRemove(targetUserStr) });
+                        await updateDoc(targetedUserDocRef, { followers: arrayRemove(currentUsername) });
+                    } catch(ex) { console.error("Unfollow operation aborted: ", ex); }
+                }
             }
         });
 
-        function closeStory() {
-            document.getElementById("story-modal").style.display = "none";
-            document.getElementById("story-progress-bar").style.transition = "none";
-            document.getElementById("story-progress-bar").style.width = "0%";
-            clearTimeout(storyTimer);
-        }
-        document.getElementById("close-story-btn").addEventListener("click", closeStory);
+        syncUserData();
 
+        // --- GLOBAL POSTS STREAM FEED LOADING ENGINE ---
         const postsTargetContainer = document.getElementById("dynamic-posts-container");
-
         onSnapshot(query(collection(db, "posts"), orderBy("timestamp", "desc")), (snapshot) => {
             postsTargetContainer.innerHTML = "";
             let totalPostsCounter = 0;
@@ -360,10 +394,6 @@
             snapshot.forEach((postDoc) => {
                 const postId = postDoc.id;
                 const postData = postDoc.data();
-                
-                // 🔥 REAL-TIME BACKEND DEBUG ENGINE LOG ADDED HERE:
-                console.log("🔥 DATABASE SNAPSHOT -> ID:", postId, " | Raw UserID Field:", postData.userId);
-
                 totalPostsCounter++;
 
                 const article = document.createElement("article");
@@ -372,7 +402,6 @@
 
                 const postUserAvatar = postData.profilePic || "https://picsum.photos/150/150?random=99";
                 const postAuthor = postData.userId || "anonymous";
-
                 const likedByArray = postData.likedBy || [];
                 const hasUserLiked = likedByArray.includes(currentUsername);
 
@@ -388,52 +417,28 @@
                                 <span class="post-location">${postData.location || 'Global Territory'}</span>
                             </div>
                         </div>
-                        <span class="material-icons post-options-btn">more_horiz</span>
+                        <span class="material-icons">more_horiz</span>
                     </div>
-                    <div class="post-image-box">
-                        <img src="${postData.postImg}" alt="Post Graphic">
-                    </div>
+                    <div class="post-image-box"><img src="${postData.postImg}"></div>
                     <div class="post-controls">
                         <div class="left-controls">
                             <span class="${heartClass} like-toggle-btn">${heartIcon}</span>
                             <span class="material-icons-outlined basic-focus-trigger">chat_bubble_outline</span>
-                            <span class="material-icons-outlined">send</span>
                         </div>
-                        <span class="material-icons-outlined">bookmark_border</span>
                     </div>
                     <div class="post-body-content">
                         <span class="likes-count">${postData.likesCount || 0} likes</span>
-                        <p class="caption-line"><span class="bold-user">${postAuthor}</span>${postData.caption || ''}</p>
-                        <div class="post-time-stamp" style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; margin-top: 5px;">Recent Activity Pipeline</div>
+                        <p class="caption-line"><span class="bold-user" onclick="window.location.href='user-profile.html?username=${postAuthor}'">${postAuthor}</span>${postData.caption || ''}</p>
                     </div>
                     <div class="comments-container" id="comments-box-${postId}"></div>
                     <div class="comment-input-area">
                         <input type="text" class="comment-input-field" placeholder="Add a comment..." id="input-field-${postId}">
-                        <button class="comment-post-btn" data-target-id="${postId}" disabled>Post</button>
+                        <button class="comment-post-btn" data-target-id="${postId}">Post</button>
                     </div>
                 `;
-
                 postsTargetContainer.appendChild(article);
-
-                const currentInputField = document.getElementById(`input-field-${postId}`);
-                const currentPostBtn = article.querySelector(`[data-target-id="${postId}"]`);
-
-                currentInputField.addEventListener("input", (e) => {
-                    currentPostBtn.disabled = e.target.value.trim() === "";
-                });
-
-                article.querySelector(".basic-focus-trigger").addEventListener("click", () => currentInputField.focus());
                 bindLiveCommentsToPost(postId);
             });
-
-            if (totalPostsCounter === 0) {
-                postsTargetContainer.innerHTML = `
-                    <div style="background: white; border: 1px solid var(--border-color); border-radius: 8px; padding: 50px 20px; text-align: center; color: var(--text-muted); font-size: 14px;">
-                        <span class="material-icons-outlined" style="font-size: 48px; margin-bottom: 14px; color: #ccc;">image</span><br>
-                        <strong style="color: #262626; font-size: 16px; display:block; margin-bottom: 5px;">No Posts Globally</strong>
-                        Be the first one to upload a post on this platform!
-                    </div>`;
-            }
         });
 
         function bindLiveCommentsToPost(postId) {
@@ -451,76 +456,6 @@
                 });
             });
         }
-
-        postsTargetContainer.addEventListener("click", async (e) => {
-            if (e.target.classList.contains("comment-post-btn")) {
-                const targetedPostId = e.target.getAttribute("data-target-id");
-                const targetInput = document.getElementById(`input-field-${targetedPostId}`);
-                const inputCommentValueStringText = targetInput.value.trim();
-
-                if (inputCommentValueStringText !== "") {
-                    e.target.disabled = true;
-                    try {
-                        await addDoc(collection(db, "comments"), {
-                            postId: targetedPostId,
-                            commentedBy: currentUsername,
-                            text: inputCommentValueStringText,
-                            timestamp: new Date()
-                        });
-                        targetInput.value = "";
-                    } catch(err) { console.error("Comment post error: ", err); }
-                }
-            }
-
-            if (e.target.classList.contains("like-toggle-btn")) {
-                const postCard = e.target.closest(".post-card");
-                const targetedPostId = postCard.getAttribute("data-post-id");
-                const isLiked = e.target.innerText === "favorite";
-                
-                const postRef = doc(db, "posts", targetedPostId);
-
-                try {
-                    if (!isLiked) {
-                        e.target.innerText = "favorite";
-                        e.target.classList.remove("material-icons-outlined");
-                        e.target.classList.add("material-icons", "liked-heart");
-                    } else {
-                        e.target.innerText = "favorite_border";
-                        e.target.classList.remove("material-icons", "liked-heart");
-                        e.target.classList.add("material-icons-outlined");
-                    }
-
-                    const postDoc = await getDoc(postRef);
-                    if (postDoc.exists()) {
-                        const postData = postDoc.data();
-                        let currentLikes = postData.likesCount || 0;
-                        
-                        if (!isLiked) {
-                            await updateDoc(postRef, {
-                                likedBy: arrayUnion(currentUsername),
-                                likesCount: currentLikes + 1
-                            });
-                        } else {
-                            await updateDoc(postRef, {
-                                likedBy: arrayRemove(currentUsername),
-                                likesCount: Math.max(0, currentLikes - 1)
-                            });
-                        }
-                    }
-                } catch (err) {
-                    console.error("Like synchronization aborted: ", err);
-                    if (isLiked) {
-                        e.target.innerText = "favorite";
-                        e.target.classList.remove("material-icons-outlined");
-                        e.target.classList.add("material-icons", "liked-heart");
-                    } else {
-                        e.target.innerText = "favorite_border";
-                        e.target.classList.remove("material-icons", "liked-heart");
-                        e.target.classList.add("material-icons-outlined");
-                    }
-                }
-            }
-        });
     </script>
 </body>
 </html>
