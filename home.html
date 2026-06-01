@@ -2,14 +2,43 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Instagram</title>
     <link href="https://fonts.googleapis.com/css2?family=Grand+Hotel&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --bg-color: #fafafa; --border-color: #dbdbdb; --text-main: #262626; --text-muted: #8e8e8e; --card-bg: #ffffff; --story-ring: linear-gradient(45deg, #fbc531, #c23616, #9c88ff); }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-main); padding-top: 60px; padding-bottom: 60px; }
+        :root { 
+            --bg-color: #fafafa; 
+            --border-color: #dbdbdb; 
+            --text-main: #262626; 
+            --text-muted: #8e8e8e; 
+            --card-bg: #ffffff; 
+            --story-ring: linear-gradient(45deg, #fbc531, #c23616, #9c88ff); 
+        }
+        
+        /* 🛠️ GLOBAL BOX RESET: Prevents extra paddings from breaking right side width */
+        *, *::before, *::after { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+        }
+        
+        /* 🛠️ Main Screen Protection Limits */
+        html, body {
+            width: 100% !important;
+            max-width: 100% !important;
+            overflow-x: hidden !important; /* Locks left/right screen spill */
+            -webkit-text-size-adjust: 100%;
+        }
+        
+        body { 
+            background-color: var(--bg-color); 
+            color: var(--text-main); 
+            padding-top: 60px; 
+            padding-bottom: 60px; 
+        }
+        
         a { text-decoration: none; color: inherit; }
         
         /* --- TOP NAVBAR --- */
@@ -35,11 +64,11 @@
         .bottom-profile-pic { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1.5px solid black; }
 
         /* --- WORKSPACE LAYOUT --- */
-        .main-workspace { max-width: 935px; margin: 30px auto 0 auto; display: flex; gap: 28px; padding: 0 20px; }
-        .feed-section { flex: 1; max-width: 614px; display: flex; flex-direction: column; gap: 24px; }
+        .main-workspace { max-width: 935px; margin: 30px auto 0 auto; display: flex; gap: 28px; padding: 0 20px; width: 100%; }
+        .feed-section { flex: 1; max-width: 614px; display: flex; flex-direction: column; gap: 24px; width: 100%; }
         
         /* Stories */
-        .stories-wrapper { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; display: flex; gap: 16px; overflow-x: auto; scrollbar-width: none; }
+        .stories-wrapper { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; display: flex; gap: 16px; overflow-x: auto; scrollbar-width: none; width: 100%; }
         .stories-wrapper::-webkit-scrollbar { display: none; }
         .story-node { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 12px; cursor: pointer; min-width: 66px; position: relative; }
         .story-ring-box { width: 66px; height: 66px; border-radius: 50%; background: var(--story-ring); padding: 2px; display: flex; justify-content: center; align-items: center; }
@@ -48,7 +77,7 @@
         .story-username { width: 100%; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-main); }
         
         /* Posts */
-        .post-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; display: flex; flex-direction: column; }
+        .post-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; display: flex; flex-direction: column; width: 100%; overflow: hidden; }
         .post-header { padding: 14px; display: flex; justify-content: space-between; align-items: center; }
         .post-user-meta { display: flex; align-items: center; gap: 12px; }
         .post-user-meta img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
@@ -113,9 +142,10 @@
             .bottom-navbar { display: flex !important; }
             
             .search-engine-box { width: 140px !important; }
-            .main-workspace { margin-top: 60px; padding: 0; } 
+            /* 🛠️ Dynamic padding bounds prevent bottom/top bars overlapping text */
+            .main-workspace { margin-top: 10px; padding: 0; width: 100% !important; } 
             .stories-wrapper { border: none; border-bottom: 1px solid var(--border-color); border-radius: 0; } 
-            .post-card { border-left: none; border-right: none; border-radius: 0; } 
+            .post-card { border-left: none; border-right: none; border-radius: 0; width: 100% !important; } 
         }
     </style>
 </head>
@@ -164,7 +194,7 @@
                 <div class="story-node"><div class="story-ring-box"><img src="https://picsum.photos/100/100?random=8" alt="user"></div><span class="story-username">travel_geek</span></div>
             </div>
 
-            <div id="dynamic-posts-container" style="display: flex; flex-direction: column; gap: 24px;">
+            <div id="dynamic-posts-container" style="display: flex; flex-direction: column; gap: 24px; width: 100%;">
                 <div style="padding: 40px; text-align: center; color: var(--text-muted); font-size: 14px;">
                     <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 24px; margin-bottom: 10px;"></i><br>Syncing global feed content...
                 </div>
@@ -335,8 +365,6 @@
                 article.setAttribute("data-post-id", postId);
 
                 const postUserAvatar = postData.profilePic || "https://picsum.photos/150/150?random=99";
-                
-                // FIXED HERE: Replaced postData.username with postData.userId
                 const postAuthor = postData.userId || "anonymous";
 
                 article.innerHTML = `
