@@ -444,7 +444,7 @@ $("account-share-profile-btn").onclick = () => {
 $("account-logout-btn").onclick = () => {
     if (confirm("Log out from this account?")) {
         localStorage.removeItem("active_user");
-        window.location.href = "login.html";
+        window.location.href = "index.html";
     }
 };
 
@@ -484,7 +484,7 @@ $("settings-share-profile-btn").onclick = () => $("share-profile-btn").click();
 
 $("settings-logout-btn").onclick = () => {
     localStorage.removeItem("active_user");
-    window.location.href = "login.html";
+    window.location.href = "index.html";
 };
 
 async function fetchUserProfileData() {
