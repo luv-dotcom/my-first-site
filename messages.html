@@ -63,6 +63,10 @@ button,input{font:inherit}button{cursor:pointer}
 #send-btn:disabled{color:#4d87ad;cursor:default}
 .toast{position:fixed;left:50%;bottom:72px;transform:translateX(-50%) translateY(20px);background:rgba(255,255,255,.92);color:#000;padding:10px 14px;border-radius:999px;font-size:13px;font-weight:700;opacity:0;pointer-events:none;transition:.25s ease;z-index:12000}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.attach-menu{position:fixed;left:14px;bottom:76px;background:#1f1f1f;border:1px solid #343434;border-radius:14px;padding:8px;display:none;flex-direction:column;gap:6px;z-index:13000;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.attach-menu.open{display:flex}
+.attach-menu button{border:none;background:#262626;color:white;padding:10px 14px;border-radius:10px;text-align:left;min-width:150px;font-weight:650;cursor:pointer}
+.attach-menu button:hover{background:#333}
 @media(max-width:768px){.top-chat-nav{height:54px;padding:0 14px}#chat-sidebar{width:100%;max-width:100%;display:flex;border-right:none}#chat-main-window{display:none;width:100%}#main-layout-container.mobile-chat-active #chat-sidebar{display:none}#main-layout-container.mobile-chat-active #chat-main-window{display:flex;position:fixed;inset:0;width:100%;height:100vh;height:100dvh;z-index:9999;background:var(--chat-bg)}#main-layout-container.mobile-chat-active #active-chat-box{height:100%;height:100dvh}#chat-back-btn{display:flex}.active-chat-header{height:56px;padding:8px 12px}#chat-messages-container{padding:12px 10px}.msg-bubble{max-width:82%;font-size:14px}.mobile-typer-container{padding:9px 10px calc(9px + env(safe-area-inset-bottom));gap:8px}.quick-action-btn{width:36px;height:36px}#message-text-input{height:42px;padding:10px 14px}}
 </style>
 </head>
@@ -115,11 +119,21 @@ button,input{font:inherit}button{cursor:pointer}
     </div>
 </div>
 
+<input type="file" id="gallery-file-input" accept="image/*,video/*" style="display:none">
+<input type="file" id="camera-file-input" accept="image/*,video/*" capture="environment" style="display:none">
+
+<div class="attach-menu" id="attach-menu">
+    <button type="button" id="attach-camera">Camera</button>
+    <button type="button" id="attach-gallery">Gallery</button>
+    <button type="button" id="attach-location">Location</button>
+</div>
+
 <div class="toast" id="chat-toast">Done</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
 import { getFirestore, doc, collection, addDoc, setDoc, updateDoc, onSnapshot, query, orderBy, arrayUnion, getDocs } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-storage.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyBrqMn7FrFW3jslaDNM0ui-VW4w6K_3Nmk",
@@ -130,7 +144,9 @@ const firebaseConfig = {
     appId: "1:599343109250:web:1306ec63908ba21c54509b"
 };
 
-const db = getFirestore(initializeApp(firebaseConfig));
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const storage = getStorage(app);
 
 let myUsername = localStorage.getItem("active_user") || "Guest_User";
 let selectedTargetUser = null;
@@ -167,7 +183,43 @@ window.addEventListener("DOMContentLoaded", () => {
     safeGet("chat-back-btn").addEventListener("click", closeMobileChat);
 
     safeGet("camera-btn").addEventListener("click", () => {
-        showToast("Photo, reel, post share support ready");
+        if (!selectedTargetUser) {
+            showToast("Select a chat first");
+            return;
+        }
+        safeGet("attach-menu").classList.toggle("open");
+    });
+
+    safeGet("attach-camera").addEventListener("click", () => {
+        safeGet("attach-menu").classList.remove("open");
+        safeGet("camera-file-input").click();
+    });
+
+    safeGet("attach-gallery").addEventListener("click", () => {
+        safeGet("attach-menu").classList.remove("open");
+        safeGet("gallery-file-input").click();
+    });
+
+    safeGet("attach-location").addEventListener("click", () => {
+        safeGet("attach-menu").classList.remove("open");
+        sendCurrentLocation();
+    });
+
+    safeGet("camera-file-input").addEventListener("change", (e) => {
+        handlePickedMedia(e.target.files[0], e.target);
+    });
+
+    safeGet("gallery-file-input").addEventListener("change", (e) => {
+        handlePickedMedia(e.target.files[0], e.target);
+    });
+
+    document.addEventListener("click", (e) => {
+        const menu = safeGet("attach-menu");
+        const plusBtn = safeGet("camera-btn");
+
+        if (!menu.contains(e.target) && e.target !== plusBtn) {
+            menu.classList.remove("open");
+        }
     });
 
     searchInput.addEventListener("input", () => renderList(latestUsersList));
@@ -201,6 +253,7 @@ function getPendingSharedPayloadFromUrl() {
         storyUrl: params.get("storyUrl") || "",
         thumbnailUrl: params.get("thumbnailUrl") || "",
         imageUrl: params.get("imageUrl") || "",
+        videoUrl: params.get("videoUrl") || "",
         title: params.get("title") || getLastMessageLabel(shareType),
         caption: params.get("caption") || "",
         storyUser: params.get("storyUser") || "",
@@ -353,6 +406,7 @@ function closeMobileChat() {
     safeGet("active-chat-box").style.display = "none";
     safeGet("message-text-input").value = "";
     safeGet("send-btn").disabled = true;
+    safeGet("attach-menu").classList.remove("open");
     renderList(latestUsersList);
 
     if (unsubscribeMessages) {
@@ -394,7 +448,14 @@ function listenToMessages(targetUser) {
                 }
             }
 
-            if (messageType === "reel" || messageType === "post" || messageType === "story") {
+            if (
+                messageType === "reel" ||
+                messageType === "post" ||
+                messageType === "story" ||
+                messageType === "image" ||
+                messageType === "video" ||
+                messageType === "location"
+            ) {
                 container.appendChild(createSharedCard(mData, isSent));
             } else {
                 container.appendChild(createTextBubble(mData, isSent));
@@ -452,22 +513,29 @@ function createSharedCard(mData, isSent) {
     const type = mData.type || "post";
     const title = mData.title || getLastMessageLabel(type);
     const caption = mData.caption || mData.text || "";
-    const mediaUrl = mData.thumbnailUrl || mData.imageUrl || mData.reelUrl || mData.postUrl || mData.storyUrl || "";
+    const mediaUrl = mData.thumbnailUrl || mData.imageUrl || mData.videoUrl || mData.reelUrl || mData.postUrl || mData.storyUrl || "";
     const targetUrl = getSharedTargetUrl(mData);
 
     card.className = `shared-card ${isSent ? "sent" : "received"}`;
 
-    const isVideo = type === "reel" || String(mediaUrl).includes(".mp4") || String(mediaUrl).includes("video");
+    let mediaHtml = `<span>No preview</span>`;
+
+    if (type === "image" && mData.imageUrl) {
+        mediaHtml = `<img src="${escapeAttr(mData.imageUrl)}" alt="Photo">`;
+    } else if (type === "video" && mData.videoUrl) {
+        mediaHtml = `<video src="${escapeAttr(mData.videoUrl)}" controls playsinline></video>`;
+    } else if (type === "location") {
+        mediaHtml = `<div style="padding:20px;text-align:center;color:white;font-weight:750;">Location shared</div>`;
+    } else if (mediaUrl) {
+        const isVideo = type === "reel" || String(mediaUrl).includes(".mp4") || String(mediaUrl).includes("video");
+        mediaHtml = isVideo
+            ? `<video src="${escapeAttr(mediaUrl)}" muted playsinline></video>`
+            : `<img src="${escapeAttr(mediaUrl)}" alt="${escapeAttr(title)}">`;
+    }
 
     card.innerHTML = `
         <div class="shared-card-media">
-            ${
-                mediaUrl
-                    ? isVideo
-                        ? `<video src="${escapeAttr(mediaUrl)}" muted playsinline></video>`
-                        : `<img src="${escapeAttr(mediaUrl)}" alt="${escapeAttr(title)}">`
-                    : `<span>No preview</span>`
-            }
+            ${mediaHtml}
         </div>
         <div class="shared-card-body">
             <div class="shared-card-type">${escapeHtml(type)}</div>
@@ -479,11 +547,97 @@ function createSharedCard(mData, isSent) {
     `;
 
     card.querySelector(".shared-card-btn").addEventListener("click", () => {
-        if (targetUrl) window.location.href = targetUrl;
+        if (type === "image" && mData.imageUrl) window.open(mData.imageUrl, "_blank");
+        else if (type === "video" && mData.videoUrl) window.open(mData.videoUrl, "_blank");
+        else if (targetUrl) window.location.href = targetUrl;
         else showToast("Link not available");
     });
 
     return card;
+}
+
+async function handlePickedMedia(file, inputEl) {
+    if (!file || !selectedTargetUser) return;
+
+    const isVideo = file.type.startsWith("video/");
+    const isImage = file.type.startsWith("image/");
+
+    if (!isVideo && !isImage) {
+        showToast("Only photo or video allowed");
+        inputEl.value = "";
+        return;
+    }
+
+    showToast("Uploading...");
+
+    try {
+        const safeName = file.name.replace(/[^\w.-]+/g, "_");
+        const mediaType = isVideo ? "video" : "image";
+        const storagePath = `chat-media/${myUsername}/${Date.now()}_${safeName}`;
+        const storageRef = ref(storage, storagePath);
+
+        await uploadBytes(storageRef, file);
+        const downloadUrl = await getDownloadURL(storageRef);
+
+        await sendMessageToUser(selectedTargetUser, {
+            type: mediaType,
+            text: isVideo ? "Sent a video" : "Sent a photo",
+            title: isVideo ? "Video" : "Photo",
+            caption: "",
+            imageUrl: isImage ? downloadUrl : "",
+            videoUrl: isVideo ? downloadUrl : "",
+            thumbnailUrl: isImage ? downloadUrl : ""
+        });
+
+        showToast(isVideo ? "Video sent" : "Photo sent");
+    } catch (err) {
+        console.error("Media send failed:", err);
+        alert("Media send nahi hua. Firebase Storage rules check karo.");
+    }
+
+    inputEl.value = "";
+}
+
+function sendCurrentLocation() {
+    if (!selectedTargetUser) {
+        showToast("Select a chat first");
+        return;
+    }
+
+    if (!navigator.geolocation) {
+        showToast("Location not supported");
+        return;
+    }
+
+    showToast("Getting location...");
+
+    navigator.geolocation.getCurrentPosition(
+        async (position) => {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            const mapLink = `https://www.google.com/maps?q=${lat},${lng}`;
+
+            await sendMessageToUser(selectedTargetUser, {
+                type: "location",
+                text: "Shared a location",
+                title: "Location",
+                caption: "Tap to open location",
+                link: mapLink,
+                latitude: lat,
+                longitude: lng
+            });
+
+            showToast("Location sent");
+        },
+        () => {
+            showToast("Location permission denied");
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 12000,
+            maximumAge: 0
+        }
+    );
 }
 
 async function sendMessageLogic() {
@@ -532,10 +686,13 @@ async function sendMessageToUser(targetUser, payload) {
             storyUrl: payload.storyUrl || "",
             thumbnailUrl: payload.thumbnailUrl || "",
             imageUrl: payload.imageUrl || "",
+            videoUrl: payload.videoUrl || "",
             title: payload.title || "",
             caption: payload.caption || "",
             storyUser: payload.storyUser || "",
             link: payload.link || "",
+            latitude: payload.latitude || null,
+            longitude: payload.longitude || null,
             timestamp: new Date()
         });
 
@@ -561,6 +718,9 @@ function getLastMessageLabel(type) {
     if (type === "reel") return "Shared a reel";
     if (type === "post") return "Shared a post";
     if (type === "story") return "Shared a story";
+    if (type === "image") return "Sent a photo";
+    if (type === "video") return "Sent a video";
+    if (type === "location") return "Shared a location";
     return "No messages yet";
 }
 
@@ -568,10 +728,16 @@ function getOpenButtonText(type) {
     if (type === "reel") return "View reel";
     if (type === "post") return "View post";
     if (type === "story") return "View story";
+    if (type === "image") return "Open photo";
+    if (type === "video") return "Open video";
+    if (type === "location") return "Open location";
     return "Open";
 }
 
 function getSharedTargetUrl(data) {
+    if (data.type === "location" && data.link) return data.link;
+    if (data.type === "image" && data.imageUrl) return data.imageUrl;
+    if (data.type === "video" && data.videoUrl) return data.videoUrl;
     if (data.type === "reel" && data.reelId) return `reels.html?reel=${encodeURIComponent(data.reelId)}`;
     if (data.type === "post" && data.postId) return `post-view.html?post=${encodeURIComponent(data.postId)}`;
     if (data.type === "story") {
