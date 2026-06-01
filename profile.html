@@ -33,7 +33,7 @@
         body { padding-bottom: 62px; }
 
         a { color: inherit; text-decoration: none; }
-        button, input { font: inherit; }
+        button, input, textarea, select { font: inherit; }
         button { cursor: pointer; }
 
         .navbar {
@@ -103,8 +103,14 @@
             height: 150px;
             border-radius: 50%;
             padding: 3px;
-            background: linear-gradient(45deg, #fbc531, #c23616, #9c88ff);
+            background: var(--surface-lift);
             justify-self: center;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .avatar-section.has-story {
+            background: linear-gradient(45deg, #fbc531, #c23616, #9c88ff);
         }
 
         .avatar-section-inner {
@@ -120,6 +126,22 @@
             height: 100%;
             object-fit: cover;
             border-radius: 50%;
+            display: block;
+            background: var(--surface-lift);
+        }
+
+        .story-hint {
+            position: absolute;
+            left: 50%;
+            bottom: -18px;
+            transform: translateX(-50%);
+            font-size: 11px;
+            color: var(--text-muted);
+            white-space: nowrap;
+            display: none;
+        }
+
+        .avatar-section.has-story .story-hint {
             display: block;
         }
 
@@ -165,12 +187,7 @@
         }
 
         .btn-edit:hover { background: #333; }
-
-        .btn-primary {
-            background: var(--blue);
-            color: white;
-        }
-
+        .btn-primary { background: var(--blue); color: white; }
         .btn-primary:hover { background: #1877f2; }
 
         .stats-row {
@@ -194,6 +211,12 @@
             margin-bottom: 2px;
         }
 
+        .bio-meta {
+            color: var(--text-muted);
+            font-size: 13px;
+            margin-bottom: 2px;
+        }
+
         .profile-link {
             color: #e0f1ff;
             font-weight: 650;
@@ -201,6 +224,7 @@
             display: inline-flex;
             gap: 6px;
             align-items: center;
+            word-break: break-all;
         }
 
         .mobile-stats-row {
@@ -258,6 +282,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow: hidden;
         }
 
         .highlight-ring i {
@@ -270,6 +295,13 @@
             justify-content: center;
             font-size: 22px;
             color: #d8d8d8;
+        }
+
+        .highlight-ring img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
         }
 
         .tabs {
@@ -382,10 +414,14 @@
             padding: 18px;
         }
 
-        .list-card {
+        .modal.open { display: flex; }
+
+        .list-card,
+        .form-card,
+        .settings-card {
             background: var(--surface-soft);
-            width: min(420px, 100%);
-            max-height: min(460px, 80vh);
+            width: min(460px, 100%);
+            max-height: min(680px, 90vh);
             border-radius: 14px;
             display: flex;
             flex-direction: column;
@@ -393,13 +429,24 @@
             border: 1px solid #333;
         }
 
+        .settings-card { width: min(560px, 100%); }
+
         .modal-head {
-            height: 50px;
+            min-height: 52px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid #363636;
             padding: 0 16px;
+            flex-shrink: 0;
+        }
+
+        .modal-body {
+            padding: 16px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
         }
 
         #modal-users-list {
@@ -425,12 +472,135 @@
             color: #666;
         }
 
+        .field-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .field-group label {
+            color: var(--text-muted);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .field-group input,
+        .field-group textarea,
+        .field-group select {
+            width: 100%;
+            border: 1px solid #363636;
+            background: #0b0b0b;
+            color: white;
+            border-radius: 10px;
+            padding: 11px 12px;
+            outline: none;
+            resize: vertical;
+        }
+
+        .field-group textarea { min-height: 82px; }
+
+        .edit-photo-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: #0b0b0b;
+            border-radius: 12px;
+        }
+
+        .edit-photo-row img {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: var(--surface-lift);
+        }
+
+        .small-note {
+            color: var(--text-muted);
+            font-size: 12px;
+            line-height: 1.35;
+        }
+
+        .modal-footer {
+            border-top: 1px solid #363636;
+            padding: 12px 16px;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .danger-btn {
+            background: var(--danger);
+            color: white;
+        }
+
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 14px;
+            align-items: center;
+            border-bottom: 1px solid #262626;
+            padding: 13px 0;
+        }
+
+        .setting-row:last-child { border-bottom: none; }
+
+        .setting-title {
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .setting-desc {
+            color: var(--text-muted);
+            font-size: 12px;
+            margin-top: 3px;
+            line-height: 1.35;
+        }
+
+        .switch {
+            position: relative;
+            width: 44px;
+            height: 26px;
+            flex: 0 0 auto;
+        }
+
+        .switch input { display: none; }
+
+        .switch span {
+            position: absolute;
+            inset: 0;
+            background: #363636;
+            border-radius: 999px;
+            transition: 0.2s;
+        }
+
+        .switch span::before {
+            content: "";
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            left: 3px;
+            top: 3px;
+            background: white;
+            border-radius: 50%;
+            transition: 0.2s;
+        }
+
+        .switch input:checked + span {
+            background: var(--blue);
+        }
+
+        .switch input:checked + span::before {
+            transform: translateX(18px);
+        }
+
         .post-modal-card {
-            width: min(900px, 100%);
+            width: min(950px, 100%);
             max-height: 90vh;
             background: var(--surface);
             display: grid;
-            grid-template-columns: minmax(0, 1.1fr) 340px;
+            grid-template-columns: minmax(0, 1.1fr) 360px;
             border: 1px solid #333;
             border-radius: 8px;
             overflow: hidden;
@@ -444,7 +614,8 @@
             min-height: 420px;
         }
 
-        .post-modal-media img {
+        .post-modal-media img,
+        .post-modal-media video {
             width: 100%;
             height: 100%;
             max-height: 90vh;
@@ -459,7 +630,7 @@
         }
 
         .post-modal-user {
-            height: 58px;
+            min-height: 58px;
             border-bottom: 1px solid var(--border-color);
             display: flex;
             align-items: center;
@@ -473,6 +644,7 @@
             height: 34px;
             border-radius: 50%;
             object-fit: cover;
+            background: var(--surface-lift);
         }
 
         .post-caption {
@@ -496,6 +668,104 @@
             align-items: center;
             gap: 16px;
             font-size: 22px;
+        }
+
+        .story-preview-shell {
+            width: min(420px, 100%);
+            height: min(760px, 92vh);
+            border-radius: 16px;
+            overflow: hidden;
+            background: #000;
+            position: relative;
+            border: 1px solid #333;
+        }
+
+        .story-preview-shell img,
+        .story-preview-shell video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .story-preview-top {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            padding: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(rgba(0,0,0,0.7), transparent);
+        }
+
+        .story-preview-user {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            font-weight: 700;
+        }
+
+        .story-preview-user img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .story-overlay-text {
+            position: absolute;
+            left: 50%;
+            top: 45%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            font-size: 28px;
+            font-weight: 800;
+            text-shadow: 0 2px 12px rgba(0,0,0,0.85);
+            max-width: 86%;
+            overflow-wrap: anywhere;
+        }
+
+        .story-sticker {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255,255,255,0.92);
+            color: #000;
+            padding: 8px 13px;
+            border-radius: 999px;
+            font-weight: 800;
+            max-width: 86%;
+            overflow-wrap: anywhere;
+        }
+
+        .mention-preview { top: 58%; }
+        .music-preview {
+            bottom: 34px;
+            background: rgba(0,0,0,0.75);
+            color: white;
+        }
+
+        .toast {
+            position: fixed;
+            left: 50%;
+            bottom: 72px;
+            transform: translateX(-50%) translateY(20px);
+            background: rgba(255,255,255,0.92);
+            color: #000;
+            padding: 10px 14px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 700;
+            opacity: 0;
+            pointer-events: none;
+            transition: 0.25s ease;
+            z-index: 3000;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
         }
 
         .bottom-navbar {
@@ -546,6 +816,8 @@
                 height: 84px;
                 justify-self: start;
             }
+
+            .story-hint { display: none !important; }
 
             .info-section { gap: 10px; }
             .username { font-size: 21px; max-width: 100%; }
@@ -637,10 +909,11 @@
 
     <main class="container">
         <section class="profile-header">
-            <div class="avatar-section">
+            <div class="avatar-section" id="avatar-click-area">
                 <div class="avatar-section-inner">
-                    <img src="https://picsum.photos/150/150?random=99" alt="Profile Picture" id="profile-avatar">
+                    <img src="" alt="Profile Picture" id="profile-avatar">
                 </div>
+                <span class="story-hint">View story</span>
             </div>
 
             <div class="info-section">
@@ -660,6 +933,7 @@
 
                 <div class="bio-info">
                     <span class="full-name" id="profile-fullname">Loading Name...</span>
+                    <div class="bio-meta" id="profile-extra-meta" style="display:none;"></div>
                     <p id="profile-bio">Loading bio information...</p>
                     <a href="#" class="profile-link" id="profile-link" style="display:none;"><i class="fa-solid fa-link"></i><span></span></a>
                 </div>
@@ -672,11 +946,11 @@
             <div id="mobile-following-click-area"><b id="mobile-following-count">0</b> following</div>
         </div>
 
-        <section class="highlights" aria-label="Story highlights">
-            <div class="highlight-item"><div class="highlight-ring"><i class="fa-solid fa-plus"></i></div><span>New</span></div>
-            <div class="highlight-item"><div class="highlight-ring"><i class="fa-solid fa-star"></i></div><span>Best</span></div>
-            <div class="highlight-item"><div class="highlight-ring"><i class="fa-solid fa-camera-retro"></i></div><span>Photos</span></div>
-            <div class="highlight-item"><div class="highlight-ring"><i class="fa-solid fa-heart"></i></div><span>Moments</span></div>
+        <section class="highlights" id="highlights-row" aria-label="Story highlights">
+            <div class="highlight-item" id="new-highlight-btn">
+                <div class="highlight-ring"><i class="fa-solid fa-plus"></i></div>
+                <span>New</span>
+            </div>
         </section>
 
         <div class="tabs">
@@ -704,6 +978,150 @@
         </div>
     </div>
 
+    <div id="edit-profile-modal" class="modal">
+        <div class="form-card">
+            <div class="modal-head">
+                <h3>Edit profile</h3>
+                <button class="icon-btn" id="close-edit-modal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="edit-photo-row">
+                    <img src="" id="edit-photo-preview" alt="Profile preview">
+                    <div style="display:flex; flex-direction:column; gap:7px; min-width:0;">
+                        <strong id="edit-photo-username">username</strong>
+                        <button class="btn-edit btn-primary" type="button" id="change-photo-btn">Change photo</button>
+                        <input type="file" id="edit-profile-photo-input" accept="image/*" style="display:none;">
+                    </div>
+                </div>
+
+                <div class="field-group">
+                    <label>Name</label>
+                    <input type="text" id="edit-name-input" maxlength="50" placeholder="Name">
+                </div>
+
+                <div class="field-group">
+                    <label>Username</label>
+                    <input type="text" id="edit-username-input" maxlength="30" placeholder="Username">
+                    <div class="small-note">Username display update hoga. App login id wahi rahegi taaki account break na ho.</div>
+                </div>
+
+                <div class="field-group">
+                    <label>Bio</label>
+                    <textarea id="edit-bio-input" maxlength="180" placeholder="Bio"></textarea>
+                </div>
+
+                <div class="field-group">
+                    <label>Website</label>
+                    <input type="url" id="edit-website-input" placeholder="https://example.com">
+                </div>
+
+                <div class="field-group">
+                    <label>Pronouns</label>
+                    <input type="text" id="edit-pronouns-input" maxlength="40" placeholder="he/him, she/her...">
+                </div>
+
+                <div class="field-group">
+                    <label>Gender</label>
+                    <select id="edit-gender-input">
+                        <option value="">Prefer not to say</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Custom">Custom</option>
+                    </select>
+                </div>
+
+                <div class="field-group">
+                    <label>Category</label>
+                    <input type="text" id="edit-category-input" maxlength="40" placeholder="Creator, Artist, Gamer...">
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-edit" id="cancel-edit-btn">Cancel</button>
+                <button class="btn-edit btn-primary" id="save-profile-btn">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="settings-modal" class="modal">
+        <div class="settings-card">
+            <div class="modal-head">
+                <h3>Settings and activity</h3>
+                <button class="icon-btn" id="close-settings-modal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="modal-body">
+                <div>
+                    <div class="setting-title">Account</div>
+                    <div class="setting-desc">Manage profile, privacy, notifications and login preferences.</div>
+                </div>
+
+                <div class="setting-row">
+                    <div>
+                        <div class="setting-title">Private account</div>
+                        <div class="setting-desc">Only approved people can see your posts.</div>
+                    </div>
+                    <label class="switch"><input type="checkbox" id="setting-private"><span></span></label>
+                </div>
+
+                <div class="setting-row">
+                    <div>
+                        <div class="setting-title">Show activity status</div>
+                        <div class="setting-desc">Let people see when you are active.</div>
+                    </div>
+                    <label class="switch"><input type="checkbox" id="setting-activity"><span></span></label>
+                </div>
+
+                <div class="setting-row">
+                    <div>
+                        <div class="setting-title">Message requests</div>
+                        <div class="setting-desc">Allow people to send you message requests.</div>
+                    </div>
+                    <label class="switch"><input type="checkbox" id="setting-messages"><span></span></label>
+                </div>
+
+                <div class="setting-row">
+                    <div>
+                        <div class="setting-title">Push notifications</div>
+                        <div class="setting-desc">Likes, comments, follows and message alerts.</div>
+                    </div>
+                    <label class="switch"><input type="checkbox" id="setting-notifications"><span></span></label>
+                </div>
+
+                <div class="setting-row">
+                    <div>
+                        <div class="setting-title">Hide like count</div>
+                        <div class="setting-desc">Hide like counts on your profile posts.</div>
+                    </div>
+                    <label class="switch"><input type="checkbox" id="setting-hide-likes"><span></span></label>
+                </div>
+
+                <div class="field-group">
+                    <label>Theme</label>
+                    <select id="setting-theme">
+                        <option value="dark">Dark</option>
+                        <option value="light">Light</option>
+                    </select>
+                </div>
+
+                <div class="field-group">
+                    <label>Account status</label>
+                    <input type="text" value="No restrictions" disabled>
+                </div>
+
+                <button class="btn-edit" id="settings-edit-profile-btn">Edit profile</button>
+                <button class="btn-edit" id="settings-share-profile-btn">Share profile</button>
+                <button class="btn-edit danger-btn" id="settings-logout-btn">Log out</button>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-edit" id="cancel-settings-btn">Cancel</button>
+                <button class="btn-edit btn-primary" id="save-settings-btn">Save settings</button>
+            </div>
+        </div>
+    </div>
+
     <div id="post-modal" class="modal">
         <div class="post-modal-card">
             <div class="post-modal-media">
@@ -728,6 +1146,27 @@
         </div>
     </div>
 
+    <div id="highlight-modal" class="modal">
+        <div class="story-preview-shell">
+            <img src="" id="highlight-preview-img" alt="Highlight" style="display:none;">
+            <video id="highlight-preview-video" playsinline autoplay muted loop style="display:none;"></video>
+
+            <div class="story-preview-top">
+                <div class="story-preview-user">
+                    <img src="" id="highlight-preview-avatar" alt="User">
+                    <span id="highlight-preview-username">username</span>
+                </div>
+                <button class="icon-btn" id="close-highlight-modal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="story-overlay-text" id="highlight-preview-text"></div>
+            <div class="story-sticker mention-preview" id="highlight-preview-mention" style="display:none;"></div>
+            <div class="story-sticker music-preview" id="highlight-preview-music" style="display:none;"></div>
+        </div>
+    </div>
+
+    <div class="toast" id="profile-toast">Done</div>
+
     <nav class="bottom-navbar">
         <a href="home.html"><i class="fa-solid fa-house"></i></a>
         <a href="search.html"><i class="fa-solid fa-magnifying-glass"></i></a>
@@ -738,7 +1177,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, query, where, getDocs, orderBy, limit } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-storage.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBrqMn7FrFW3jslaDNM0ui-VW4w6K_3Nmk",
@@ -749,8 +1189,19 @@
             appId: "1:599343109250:web:1306ec63908ba21c54509b"
         };
 
-        const db = getFirestore(initializeApp(firebaseConfig));
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
         const urlParams = new URLSearchParams(window.location.search);
+
+        const defaultAvatarSvg = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300">
+                <rect width="300" height="300" fill="#262626"/>
+                <circle cx="150" cy="112" r="54" fill="#8e8e8e"/>
+                <path d="M54 268c12-68 56-102 96-102s84 34 96 102" fill="#8e8e8e"/>
+            </svg>
+        `;
+        const DEFAULT_AVATAR = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(defaultAvatarSvg)}`;
 
         let targetUsername = urlParams.get("username") || urlParams.get("id");
         let activeUser = localStorage.getItem("active_user");
@@ -764,34 +1215,74 @@
             targetUsername = activeUser;
         }
 
-        let currentProfilePic = "https://picsum.photos/150/150?random=99";
+        let currentProfilePic = DEFAULT_AVATAR;
         let currentDisplayUsername = targetUsername;
+        let currentUserData = {};
         let currentPosts = [];
+        let currentHighlights = [];
+        let hasActiveStory = false;
+        let selectedProfilePhotoFile = null;
 
         const $ = (id) => document.getElementById(id);
+        const isOwnProfile = () => targetUsername === activeUser;
 
         window.navigateToUser = function(username) {
             const cleanPath = window.location.origin + window.location.pathname;
             window.location.href = `${cleanPath}?username=${encodeURIComponent(username)}`;
         };
 
+        function showToast(text) {
+            $("profile-toast").innerText = text;
+            $("profile-toast").classList.add("show");
+            setTimeout(() => $("profile-toast").classList.remove("show"), 1600);
+        }
+
+        function openModal(id) {
+            $(id).classList.add("open");
+        }
+
+        function closeModal(id) {
+            $(id).classList.remove("open");
+        }
+
+        document.querySelectorAll(".modal").forEach((modal) => {
+            modal.addEventListener("click", (e) => {
+                if (e.target === modal) modal.classList.remove("open");
+            });
+        });
+
         $("share-profile-btn").addEventListener("click", async () => {
             const url = window.location.href;
-            if (navigator.share) {
-                await navigator.share({ title: currentDisplayUsername, url });
-            } else {
-                await navigator.clipboard.writeText(url);
-                alert("Profile link copied.");
+
+            try {
+                if (navigator.share) {
+                    await navigator.share({ title: currentDisplayUsername, url });
+                } else {
+                    await navigator.clipboard.writeText(url);
+                    showToast("Profile link copied");
+                }
+            } catch (err) {
+                showToast("Share cancelled");
             }
         });
 
         $("settings-btn").addEventListener("click", () => {
-            if (targetUsername === activeUser) {
-                window.location.href = "edit-profile.html";
-            } else {
-                alert("Settings sirf apni profile ke liye hoti hai.");
+            if (!isOwnProfile()) {
+                showToast("Settings only for your profile");
+                return;
             }
+
+            fillSettingsModal();
+            openModal("settings-modal");
         });
+
+        $("close-modal").onclick = () => closeModal("list-modal");
+        $("close-post-modal").onclick = () => closeModal("post-modal");
+        $("close-edit-modal").onclick = () => closeModal("edit-profile-modal");
+        $("cancel-edit-btn").onclick = () => closeModal("edit-profile-modal");
+        $("close-settings-modal").onclick = () => closeModal("settings-modal");
+        $("cancel-settings-btn").onclick = () => closeModal("settings-modal");
+        $("close-highlight-modal").onclick = () => closeModal("highlight-modal");
 
         document.querySelectorAll(".tab-item").forEach((tab) => {
             tab.addEventListener("click", () => {
@@ -801,14 +1292,55 @@
             });
         });
 
-        $("close-modal").onclick = () => $("list-modal").style.display = "none";
-        $("list-modal").addEventListener("click", (e) => {
-            if (e.target === $("list-modal")) $("list-modal").style.display = "none";
+        $("avatar-click-area").addEventListener("click", () => {
+            if (hasActiveStory) {
+                window.location.href = `story-view.html?mode=view&user=${encodeURIComponent(targetUsername)}`;
+                return;
+            }
+
+            if (isOwnProfile()) {
+                openEditProfileModal();
+            } else {
+                showToast("No active story");
+            }
         });
 
-        $("close-post-modal").onclick = () => $("post-modal").style.display = "none";
-        $("post-modal").addEventListener("click", (e) => {
-            if (e.target === $("post-modal")) $("post-modal").style.display = "none";
+        $("new-highlight-btn").addEventListener("click", () => {
+            if (!isOwnProfile()) {
+                showToast("Only this user can add highlights");
+                return;
+            }
+
+            window.location.href = "story-view.html?mode=create";
+        });
+
+        $("change-photo-btn").addEventListener("click", () => {
+            $("edit-profile-photo-input").click();
+        });
+
+        $("edit-profile-photo-input").addEventListener("change", () => {
+            selectedProfilePhotoFile = $("edit-profile-photo-input").files[0];
+
+            if (selectedProfilePhotoFile) {
+                $("edit-photo-preview").src = URL.createObjectURL(selectedProfilePhotoFile);
+            }
+        });
+
+        $("save-profile-btn").addEventListener("click", saveProfileChanges);
+        $("save-settings-btn").addEventListener("click", saveSettingsChanges);
+
+        $("settings-edit-profile-btn").addEventListener("click", () => {
+            closeModal("settings-modal");
+            openEditProfileModal();
+        });
+
+        $("settings-share-profile-btn").addEventListener("click", () => {
+            $("share-profile-btn").click();
+        });
+
+        $("settings-logout-btn").addEventListener("click", () => {
+            localStorage.removeItem("active_user");
+            window.location.href = "login.html";
         });
 
         async function fetchUserProfileData() {
@@ -819,31 +1351,35 @@
                 const userDocSnap = await getDoc(userDocRef);
 
                 if (userDocSnap.exists()) {
-                    const userData = userDocSnap.data();
-                    currentDisplayUsername = userData.username || targetUsername;
-                    currentProfilePic = userData.profilePic || currentProfilePic;
+                    currentUserData = userDocSnap.data();
+                    currentDisplayUsername = currentUserData.username || targetUsername;
+                    currentProfilePic = currentUserData.profilePic || DEFAULT_AVATAR;
 
                     $("profile-username").innerText = currentDisplayUsername;
                     $("nav-title").innerText = currentDisplayUsername;
-                    $("profile-fullname").innerText = userData.name || "Instagram User";
-                    $("profile-bio").innerHTML = escapeHtml(userData.bio || "Welcome to my profile!").replaceAll("\n", "<br>");
+                    $("profile-fullname").innerText = currentUserData.name || "Instagram User";
+                    $("profile-bio").innerHTML = escapeHtml(currentUserData.bio || "Welcome to my profile!").replaceAll("\n", "<br>");
                     $("profile-avatar").src = currentProfilePic;
 
-                    if (userData.website) {
-                        $("profile-link").style.display = "inline-flex";
-                        $("profile-link").href = userData.website;
-                        $("profile-link").querySelector("span").innerText = userData.website.replace(/^https?:\/\//, "");
-                    }
-
-                    document.title = `${currentDisplayUsername} • Instagram Profile`;
+                    renderExtraMeta(currentUserData);
+                    renderWebsite(currentUserData.website);
+                    document.title = `${currentDisplayUsername} - Instagram Profile`;
                 } else {
+                    currentUserData = {};
+                    currentDisplayUsername = targetUsername;
+                    currentProfilePic = DEFAULT_AVATAR;
+
                     $("profile-username").innerText = targetUsername;
                     $("nav-title").innerText = targetUsername;
                     $("profile-fullname").innerText = "Instagram User";
                     $("profile-bio").innerText = "Welcome to my profile!";
-                    $("profile-avatar").src = currentProfilePic;
-                    document.title = `${targetUsername} • Instagram Profile`;
+                    $("profile-avatar").src = DEFAULT_AVATAR;
+                    $("profile-link").style.display = "none";
+                    $("profile-extra-meta").style.display = "none";
+                    document.title = `${targetUsername} - Instagram Profile`;
                 }
+
+                await refreshStoryStatus();
 
                 const followersSnap = await getDocs(query(collection(db, "follows"), where("following", "==", targetUsername)));
                 const followingSnap = await getDocs(query(collection(db, "follows"), where("follower", "==", targetUsername)));
@@ -854,6 +1390,7 @@
                 setCounts(0, followersCount, followingCount);
                 await setupActionButtons(followersCount);
                 setupListModals();
+                await loadHighlights();
                 await loadTargetUserPosts();
             } catch (err) {
                 console.error("Error loading user profile system:", err);
@@ -861,14 +1398,67 @@
             }
         }
 
+        function renderExtraMeta(data) {
+            const pieces = [];
+
+            if (data.category) pieces.push(data.category);
+            if (data.pronouns) pieces.push(data.pronouns);
+            if (data.gender) pieces.push(data.gender);
+
+            if (pieces.length) {
+                $("profile-extra-meta").innerText = pieces.join(" - ");
+                $("profile-extra-meta").style.display = "block";
+            } else {
+                $("profile-extra-meta").style.display = "none";
+            }
+        }
+
+        function renderWebsite(website) {
+            if (website) {
+                $("profile-link").style.display = "inline-flex";
+                $("profile-link").href = website.startsWith("http") ? website : `https://${website}`;
+                $("profile-link").querySelector("span").innerText = website.replace(/^https?:\/\//, "");
+            } else {
+                $("profile-link").style.display = "none";
+            }
+        }
+
+        async function refreshStoryStatus() {
+            try {
+                const storyQuery = query(
+                    collection(db, "stories"),
+                    where("userId", "==", targetUsername),
+                    orderBy("createdAt", "desc"),
+                    limit(1)
+                );
+
+                const storySnap = await getDocs(storyQuery);
+                hasActiveStory = false;
+
+                storySnap.forEach((storyDoc) => {
+                    const storyData = storyDoc.data();
+                    const expiresAt = storyData.expiresAt && storyData.expiresAt.toDate ? storyData.expiresAt.toDate() : null;
+
+                    if (!expiresAt || expiresAt > new Date()) {
+                        hasActiveStory = true;
+                    }
+                });
+
+                $("avatar-click-area").classList.toggle("has-story", hasActiveStory);
+            } catch (err) {
+                console.error("Story status failed:", err);
+                hasActiveStory = false;
+            }
+        }
+
         async function setupActionButtons(followersCount) {
             const actionBtn = $("profile-action-btn");
             const msgBtn = $("message-btn");
 
-            if (targetUsername === activeUser) {
+            if (isOwnProfile()) {
                 actionBtn.innerText = "Edit profile";
                 actionBtn.classList.remove("btn-primary");
-                actionBtn.onclick = () => window.location.href = "edit-profile.html";
+                actionBtn.onclick = openEditProfileModal;
 
                 msgBtn.style.display = "inline-block";
                 msgBtn.innerText = "Share profile";
@@ -900,6 +1490,7 @@
                             following: targetUsername,
                             timestamp: new Date()
                         });
+
                         followersCount++;
                         paintFollowing(true);
                     } else {
@@ -912,17 +1503,126 @@
                     $("mobile-follower-count").innerText = followersCount;
                 } catch (err) {
                     console.error("Follow action failed:", err);
-                    alert("Follow update nahi hua. Firebase rules check karo.");
+                    showToast("Follow update failed");
                 } finally {
                     actionBtn.disabled = false;
                 }
             };
         }
 
+        function openEditProfileModal() {
+            if (!isOwnProfile()) return;
+
+            selectedProfilePhotoFile = null;
+            $("edit-photo-preview").src = currentProfilePic || DEFAULT_AVATAR;
+            $("edit-photo-username").innerText = currentDisplayUsername;
+            $("edit-name-input").value = currentUserData.name || "";
+            $("edit-username-input").value = currentUserData.username || targetUsername;
+            $("edit-bio-input").value = currentUserData.bio || "";
+            $("edit-website-input").value = currentUserData.website || "";
+            $("edit-pronouns-input").value = currentUserData.pronouns || "";
+            $("edit-gender-input").value = currentUserData.gender || "";
+            $("edit-category-input").value = currentUserData.category || "";
+
+            openModal("edit-profile-modal");
+        }
+
+        async function saveProfileChanges() {
+            $("save-profile-btn").disabled = true;
+            $("save-profile-btn").innerText = "Saving...";
+
+            try {
+                let uploadedPhotoUrl = currentProfilePic;
+
+                if (selectedProfilePhotoFile) {
+                    const safeName = selectedProfilePhotoFile.name.replaceAll(" ", "_");
+                    const photoRef = ref(storage, `profile-pictures/${activeUser}/${Date.now()}_${safeName}`);
+                    await uploadBytes(photoRef, selectedProfilePhotoFile);
+                    uploadedPhotoUrl = await getDownloadURL(photoRef);
+                }
+
+                const updatedData = {
+                    username: $("edit-username-input").value.trim() || activeUser,
+                    name: $("edit-name-input").value.trim() || "Instagram User",
+                    bio: $("edit-bio-input").value.trim(),
+                    website: $("edit-website-input").value.trim(),
+                    pronouns: $("edit-pronouns-input").value.trim(),
+                    gender: $("edit-gender-input").value,
+                    category: $("edit-category-input").value.trim(),
+                    profilePic: uploadedPhotoUrl,
+                    updatedAt: new Date()
+                };
+
+                await setDoc(doc(db, "users", activeUser), updatedData, { merge: true });
+
+                currentUserData = { ...currentUserData, ...updatedData };
+                currentDisplayUsername = updatedData.username;
+                currentProfilePic = updatedData.profilePic || DEFAULT_AVATAR;
+
+                $("profile-username").innerText = currentDisplayUsername;
+                $("nav-title").innerText = currentDisplayUsername;
+                $("profile-fullname").innerText = updatedData.name;
+                $("profile-bio").innerHTML = escapeHtml(updatedData.bio || "Welcome to my profile!").replaceAll("\n", "<br>");
+                $("profile-avatar").src = currentProfilePic;
+                renderExtraMeta(updatedData);
+                renderWebsite(updatedData.website);
+
+                closeModal("edit-profile-modal");
+                showToast("Profile updated");
+            } catch (err) {
+                console.error("Profile save failed:", err);
+                showToast("Profile save failed. Storage rules check karo.");
+            } finally {
+                $("save-profile-btn").disabled = false;
+                $("save-profile-btn").innerText = "Save";
+            }
+        }
+
+        function fillSettingsModal() {
+            const settings = currentUserData.settings || {};
+
+            $("setting-private").checked = !!settings.privateAccount;
+            $("setting-activity").checked = settings.showActivityStatus !== false;
+            $("setting-messages").checked = settings.allowMessageRequests !== false;
+            $("setting-notifications").checked = settings.pushNotifications !== false;
+            $("setting-hide-likes").checked = !!settings.hideLikeCount;
+            $("setting-theme").value = settings.theme || "dark";
+        }
+
+        async function saveSettingsChanges() {
+            $("save-settings-btn").disabled = true;
+            $("save-settings-btn").innerText = "Saving...";
+
+            const settings = {
+                privateAccount: $("setting-private").checked,
+                showActivityStatus: $("setting-activity").checked,
+                allowMessageRequests: $("setting-messages").checked,
+                pushNotifications: $("setting-notifications").checked,
+                hideLikeCount: $("setting-hide-likes").checked,
+                theme: $("setting-theme").value
+            };
+
+            try {
+                await setDoc(doc(db, "users", activeUser), {
+                    settings,
+                    updatedAt: new Date()
+                }, { merge: true });
+
+                currentUserData.settings = settings;
+                closeModal("settings-modal");
+                showToast("Settings saved");
+            } catch (err) {
+                console.error("Settings save failed:", err);
+                showToast("Settings save failed");
+            } finally {
+                $("save-settings-btn").disabled = false;
+                $("save-settings-btn").innerText = "Save settings";
+            }
+        }
+
         function setupListModals() {
             $("follower-click-area").onclick = () => openUserList("Followers", "following", targetUsername, "follower");
             $("mobile-follower-click-area").onclick = () => openUserList("Followers", "following", targetUsername, "follower");
-
             $("following-click-area").onclick = () => openUserList("Following", "follower", targetUsername, "following");
             $("mobile-following-click-area").onclick = () => openUserList("Following", "follower", targetUsername, "following");
         }
@@ -930,7 +1630,7 @@
         async function openUserList(title, fieldName, fieldValue, resultField) {
             $("modal-title").innerText = title;
             $("modal-users-list").innerHTML = `<div style="padding:22px; text-align:center; color:var(--text-muted);"><i class="fa-solid fa-circle-notch fa-spin"></i> Loading...</div>`;
-            $("list-modal").style.display = "flex";
+            openModal("list-modal");
 
             const snap = await getDocs(query(collection(db, "follows"), where(fieldName, "==", fieldValue)));
 
@@ -940,6 +1640,7 @@
             }
 
             $("modal-users-list").innerHTML = "";
+
             snap.forEach((item) => {
                 const data = item.data();
                 const username = data[resultField];
@@ -950,6 +1651,81 @@
                 row.onclick = () => window.navigateToUser(username);
                 $("modal-users-list").appendChild(row);
             });
+        }
+
+        async function loadHighlights() {
+            const row = $("highlights-row");
+            row.innerHTML = "";
+
+            if (isOwnProfile()) {
+                const newItem = document.createElement("div");
+                newItem.className = "highlight-item";
+                newItem.id = "new-highlight-btn-live";
+                newItem.innerHTML = `<div class="highlight-ring"><i class="fa-solid fa-plus"></i></div><span>New</span>`;
+                newItem.onclick = () => window.location.href = "story-view.html?mode=create";
+                row.appendChild(newItem);
+            }
+
+            try {
+                const highlightSnap = await getDocs(query(collection(db, "highlights"), where("userId", "==", targetUsername)));
+                currentHighlights = [];
+
+                highlightSnap.forEach((item) => {
+                    currentHighlights.push({ id: item.id, ...item.data() });
+                });
+
+                currentHighlights.sort((a, b) => {
+                    const at = a.savedAt && a.savedAt.toMillis ? a.savedAt.toMillis() : 0;
+                    const bt = b.savedAt && b.savedAt.toMillis ? b.savedAt.toMillis() : 0;
+                    return bt - at;
+                });
+
+                currentHighlights.forEach((highlight, index) => {
+                    const item = document.createElement("div");
+                    item.className = "highlight-item";
+                    item.innerHTML = `
+                        <div class="highlight-ring">
+                            ${highlight.mediaType === "video" ? `<i class="fa-solid fa-play"></i>` : `<img src="${escapeAttr(highlight.mediaUrl || DEFAULT_AVATAR)}" alt="Highlight">`}
+                        </div>
+                        <span>${escapeHtml(highlight.title || highlight.music || highlight.text || "Highlight")}</span>
+                    `;
+                    item.onclick = () => openHighlightModal(highlight);
+                    row.appendChild(item);
+                });
+
+                if (!isOwnProfile() && currentHighlights.length === 0) {
+                    row.innerHTML = `
+                        <div class="highlight-item">
+                            <div class="highlight-ring"><i class="fa-regular fa-circle"></i></div>
+                            <span>No highlights</span>
+                        </div>
+                    `;
+                }
+            } catch (err) {
+                console.error("Highlights load failed:", err);
+            }
+        }
+
+        function openHighlightModal(highlight) {
+            $("highlight-preview-avatar").src = currentProfilePic || DEFAULT_AVATAR;
+            $("highlight-preview-username").innerText = currentDisplayUsername;
+
+            $("highlight-preview-img").style.display = highlight.mediaType === "video" ? "none" : "block";
+            $("highlight-preview-video").style.display = highlight.mediaType === "video" ? "block" : "none";
+
+            if (highlight.mediaType === "video") {
+                $("highlight-preview-video").src = highlight.mediaUrl || "";
+            } else {
+                $("highlight-preview-img").src = highlight.mediaUrl || "";
+            }
+
+            $("highlight-preview-text").innerText = highlight.text || "";
+            $("highlight-preview-mention").style.display = highlight.mention ? "block" : "none";
+            $("highlight-preview-mention").innerText = highlight.mention || "";
+            $("highlight-preview-music").style.display = highlight.music ? "block" : "none";
+            $("highlight-preview-music").innerText = highlight.music ? `Music: ${highlight.music}` : "";
+
+            openModal("highlight-modal");
         }
 
         async function loadTargetUserPosts() {
@@ -982,7 +1758,7 @@
             const gridContainer = $("user-posts-grid");
 
             if (tabName === "reels") {
-                gridContainer.innerHTML = emptyState("fa-clapperboard", "No Reels Yet", "Reels share honge to yahan dikhेंगे.");
+                gridContainer.innerHTML = emptyState("fa-clapperboard", "No Reels Yet", "Reels share honge to yahan dikhenge.");
                 return;
             }
 
@@ -999,27 +1775,30 @@
             }
 
             currentPosts.forEach((postData, index) => {
+                const imageUrl = postData.postImg || postData.imageUrl || `https://picsum.photos/600/600?random=${index}`;
                 const postItem = document.createElement("div");
+
                 postItem.className = "post-item";
                 postItem.innerHTML = `
-                    <img src="${escapeAttr(postData.postImg || "https://picsum.photos/600/600?random=" + index)}" alt="User post">
+                    <img src="${escapeAttr(imageUrl)}" alt="User post">
                     <div class="overlay">
                         <span><i class="fa-solid fa-heart"></i> ${postData.likesCount || 0}</span>
                         <span><i class="fa-solid fa-comment"></i> ${postData.commentsCount || 0}</span>
                     </div>
                 `;
-                postItem.onclick = () => openPostModal(postData);
+
+                postItem.onclick = () => openPostModal({ ...postData, postImg: imageUrl });
                 gridContainer.appendChild(postItem);
             });
         }
 
         function openPostModal(postData) {
             $("post-modal-img").src = postData.postImg || "";
-            $("post-modal-avatar").src = currentProfilePic;
+            $("post-modal-avatar").src = currentProfilePic || DEFAULT_AVATAR;
             $("post-modal-username").innerText = currentDisplayUsername;
             $("post-modal-caption").innerHTML = `<strong>${escapeHtml(currentDisplayUsername)}</strong> ${escapeHtml(postData.caption || "")}`;
             $("post-modal-likes").innerText = `${postData.likesCount || 0} likes`;
-            $("post-modal").style.display = "flex";
+            openModal("post-modal");
         }
 
         function setCounts(posts, followers, following) {
