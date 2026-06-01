@@ -16,134 +16,33 @@
     --link-color:#0095f6;
     --error-color:#ed4956;
 }
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
-}
-body{
-    background:var(--bg-color);
-    color:var(--text-main);
-    min-height:100vh;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:20px;
-}
-.auth-container{
-    width:100%;
-    max-width:350px;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-}
-.auth-card{
-    background:var(--card-bg);
-    border:1px solid var(--border-color);
-    border-radius:4px;
-    padding:34px 28px 24px;
-    text-align:center;
-}
-.logo-text{
-    font-family:"Grand Hotel",cursive;
-    font-size:52px;
-    font-weight:400;
-    margin-bottom:14px;
-}
-.subtitle{
-    color:var(--text-muted);
-    font-size:16px;
-    line-height:1.25;
-    font-weight:700;
-    margin-bottom:18px;
-}
-.step-title{
-    color:white;
-    font-size:15px;
-    font-weight:700;
-    margin-bottom:12px;
-    display:none;
-}
-form{
-    width:100%;
-    display:flex;
-    flex-direction:column;
-    gap:6px;
-}
-.input-box input,
-.input-box select{
-    width:100%;
-    padding:11px 8px;
-    background:#121212;
-    border:1px solid var(--border-color);
-    border-radius:4px;
-    color:white;
-    font-size:12px;
-    outline:none;
-}
-.input-box input:focus,
-.input-box select:focus{
-    border-color:#555;
-}
-.auth-btn{
-    margin-top:8px;
-    background:var(--link-color);
-    color:white;
-    border:none;
-    border-radius:8px;
-    padding:8px;
-    font-size:14px;
-    font-weight:700;
-    cursor:pointer;
-}
-.auth-btn:disabled{
-    opacity:.55;
-    cursor:default;
-}
-.back-btn{
-    background:none;
-    border:none;
-    color:var(--link-color);
-    font-size:13px;
-    font-weight:700;
-    margin-top:12px;
-    display:none;
-}
-.msg-box{
-    margin-top:14px;
-    font-size:13px;
-    line-height:1.4;
-    color:var(--error-color);
-    display:none;
-}
-.terms{
-    color:var(--text-muted);
-    font-size:11px;
-    line-height:1.35;
-    margin-top:14px;
-}
-.redirect-card{
-    background:var(--card-bg);
-    border:1px solid var(--border-color);
-    border-radius:4px;
-    padding:20px;
-    text-align:center;
-    font-size:14px;
-}
-.redirect-card a{
-    color:var(--link-color);
-    font-weight:700;
-    text-decoration:none;
-}
-.step{
-    display:none;
-}
-.step.active{
-    display:flex;
-    flex-direction:column;
-    gap:6px;
-}
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+body{background:var(--bg-color);color:var(--text-main);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.auth-container{width:100%;max-width:350px;display:flex;flex-direction:column;gap:10px}
+.auth-card{background:var(--card-bg);border:1px solid var(--border-color);border-radius:4px;padding:34px 28px 24px;text-align:center}
+.logo-text{font-family:"Grand Hotel",cursive;font-size:52px;font-weight:400;margin-bottom:14px}
+.subtitle{color:var(--text-muted);font-size:16px;line-height:1.25;font-weight:700;margin-bottom:18px}
+.step-title{color:white;font-size:16px;font-weight:750;margin-bottom:8px}
+.step-note{color:var(--text-muted);font-size:12px;line-height:1.35;margin-bottom:12px}
+form{width:100%;display:flex;flex-direction:column;gap:6px}
+.input-box input,.input-box select,.input-box textarea{width:100%;padding:11px 8px;background:#121212;border:1px solid var(--border-color);border-radius:4px;color:white;font-size:12px;outline:none}
+.input-box textarea{min-height:70px;resize:vertical}
+.input-box input:focus,.input-box select:focus,.input-box textarea:focus{border-color:#555}
+.auth-btn{margin-top:8px;background:var(--link-color);color:white;border:none;border-radius:8px;padding:8px;font-size:14px;font-weight:700;cursor:pointer}
+.auth-btn:disabled{opacity:.55;cursor:default}
+.skip-btn,.back-btn{background:none;border:none;color:var(--link-color);font-size:13px;font-weight:700;margin-top:12px;cursor:pointer}
+.back-btn{display:none}
+.msg-box{margin-top:14px;font-size:13px;line-height:1.4;color:var(--error-color);display:none}
+.terms{color:var(--text-muted);font-size:11px;line-height:1.35;margin-top:14px}
+.redirect-card{background:var(--card-bg);border:1px solid var(--border-color);border-radius:4px;padding:20px;text-align:center;font-size:14px}
+.redirect-card a{color:var(--link-color);font-weight:700;text-decoration:none}
+.step{display:none}
+.step.active{display:flex;flex-direction:column;gap:6px}
+.dob-row{display:grid;grid-template-columns:1.2fr .8fr 1fr;gap:6px}
+.photo-preview{width:88px;height:88px;border-radius:50%;object-fit:cover;background:#1d1d1d;border:1px solid var(--border-color);margin:4px auto 10px;display:none}
+.file-label{display:block;background:#121212;border:1px solid var(--border-color);border-radius:8px;padding:11px 8px;color:white;font-size:13px;font-weight:700;cursor:pointer}
+.file-name{color:var(--text-muted);font-size:11px;margin-top:2px;min-height:14px}
+.hidden{display:none}
 </style>
 </head>
 
@@ -163,7 +62,7 @@ form{
             </div>
 
             <div class="step" id="step-2">
-                <div class="step-title" style="display:block;">Create your account</div>
+                <div class="step-title">Create your account</div>
 
                 <div class="input-box">
                     <input type="text" id="fullname-input" placeholder="Full Name" autocomplete="name">
@@ -181,23 +80,58 @@ form{
             </div>
 
             <div class="step" id="step-3">
-                <div class="step-title" style="display:block;">Complete your profile</div>
+                <div class="step-title">Add your birthday</div>
+                <div class="step-note">This is optional. It will be saved only if you choose a full date.</div>
+
+                <div class="dob-row">
+                    <div class="input-box">
+                        <select id="birth-month">
+                            <option value="">Month</option>
+                        </select>
+                    </div>
+
+                    <div class="input-box">
+                        <select id="birth-day">
+                            <option value="">Day</option>
+                        </select>
+                    </div>
+
+                    <div class="input-box">
+                        <select id="birth-year">
+                            <option value="">Year</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="button" class="auth-btn" id="step-3-btn">Next</button>
+                <button type="button" class="skip-btn" id="skip-dob-btn">Skip</button>
+            </div>
+
+            <div class="step" id="step-4">
+                <div class="step-title">Complete your profile</div>
+                <div class="step-note">Bio and profile photo are optional.</div>
+
+                <img id="photo-preview" class="photo-preview" alt="Profile preview">
+
+                <label class="file-label" for="profile-file-input">Choose profile photo</label>
+                <input type="file" id="profile-file-input" accept="image/*" class="hidden">
+                <div class="file-name" id="profile-file-name">No photo selected</div>
 
                 <div class="input-box">
-                    <input type="text" id="bio-input" placeholder="Bio">
+                    <input type="url" id="pic-input" placeholder="Or paste Profile Pic URL (Optional)">
+                </div>
+
+                <div class="input-box">
+                    <textarea id="bio-input" placeholder="Bio (Optional)"></textarea>
                 </div>
 
                 <div class="input-box">
                     <select id="gender-input">
-                        <option value="" disabled selected>Select Gender</option>
+                        <option value="" selected>Gender (Optional)</option>
                         <option value="Male">Male</option>
                         <option value="Female">Female</option>
                         <option value="Prefer not to say">Prefer not to say</option>
                     </select>
-                </div>
-
-                <div class="input-box">
-                    <input type="url" id="pic-input" placeholder="Profile Pic URL (Optional)">
                 </div>
 
                 <button type="button" class="auth-btn" id="create-btn">Sign up</button>
@@ -221,6 +155,7 @@ form{
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
 import { getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-storage.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyBrqMn7FrFW3jslaDNM0ui-VW4w6K_3Nmk",
@@ -233,6 +168,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const storage = getStorage(app);
 
 const identityInput = document.getElementById("identity-input");
 const fullnameInput = document.getElementById("fullname-input");
@@ -241,12 +177,23 @@ const passwordInput = document.getElementById("password-input");
 const bioInput = document.getElementById("bio-input");
 const genderInput = document.getElementById("gender-input");
 const picInput = document.getElementById("pic-input");
+const profileFileInput = document.getElementById("profile-file-input");
+const profileFileName = document.getElementById("profile-file-name");
+const photoPreview = document.getElementById("photo-preview");
+
+const birthMonth = document.getElementById("birth-month");
+const birthDay = document.getElementById("birth-day");
+const birthYear = document.getElementById("birth-year");
 
 const step1 = document.getElementById("step-1");
 const step2 = document.getElementById("step-2");
 const step3 = document.getElementById("step-3");
+const step4 = document.getElementById("step-4");
+
 const step1Btn = document.getElementById("step-1-btn");
 const step2Btn = document.getElementById("step-2-btn");
+const step3Btn = document.getElementById("step-3-btn");
+const skipDobBtn = document.getElementById("skip-dob-btn");
 const createBtn = document.getElementById("create-btn");
 const backBtn = document.getElementById("back-btn");
 const statusMsg = document.getElementById("status-msg");
@@ -256,8 +203,12 @@ let currentStep = 1;
 let signupEmail = "";
 let signupPhone = "";
 
+fillDobOptions();
+
 step1Btn.addEventListener("click", checkIdentity);
 step2Btn.addEventListener("click", checkAccountDetails);
+step3Btn.addEventListener("click", checkDobAndContinue);
+skipDobBtn.addEventListener("click", () => showStep(4));
 createBtn.addEventListener("click", createAccount);
 backBtn.addEventListener("click", goBack);
 
@@ -275,43 +226,61 @@ passwordInput.addEventListener("keydown", (e) => {
     }
 });
 
+profileFileInput.addEventListener("change", () => {
+    const file = profileFileInput.files[0];
+
+    if (!file) {
+        profileFileName.innerText = "No photo selected";
+        photoPreview.style.display = "none";
+        photoPreview.src = "";
+        return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+        showStatus("Please choose an image file.");
+        profileFileInput.value = "";
+        return;
+    }
+
+    profileFileName.innerText = file.name;
+    photoPreview.src = URL.createObjectURL(file);
+    photoPreview.style.display = "block";
+    picInput.value = "";
+});
+
+picInput.addEventListener("input", () => {
+    const url = picInput.value.trim();
+
+    if (url) {
+        profileFileInput.value = "";
+        profileFileName.innerText = "Using profile photo URL";
+        photoPreview.src = url;
+        photoPreview.style.display = "block";
+    }
+});
+
 function showStep(step) {
     currentStep = step;
 
     step1.classList.remove("active");
     step2.classList.remove("active");
     step3.classList.remove("active");
+    step4.classList.remove("active");
 
-    if (step === 1) {
-        step1.classList.add("active");
-        backBtn.style.display = "none";
-        mainSubtitle.style.display = "block";
-    }
+    if (step === 1) step1.classList.add("active");
+    if (step === 2) step2.classList.add("active");
+    if (step === 3) step3.classList.add("active");
+    if (step === 4) step4.classList.add("active");
 
-    if (step === 2) {
-        step2.classList.add("active");
-        backBtn.style.display = "inline-block";
-        mainSubtitle.style.display = "none";
-    }
-
-    if (step === 3) {
-        step3.classList.add("active");
-        backBtn.style.display = "inline-block";
-        mainSubtitle.style.display = "none";
-    }
-
+    backBtn.style.display = step === 1 ? "none" : "inline-block";
+    mainSubtitle.style.display = step === 1 ? "block" : "none";
     hideStatus();
 }
 
 function goBack() {
-    if (currentStep === 3) {
-        showStep(2);
-        return;
-    }
-
-    if (currentStep === 2) {
-        showStep(1);
-    }
+    if (currentStep === 4) return showStep(3);
+    if (currentStep === 3) return showStep(2);
+    if (currentStep === 2) return showStep(1);
 }
 
 async function checkIdentity() {
@@ -431,29 +400,59 @@ async function checkAccountDetails() {
     step2Btn.innerText = "Next";
 }
 
+function checkDobAndContinue() {
+    hideStatus();
+
+    const month = birthMonth.value;
+    const day = birthDay.value;
+    const year = birthYear.value;
+
+    const anyDob = month || day || year;
+    const fullDob = month && day && year;
+
+    if (anyDob && !fullDob) {
+        showStatus("Choose full birthday or skip this step.");
+        return;
+    }
+
+    showStep(4);
+}
+
 async function createAccount() {
     const fullName = fullnameInput.value.trim();
     const username = usernameInput.value.trim().toLowerCase();
     const password = passwordInput.value.trim();
     const bio = bioInput.value.trim();
     const gender = genderInput.value;
+    const profileFile = profileFileInput.files[0];
+
     let profilePic = picInput.value.trim();
 
+    const month = birthMonth.value;
+    const day = birthDay.value;
+    const year = birthYear.value;
+    const dateOfBirth = month && day && year ? `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}` : "";
+
     hideStatus();
-
-    if (!bio || !gender) {
-        showStatus("Bio and gender are required.");
-        return;
-    }
-
-    if (!profilePic) {
-        profilePic = `https://picsum.photos/150/150?random=${Math.floor(Math.random() * 1000)}`;
-    }
 
     createBtn.disabled = true;
     createBtn.innerText = "Creating account...";
 
     try {
+        if (profileFile) {
+            createBtn.innerText = "Uploading photo...";
+            const safeName = profileFile.name.replace(/[^\w.-]+/g, "_");
+            const storageRef = ref(storage, `profile-pictures/${username}/${Date.now()}_${safeName}`);
+            await uploadBytes(storageRef, profileFile);
+            profilePic = await getDownloadURL(storageRef);
+        }
+
+        if (!profilePic) {
+            profilePic = `https://picsum.photos/150/150?random=${Math.floor(Math.random() * 1000)}`;
+        }
+
+        createBtn.innerText = "Saving account...";
+
         await setDoc(doc(db, "users", username), {
             username: username,
             email: signupEmail,
@@ -462,6 +461,7 @@ async function createAccount() {
             fullName: fullName,
             bio: bio,
             gender: gender,
+            dateOfBirth: dateOfBirth,
             profilePic: profilePic,
             followers: [],
             following: [],
@@ -475,6 +475,36 @@ async function createAccount() {
         showStatus("Failed to create account. Try again.");
         createBtn.disabled = false;
         createBtn.innerText = "Sign up";
+    }
+}
+
+function fillDobOptions() {
+    const months = [
+        ["1", "January"], ["2", "February"], ["3", "March"], ["4", "April"],
+        ["5", "May"], ["6", "June"], ["7", "July"], ["8", "August"],
+        ["9", "September"], ["10", "October"], ["11", "November"], ["12", "December"]
+    ];
+
+    months.forEach(([value, label]) => {
+        const opt = document.createElement("option");
+        opt.value = value;
+        opt.innerText = label;
+        birthMonth.appendChild(opt);
+    });
+
+    for (let d = 1; d <= 31; d++) {
+        const opt = document.createElement("option");
+        opt.value = String(d);
+        opt.innerText = String(d);
+        birthDay.appendChild(opt);
+    }
+
+    const currentYear = new Date().getFullYear();
+    for (let y = currentYear; y >= 1940; y--) {
+        const opt = document.createElement("option");
+        opt.value = String(y);
+        opt.innerText = String(y);
+        birthYear.appendChild(opt);
     }
 }
 
