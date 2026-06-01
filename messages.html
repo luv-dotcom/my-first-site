@@ -54,6 +54,7 @@ button,input{font:inherit}button{cursor:pointer}
 .shared-card-title{font-size:14px;font-weight:750;color:white;line-height:1.25}
 .shared-card-caption{font-size:12px;color:var(--text-muted);line-height:1.35;overflow-wrap:anywhere}
 .shared-card-btn{margin-top:3px;border:none;background:#0095f6;color:white;border-radius:9px;padding:8px 10px;font-size:13px;font-weight:750;cursor:pointer}
+.shared-card-btn.stop-live{background:#ed4956}
 .shared-card .msg-time{padding:0 12px 10px;color:var(--text-muted)}
 .mobile-typer-container{width:100%;padding:12px 14px calc(12px + env(safe-area-inset-bottom));display:flex;gap:10px;border-top:1px solid var(--border-color);background:var(--sidebar-bg);align-items:center;flex-shrink:0;z-index:10}
 .quick-action-btn{width:38px;height:38px;border-radius:50%;border:none;background:#262626;color:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px}
@@ -65,7 +66,7 @@ button,input{font:inherit}button{cursor:pointer}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .attach-menu{position:fixed;left:14px;bottom:76px;background:#1f1f1f;border:1px solid #343434;border-radius:14px;padding:8px;display:none;flex-direction:column;gap:6px;z-index:13000;box-shadow:0 10px 30px rgba(0,0,0,.35)}
 .attach-menu.open{display:flex}
-.attach-menu button{border:none;background:#262626;color:white;padding:10px 14px;border-radius:10px;text-align:left;min-width:150px;font-weight:650;cursor:pointer}
+.attach-menu button{border:none;background:#262626;color:white;padding:10px 14px;border-radius:10px;text-align:left;min-width:170px;font-weight:650;cursor:pointer}
 .attach-menu button:hover{background:#333}
 @media(max-width:768px){.top-chat-nav{height:54px;padding:0 14px}#chat-sidebar{width:100%;max-width:100%;display:flex;border-right:none}#chat-main-window{display:none;width:100%}#main-layout-container.mobile-chat-active #chat-sidebar{display:none}#main-layout-container.mobile-chat-active #chat-main-window{display:flex;position:fixed;inset:0;width:100%;height:100vh;height:100dvh;z-index:9999;background:var(--chat-bg)}#main-layout-container.mobile-chat-active #active-chat-box{height:100%;height:100dvh}#chat-back-btn{display:flex}.active-chat-header{height:56px;padding:8px 12px}#chat-messages-container{padding:12px 10px}.msg-bubble{max-width:82%;font-size:14px}.mobile-typer-container{padding:9px 10px calc(9px + env(safe-area-inset-bottom));gap:8px}.quick-action-btn{width:36px;height:36px}#message-text-input{height:42px;padding:10px 14px}}
 </style>
@@ -125,7 +126,8 @@ button,input{font:inherit}button{cursor:pointer}
 <div class="attach-menu" id="attach-menu">
     <button type="button" id="attach-camera">Camera</button>
     <button type="button" id="attach-gallery">Gallery</button>
-    <button type="button" id="attach-location">Location</button>
+    <button type="button" id="attach-current-location">Current Location</button>
+    <button type="button" id="attach-live-location">Live Location</button>
 </div>
 
 <div class="toast" id="chat-toast">Done</div>
@@ -156,6 +158,9 @@ let unsubscribeUsers = null;
 let activeRoomListeners = {};
 let latestUsersList = [];
 let pendingSharedPayload = null;
+let liveLocationWatchId = null;
+let liveLocationMessageRef = null;
+let liveLocationMessageId = null;
 
 const safeGet = (id) => document.getElementById(id);
 
@@ -200,9 +205,14 @@ window.addEventListener("DOMContentLoaded", () => {
         safeGet("gallery-file-input").click();
     });
 
-    safeGet("attach-location").addEventListener("click", () => {
+    safeGet("attach-current-location").addEventListener("click", () => {
         safeGet("attach-menu").classList.remove("open");
         sendCurrentLocation();
+    });
+
+    safeGet("attach-live-location").addEventListener("click", () => {
+        safeGet("attach-menu").classList.remove("open");
+        startLiveLocation();
     });
 
     safeGet("camera-file-input").addEventListener("change", (e) => {
@@ -436,6 +446,11 @@ function listenToMessages(targetUser) {
             const mData = msgDoc.data();
             const messageType = mData.type || "text";
             const isSent = mData.sender === myUsername;
+            const messageWithMeta = {
+                ...mData,
+                _id: msgDoc.id,
+                _roomId: chatRoomId
+            };
 
             if (!isSent && mData.receiver === myUsername) {
                 const seenBy = Array.isArray(mData.seenBy) ? mData.seenBy : [];
@@ -454,9 +469,10 @@ function listenToMessages(targetUser) {
                 messageType === "story" ||
                 messageType === "image" ||
                 messageType === "video" ||
-                messageType === "location"
+                messageType === "location" ||
+                messageType === "liveLocation"
             ) {
-                container.appendChild(createSharedCard(mData, isSent));
+                container.appendChild(createSharedCard(messageWithMeta, isSent));
             } else {
                 container.appendChild(createTextBubble(mData, isSent));
             }
@@ -512,7 +528,7 @@ function createSharedCard(mData, isSent) {
     const card = document.createElement("div");
     const type = mData.type || "post";
     const title = mData.title || getLastMessageLabel(type);
-    const caption = mData.caption || mData.text || "";
+    const caption = getLocationCaption(mData) || mData.caption || mData.text || "";
     const mediaUrl = mData.thumbnailUrl || mData.imageUrl || mData.videoUrl || mData.reelUrl || mData.postUrl || mData.storyUrl || "";
     const targetUrl = getSharedTargetUrl(mData);
 
@@ -524,8 +540,16 @@ function createSharedCard(mData, isSent) {
         mediaHtml = `<img src="${escapeAttr(mData.imageUrl)}" alt="Photo">`;
     } else if (type === "video" && mData.videoUrl) {
         mediaHtml = `<video src="${escapeAttr(mData.videoUrl)}" controls playsinline></video>`;
-    } else if (type === "location") {
-        mediaHtml = `<div style="padding:20px;text-align:center;color:white;font-weight:750;">Location shared</div>`;
+    } else if (type === "location" || type === "liveLocation") {
+        const activeText = type === "liveLocation" && mData.liveLocationActive ? "Live location active" : type === "liveLocation" ? "Live location ended" : "Location shared";
+        const lat = mData.latitude ? Number(mData.latitude).toFixed(5) : "";
+        const lng = mData.longitude ? Number(mData.longitude).toFixed(5) : "";
+        mediaHtml = `
+            <div style="padding:20px;text-align:center;color:white;font-weight:750;line-height:1.5;">
+                ${escapeHtml(activeText)}
+                <div style="color:var(--text-muted);font-size:12px;margin-top:8px;">${escapeHtml(lat && lng ? `${lat}, ${lng}` : "Tap to open map")}</div>
+            </div>
+        `;
     } else if (mediaUrl) {
         const isVideo = type === "reel" || String(mediaUrl).includes(".mp4") || String(mediaUrl).includes("video");
         mediaHtml = isVideo
@@ -542,6 +566,7 @@ function createSharedCard(mData, isSent) {
             <div class="shared-card-title">${escapeHtml(title)}</div>
             <div class="shared-card-caption">${escapeHtml(caption)}</div>
             <button class="shared-card-btn" type="button">${escapeHtml(getOpenButtonText(type))}</button>
+            ${type === "liveLocation" && isSent && mData.liveLocationActive ? `<button class="shared-card-btn stop-live" type="button">Stop live location</button>` : ""}
         </div>
         <span class="msg-time">${formatMessageTime(mData.timestamp)}</span>
     `;
@@ -549,11 +574,22 @@ function createSharedCard(mData, isSent) {
     card.querySelector(".shared-card-btn").addEventListener("click", () => {
         if (type === "image" && mData.imageUrl) window.open(mData.imageUrl, "_blank");
         else if (type === "video" && mData.videoUrl) window.open(mData.videoUrl, "_blank");
-        else if (targetUrl) window.location.href = targetUrl;
+        else if (targetUrl) window.open(targetUrl, "_blank");
         else showToast("Link not available");
     });
 
+    const stopBtn = card.querySelector(".stop-live");
+    if (stopBtn) {
+        stopBtn.addEventListener("click", () => stopLiveLocation(mData));
+    }
+
     return card;
+}
+
+function getLocationCaption(data) {
+    if (data.type !== "liveLocation") return "";
+    if (data.liveLocationActive) return "Updating while sender keeps this chat open";
+    return "Live location ended";
 }
 
 async function handlePickedMedia(file, inputEl) {
@@ -620,7 +656,7 @@ function sendCurrentLocation() {
             await sendMessageToUser(selectedTargetUser, {
                 type: "location",
                 text: "Shared a location",
-                title: "Location",
+                title: "Current Location",
                 caption: "Tap to open location",
                 link: mapLink,
                 latitude: lat,
@@ -638,6 +674,104 @@ function sendCurrentLocation() {
             maximumAge: 0
         }
     );
+}
+
+function startLiveLocation() {
+    if (!selectedTargetUser) {
+        showToast("Select a chat first");
+        return;
+    }
+
+    if (!navigator.geolocation) {
+        showToast("Location not supported");
+        return;
+    }
+
+    if (liveLocationWatchId !== null) {
+        showToast("Live location already sharing");
+        return;
+    }
+
+    showToast("Starting live location...");
+
+    liveLocationWatchId = navigator.geolocation.watchPosition(
+        async (position) => {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            const mapLink = `https://www.google.com/maps?q=${lat},${lng}`;
+
+            try {
+                if (!liveLocationMessageRef) {
+                    liveLocationMessageRef = await sendMessageToUser(selectedTargetUser, {
+                        type: "liveLocation",
+                        text: "Started live location",
+                        title: "Live Location",
+                        caption: "Updating while sender keeps this chat open",
+                        link: mapLink,
+                        latitude: lat,
+                        longitude: lng,
+                        liveLocationActive: true,
+                        liveLocationStartedAt: new Date(),
+                        liveLocationUpdatedAt: new Date()
+                    });
+
+                    liveLocationMessageId = liveLocationMessageRef.id;
+                    showToast("Live location started");
+                } else {
+                    await updateDoc(liveLocationMessageRef, {
+                        link: mapLink,
+                        latitude: lat,
+                        longitude: lng,
+                        liveLocationActive: true,
+                        liveLocationUpdatedAt: new Date()
+                    });
+                }
+            } catch (err) {
+                console.error("Live location update failed:", err);
+                showToast("Live location update failed");
+            }
+        },
+        () => {
+            showToast("Location permission denied");
+            if (liveLocationWatchId !== null) {
+                navigator.geolocation.clearWatch(liveLocationWatchId);
+                liveLocationWatchId = null;
+            }
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 12000,
+            maximumAge: 5000
+        }
+    );
+}
+
+async function stopLiveLocation(messageData = null) {
+    if (liveLocationWatchId !== null) {
+        navigator.geolocation.clearWatch(liveLocationWatchId);
+        liveLocationWatchId = null;
+    }
+
+    try {
+        const roomId = messageData?._roomId || (selectedTargetUser ? [myUsername, selectedTargetUser].sort().join("_chat_room_") : "");
+        const messageId = messageData?._id || liveLocationMessageId;
+
+        if (roomId && messageId) {
+            await updateDoc(doc(db, "chats", roomId, "messages", messageId), {
+                text: "Live location ended",
+                caption: "Live location ended",
+                liveLocationActive: false,
+                liveLocationEndedAt: new Date()
+            });
+        }
+
+        liveLocationMessageRef = null;
+        liveLocationMessageId = null;
+        showToast("Live location stopped");
+    } catch (err) {
+        console.error("Stop live location failed:", err);
+        showToast("Stop failed");
+    }
 }
 
 async function sendMessageLogic() {
@@ -669,7 +803,7 @@ async function sendMessageToUser(targetUser, payload) {
     const lastMessageText = payload.text || getLastMessageLabel(messageType);
 
     try {
-        await addDoc(collection(db, "chats", chatRoomId, "messages"), {
+        const messageRef = await addDoc(collection(db, "chats", chatRoomId, "messages"), {
             sender: myUsername,
             receiver: targetUser,
             type: messageType,
@@ -693,6 +827,10 @@ async function sendMessageToUser(targetUser, payload) {
             link: payload.link || "",
             latitude: payload.latitude || null,
             longitude: payload.longitude || null,
+            liveLocationActive: payload.liveLocationActive || false,
+            liveLocationStartedAt: payload.liveLocationStartedAt || null,
+            liveLocationUpdatedAt: payload.liveLocationUpdatedAt || null,
+            liveLocationEndedAt: payload.liveLocationEndedAt || null,
             timestamp: new Date()
         });
 
@@ -704,11 +842,14 @@ async function sendMessageToUser(targetUser, payload) {
             readBy: [myUsername],
             timestamp: new Date()
         }, { merge: true });
+
+        return messageRef;
     } catch (err) {
         console.error("Message send failed:", err);
         alert("Message send nahi hua. Internet/Firebase rules check karo.");
         safeGet("message-text-input").value = payload.text || "";
         safeGet("send-btn").disabled = false;
+        throw err;
     }
 }
 
@@ -721,6 +862,7 @@ function getLastMessageLabel(type) {
     if (type === "image") return "Sent a photo";
     if (type === "video") return "Sent a video";
     if (type === "location") return "Shared a location";
+    if (type === "liveLocation") return "Shared live location";
     return "No messages yet";
 }
 
@@ -731,11 +873,12 @@ function getOpenButtonText(type) {
     if (type === "image") return "Open photo";
     if (type === "video") return "Open video";
     if (type === "location") return "Open location";
+    if (type === "liveLocation") return "Open live location";
     return "Open";
 }
 
 function getSharedTargetUrl(data) {
-    if (data.type === "location" && data.link) return data.link;
+    if ((data.type === "location" || data.type === "liveLocation") && data.link) return data.link;
     if (data.type === "image" && data.imageUrl) return data.imageUrl;
     if (data.type === "video" && data.videoUrl) return data.videoUrl;
     if (data.type === "reel" && data.reelId) return `reels.html?reel=${encodeURIComponent(data.reelId)}`;
