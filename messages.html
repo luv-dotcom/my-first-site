@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Instagram DM Clone</title>
     <style>
         :root {
@@ -11,6 +11,9 @@
             --border-color: #262626;
             --sidebar-bg: #1a1a1a;
             --chat-bg: #121212;
+        }
+        * {
+            box-sizing: border-box;
         }
         body {
             margin: 0;
@@ -49,7 +52,7 @@
             align-self: flex-start;
         }
 
-        /* 📱 MOBILE RESPONSIVE STATES */
+        /* 📱 MOBILE OVERRIDES (100% FIXED POSITION FOR SCREEN LOCK) */
         @media (max-width: 768px) {
             #chat-sidebar {
                 width: 100% !important;
@@ -57,22 +60,27 @@
                 display: flex !important;
             }
             #chat-main-window {
-                display: none !important; /* Shuruat me hidden rahega jab tak ID select na ho */
-                width: 100% !important;
+                display: none !important;
             }
             
-            /* Jab main layout container par '.mobile-chat-active' class lagegi */
+            /* Jab koi ID select ho, toh chat layer ko fixed screen bana do */
             .mobile-chat-active #chat-sidebar {
-                display: none !important; /* IDs ki list hide ho jayegi */
+                display: none !important;
             }
             .mobile-chat-active #chat-main-window {
-                display: flex !important; /* Pura chat box saamne aa jayega */
-                flex-direction: column;
-                width: 100% !important;
-                height: 100% !important;
+                display: flex !important;
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                bottom: 0 !important;
+                width: 100vw !important;
+                height: 100vh !important;
+                z-index: 9999 !important;
+                background: var(--chat-bg);
             }
             #chat-back-btn {
-                display: flex !important; /* Back button chalu ho jayega */
+                display: flex !important;
             }
         }
     </style>
@@ -90,23 +98,23 @@
             <div style="width: 50px;"></div>
         </div>
 
-        <div id="main-layout-container" style="display: flex; flex: 1; overflow: hidden; position: relative; height: calc(100vh - 60px);">
+        <div id="main-layout-container" style="display: flex; flex: 1; overflow: hidden; position: relative;">
             
             <div id="chat-sidebar" style="width: 350px; border-right: 1px solid var(--border-color); display: flex; flex-direction: column; background: var(--sidebar-bg); flex-shrink: 0;">
                 <div id="global-users-chat-list" style="flex: 1; overflow-y: auto;">
                     </div>
             </div>
 
-            <div id="chat-main-window" style="flex: 1; display: flex; flex-direction: column; background: var(--chat-bg); height: 100%;">
+            <div id="chat-main-window" style="flex: 1; display: flex; flex-direction: column; background: var(--chat-bg);">
                 
                 <div id="placeholder-box" style="flex: 1; display: flex; align-items: center; justify-content: center; flex-direction: column; color: #8e8e8e;">
                     <h2>Your Messages</h2>
                     <p>Select a user to start chatting.</p>
                 </div>
                 
-                <div id="active-chat-box" style="flex: 1; display: none; flex-direction: column; height: 100%; overflow: hidden;">
+                <div id="active-chat-box" style="flex: 1; display: none; flex-direction: column; height: 100%; width: 100%; overflow: hidden; position: relative;">
                     
-                    <div style="padding: 15px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; background: var(--sidebar-bg); flex-shrink: 0;">
+                    <div style="padding: 15px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; background: var(--sidebar-bg); flex-shrink: 0; height: 60px;">
                         <button id="chat-back-btn" style="background: none; border: none; color: #0095f6; font-size: 15px; font-weight: bold; cursor: pointer; margin-right: 15px; display: none; align-items: center; gap: 4px; padding: 5px 0;">
                             ⬅️ Chats
                         </button>
@@ -115,12 +123,12 @@
                         <span id="chat-user-username" style="font-weight: 600;">Username</span>
                     </div>
                     
-                    <div id="chat-messages-container" style="flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px;">
+                    <div id="chat-messages-container" style="flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; padding-bottom: 80px;">
                         </div>
                     
-                    <div style="padding: 12px; display: flex; gap: 10px; border-top: 1px solid var(--border-color); background: var(--sidebar-bg); align-items: center; flex-shrink: 0;">
-                        <input type="text" id="message-text-input" placeholder="Message..." style="flex: 1; padding: 12px 16px; border: 1px solid var(--border-color); border-radius: 24px; outline: none; font-size: 15px; background: #262626; color: white;">
-                        <button id="send-btn" disabled style="background: none; border: none; color: #0095f6; font-weight: 600; cursor: pointer; padding: 0 5px; font-size: 15px;">Send</button>
+                    <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 12px; display: flex; gap: 10px; border-top: 1px solid var(--border-color); background: var(--sidebar-bg); align-items: center; z-index: 10;">
+                        <input type="text" id="message-text-input" placeholder="Message..." style="flex: 1; padding: 12px 16px; border: 1px solid var(--border-color); border-radius: 24px; outline: none; font-size: 16px; background: #262626; color: white;">
+                        <button id="send-btn" disabled style="background: none; border: none; color: #0095f6; font-weight: 600; cursor: pointer; padding: 0 5px; font-size: 16px;">Send</button>
                     </div>
                 </div>
 
@@ -169,7 +177,7 @@
                     sendBtn.addEventListener("click", sendMessageLogic);
                 }
 
-                // Back Button Logic
+                // Back Button Click Logic
                 const backBtn = safeGet("chat-back-btn");
                 if (backBtn) {
                     backBtn.addEventListener("click", () => {
@@ -249,7 +257,6 @@
         async function openChat(target, avatar) {
             selectedTargetUser = target;
             
-            // 🛠️ FIXING THE CLASS TRIGGER PLACE:
             const container = safeGet("main-layout-container");
             if (container) {
                 container.classList.add("mobile-chat-active");
