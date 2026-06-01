@@ -91,7 +91,6 @@
         .post-controls i, .post-controls span { font-size: 26px; cursor: pointer; transition: transform 0.1s ease; color: var(--text-main); }
         .post-controls i:hover, .post-controls span:hover { transform: scale(1.1); }
         
-        /* ❤️ Like Heart Color Styling Fix */
         .liked-heart { color: #ed4956 !important; }
         
         .post-body-content { padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; font-size: 14px; }
@@ -133,7 +132,6 @@
         .story-close-btn { position: absolute; top: 25px; right: 15px; color: white; background: none; border: none; cursor: pointer; }
         .story-close-btn span { font-size: 28px; }
 
-        /* --- RESPONSIVE QUERIES --- */
         @media (max-width: 1000px) { 
             .desktop-suggestions { display: none; } 
             .main-workspace { justify-content: center; } 
@@ -297,7 +295,6 @@
             }
         }
 
-        // Run user data synchronization immediately on load
         syncUserData();
 
         async function checkUserStories() {
@@ -356,7 +353,6 @@
 
         const postsTargetContainer = document.getElementById("dynamic-posts-container");
 
-        // LIVE FEED STREAM WITH PERSISTENT USER-LIKE TRACKING ENGINE
         onSnapshot(query(collection(db, "posts"), orderBy("timestamp", "desc")), (snapshot) => {
             postsTargetContainer.innerHTML = "";
             let totalPostsCounter = 0;
@@ -364,6 +360,10 @@
             snapshot.forEach((postDoc) => {
                 const postId = postDoc.id;
                 const postData = postDoc.data();
+                
+                // 🔥 REAL-TIME BACKEND DEBUG ENGINE LOG ADDED HERE:
+                console.log("🔥 DATABASE SNAPSHOT -> ID:", postId, " | Raw UserID Field:", postData.userId);
+
                 totalPostsCounter++;
 
                 const article = document.createElement("article");
@@ -373,11 +373,9 @@
                 const postUserAvatar = postData.profilePic || "https://picsum.photos/150/150?random=99";
                 const postAuthor = postData.userId || "anonymous";
 
-                // Check standard database array tracking for active session context user
                 const likedByArray = postData.likedBy || [];
                 const hasUserLiked = likedByArray.includes(currentUsername);
 
-                // Conditional setup for persistent loading UI states
                 const heartIcon = hasUserLiked ? "favorite" : "favorite_border";
                 const heartClass = hasUserLiked ? "material-icons liked-heart" : "material-icons-outlined";
 
@@ -454,7 +452,6 @@
             });
         }
 
-        // GLOBAL CLICK EVENT ROUTER
         postsTargetContainer.addEventListener("click", async (e) => {
             if (e.target.classList.contains("comment-post-btn")) {
                 const targetedPostId = e.target.getAttribute("data-target-id");
@@ -475,7 +472,6 @@
                 }
             }
 
-            // SMART UNIQUE REAL-TIME LIKE TOGGLE SYSTEM
             if (e.target.classList.contains("like-toggle-btn")) {
                 const postCard = e.target.closest(".post-card");
                 const targetedPostId = postCard.getAttribute("data-post-id");
@@ -511,7 +507,6 @@
                             });
                         }
                     }
-                    console.log("Database user-like alignment synchronized!");
                 } catch (err) {
                     console.error("Like synchronization aborted: ", err);
                     if (isLiked) {
