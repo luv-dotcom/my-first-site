@@ -138,12 +138,12 @@
             .desktop-suggestions { display: none; } 
             .main-workspace { justify-content: center; } 
         }
-         
+          
         @media (max-width: 768px) { 
             .top-navbar .nav-icons { display: none !important; }
             .mobile-header-right { display: flex !important; }
             .bottom-navbar { display: flex !important; }
-             
+              
             .search-engine-box { width: 140px !important; }
             .main-workspace { margin-top: 10px; padding: 0; width: 100% !important; } 
             .stories-wrapper { border: none; border-bottom: 1px solid var(--border-color); border-radius: 0; } 
@@ -297,6 +297,9 @@
             }
         }
 
+        // Run user data synchronization immediately on load
+        syncUserData();
+
         async function checkUserStories() {
             try {
                 const querySnapshot = await getDocs(collection(db, "stories"));
@@ -381,9 +384,9 @@
                 article.innerHTML = `
                     <div class="post-header">
                         <div class="post-user-meta">
-                            <a href="user-profile.html?id=${postAuthor}"><img src="${postUserAvatar}" alt="user"></a>
+                            <a href="user-profile.html?username=${postAuthor}"><img src="${postUserAvatar}" alt="user"></a>
                             <div class="post-user-details">
-                                <a href="user-profile.html?id=${postAuthor}" class="post-username">${postAuthor}</a>
+                                <a href="user-profile.html?username=${postAuthor}" class="post-username">${postAuthor}</a>
                                 <span class="post-location">${postData.location || 'Global Territory'}</span>
                             </div>
                         </div>
@@ -472,7 +475,7 @@
                 }
             }
 
-            // 🚀 SMART UNIQUE REAL-TIME LIKE TOGGLE SYSTEM (MAX 1 LIKE PER USER)
+            // SMART UNIQUE REAL-TIME LIKE TOGGLE SYSTEM
             if (e.target.classList.contains("like-toggle-btn")) {
                 const postCard = e.target.closest(".post-card");
                 const targetedPostId = postCard.getAttribute("data-post-id");
@@ -481,7 +484,6 @@
                 const postRef = doc(db, "posts", targetedPostId);
 
                 try {
-                    // Optimistic UI Update Engine (Immediate Color Switching)
                     if (!isLiked) {
                         e.target.innerText = "favorite";
                         e.target.classList.remove("material-icons-outlined");
@@ -492,20 +494,17 @@
                         e.target.classList.add("material-icons-outlined");
                     }
 
-                    // Secure server data checking pipeline
                     const postDoc = await getDoc(postRef);
                     if (postDoc.exists()) {
                         const postData = postDoc.data();
                         let currentLikes = postData.likesCount || 0;
                         
                         if (!isLiked) {
-                            // Register User + Increment Count
                             await updateDoc(postRef, {
                                 likedBy: arrayUnion(currentUsername),
                                 likesCount: currentLikes + 1
                             });
                         } else {
-                            // Deregister User + Decrement Count
                             await updateDoc(postRef, {
                                 likedBy: arrayRemove(currentUsername),
                                 likesCount: Math.max(0, currentLikes - 1)
@@ -515,7 +514,6 @@
                     console.log("Database user-like alignment synchronized!");
                 } catch (err) {
                     console.error("Like synchronization aborted: ", err);
-                    // Standard State Rollback Engine if network drops
                     if (isLiked) {
                         e.target.innerText = "favorite";
                         e.target.classList.remove("material-icons-outlined");
@@ -528,55 +526,6 @@
                 }
             }
         });
-
-        const searchInput = document.getElementById("global-search-input");
-        const resultsDropdown = document.getElementById("search-results-dropdown");
-
-        searchInput.addEventListener("input", async (e) => {
-            const searchText = e.target.value.trim().toLowerCase();
-            resultsDropdown.innerHTML = ""; 
-
-            if (searchText === "") { resultsDropdown.style.display = "none"; return; }
-
-            try {
-                const querySnapshot = await getDocs(collection(db, "users"));
-                let matchCount = 0;
-
-                querySnapshot.forEach((docSnap) => {
-                    const userData = docSnap.data();
-                    const uName = (userData.username || docSnap.id).toLowerCase();
-                    let fullName = (userData.name || "").toLowerCase();
-
-                    if (uName.includes(searchText) || fullName.includes(searchText)) {
-                        matchCount++;
-                        const userRow = document.createElement("div");
-                        userRow.style.cssText = "display: flex; align-items: center; gap: 10px; padding: 10px 14px; cursor: pointer; transition: background 0.2s;";
-                        userRow.innerHTML = `
-                            <img src="${userData.profilePic || 'https://picsum.photos/150/150?random=99'}" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover;">
-                            <div style="display: flex; flex-direction: column;">
-                                <span style="font-size: 14px; font-weight: 600; color: #262626;">${userData.username || docSnap.id}</span>
-                                <span style="font-size: 12px; color: #8e8e8e;">${userData.name || ''}</span>
-                            </div>`;
-
-                        userRow.addEventListener("mouseenter", () => userRow.style.backgroundColor = "#fafafa");
-                        userRow.addEventListener("mouseleave", () => userRow.style.backgroundColor = "transparent");
-                        userRow.addEventListener("click", () => {
-                            const clickedUser = userData.username || docSnap.id;
-                            window.location.href = (clickedUser === currentUsername) ? "profile.html" : `user-profile.html?id=${clickedUser}`;
-                        });
-                        resultsDropdown.appendChild(userRow);
-                    }
-                });
-
-                resultsDropdown.style.display = matchCount > 0 ? "block" : "none";
-            } catch (err) { console.error("Search system failure: ", err); }
-        });
-
-        document.addEventListener("click", (e) => {
-            if (!document.querySelector(".search-engine-box").contains(e.target)) { resultsDropdown.style.display = "none"; }
-        });
-
-        syncUserData();
     </script>
 </body>
 </html>
