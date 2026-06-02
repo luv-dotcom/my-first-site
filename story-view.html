@@ -1,400 +1,926 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Story</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Story</title>
 
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-        html, body { width: 100%; height: 100%; background: #000; color: white; overflow: hidden; }
-        button, input { font: inherit; }
-        button { cursor: pointer; border: none; }
-
-        .screen { width: 100%; height: 100dvh; display: none; background: #000; }
-        .screen.active { display: flex; }
-
-        .picker-screen { align-items: center; justify-content: center; flex-direction: column; gap: 18px; padding: 24px; text-align: center; }
-        .picker-icon { width: 86px; height: 86px; border: 2px solid white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        .picker-icon span { font-size: 38px; }
-        .primary-btn { background: #0095f6; color: white; padding: 12px 22px; border-radius: 10px; font-weight: 700; }
-        .ghost-btn { background: rgba(255,255,255,0.12); color: white; padding: 10px 16px; border-radius: 10px; font-weight: 650; }
-
-        .story-shell { width: 100%; height: 100%; max-width: 480px; margin: 0 auto; position: relative; background: #111; overflow: hidden; }
-        .story-media { width: 100%; height: 100%; object-fit: contain; background: #000; display: block; }
-
-        .top-bar { position: absolute; top: 0; left: 0; right: 0; padding: 14px 12px; display: flex; align-items: center; justify-content: space-between; z-index: 20; background: linear-gradient(rgba(0,0,0,0.55), transparent); }
-        .story-user { display: flex; align-items: center; gap: 9px; min-width: 0; font-weight: 700; }
-        .story-user img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255,255,255,0.8); }
-        .story-user span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-        .icon-btn { width: 38px; height: 38px; border-radius: 50%; background: rgba(0,0,0,0.42); color: white; display: inline-flex; align-items: center; justify-content: center; }
-        .icon-btn span { font-size: 24px; }
-
-        .progress-wrap { position: absolute; top: 8px; left: 10px; right: 10px; height: 3px; background: rgba(255,255,255,0.28); border-radius: 20px; z-index: 30; overflow: hidden; }
-        .progress-fill { height: 100%; width: 0%; background: white; border-radius: inherit; }
-
-        .editor-tools { position: absolute; top: 62px; right: 10px; z-index: 22; display: flex; flex-direction: column; gap: 10px; }
-        .editor-bottom { position: absolute; left: 0; right: 0; bottom: 0; z-index: 22; padding: 14px 12px calc(14px + env(safe-area-inset-bottom)); display: flex; gap: 10px; align-items: center; background: linear-gradient(transparent, rgba(0,0,0,0.7)); }
-        .editor-bottom .primary-btn { flex: 1; }
-
-        .story-overlay-text { position: absolute; left: 50%; top: 45%; transform: translate(-50%, -50%); z-index: 15; color: white; font-size: 30px; font-weight: 800; text-align: center; text-shadow: 0 2px 10px rgba(0,0,0,0.85); max-width: 88%; overflow-wrap: anywhere; }
-        .mention-sticker { position: absolute; left: 50%; top: 58%; transform: translateX(-50%); z-index: 15; background: rgba(255,255,255,0.92); color: #000; padding: 8px 13px; border-radius: 999px; font-weight: 800; max-width: 88%; overflow-wrap: anywhere; }
-        .music-sticker { position: absolute; left: 50%; bottom: 96px; transform: translateX(-50%); z-index: 15; background: rgba(0,0,0,0.72); color: white; padding: 10px 14px; border-radius: 14px; display: none; align-items: center; gap: 8px; font-weight: 750; max-width: 88%; }
-        .music-sticker span { font-size: 20px; }
-
-        .editor-panel { position: absolute; inset: 0; z-index: 50; display: none; align-items: flex-end; background: rgba(0,0,0,0.55); }
-        .editor-panel.active { display: flex; }
-        .panel-card { width: 100%; background: #1c1c1c; border-radius: 18px 18px 0 0; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-        .panel-card h3 { font-size: 16px; }
-        .panel-card input { width: 100%; padding: 13px 14px; border-radius: 12px; border: 1px solid #333; background: #111; color: white; outline: none; font-size: 16px; }
-        .panel-actions { display: flex; gap: 10px; }
-        .panel-actions button { flex: 1; }
-
-        .highlight-toggle { display: flex; align-items: center; gap: 9px; color: white; font-weight: 650; background: rgba(255,255,255,0.12); padding: 10px 12px; border-radius: 12px; }
-        .highlight-toggle input { width: 18px; height: 18px; accent-color: #0095f6; }
-
-        .loading-box { position: absolute; inset: 0; z-index: 80; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 12px; background: rgba(0,0,0,0.82); text-align: center; padding: 24px; }
-        .loading-box.active { display: flex; }
-        .loader { width: 32px; height: 32px; border: 3px solid rgba(255,255,255,0.28); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        @media (min-width: 700px) {
-            body { background: #121212; }
-            .story-shell { height: 100dvh; box-shadow: 0 0 0 1px #262626; }
-        }
-    </style>
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+html,body{
+    width:100%;
+    height:100%;
+    background:#000;
+    color:white;
+    overflow:hidden;
+}
+button,input{
+    font:inherit;
+}
+button{
+    cursor:pointer;
+    border:none;
+}
+.screen{
+    width:100%;
+    height:100dvh;
+    display:none;
+    background:#000;
+}
+.screen.active{
+    display:flex;
+}
+.picker-screen{
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    gap:18px;
+    padding:24px;
+    text-align:center;
+}
+.picker-icon{
+    width:86px;
+    height:86px;
+    border:2px solid white;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+.picker-icon span{
+    font-size:38px;
+}
+.primary-btn{
+    background:#0095f6;
+    color:white;
+    padding:12px 22px;
+    border-radius:10px;
+    font-weight:800;
+}
+.primary-btn:disabled{
+    opacity:.55;
+    cursor:default;
+}
+.ghost-btn{
+    background:rgba(255,255,255,.12);
+    color:white;
+    padding:10px 16px;
+    border-radius:10px;
+    font-weight:700;
+}
+.danger-btn{
+    background:#ed4956;
+    color:white;
+    padding:10px 16px;
+    border-radius:10px;
+    font-weight:800;
+}
+.story-shell{
+    width:100%;
+    height:100%;
+    max-width:480px;
+    margin:0 auto;
+    position:relative;
+    background:#111;
+    overflow:hidden;
+}
+.story-media{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    background:#000;
+    display:block;
+}
+.top-bar{
+    position:absolute;
+    top:0;
+    left:0;
+    right:0;
+    padding:18px 12px 14px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    z-index:20;
+    background:linear-gradient(rgba(0,0,0,.72),transparent);
+}
+.story-user{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    min-width:0;
+    font-weight:800;
+}
+.story-user img{
+    width:32px;
+    height:32px;
+    border-radius:50%;
+    object-fit:cover;
+    border:1px solid rgba(255,255,255,.8);
+}
+.story-user span{
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+.top-actions{
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+.icon-btn{
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    background:rgba(0,0,0,.42);
+    color:white;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+}
+.icon-btn span{
+    font-size:24px;
+}
+.progress-list{
+    position:absolute;
+    top:8px;
+    left:10px;
+    right:10px;
+    display:flex;
+    gap:4px;
+    z-index:30;
+}
+.progress-track{
+    flex:1;
+    height:3px;
+    background:rgba(255,255,255,.28);
+    border-radius:20px;
+    overflow:hidden;
+}
+.progress-fill{
+    height:100%;
+    width:0%;
+    background:white;
+    border-radius:inherit;
+}
+.tap-zone{
+    position:absolute;
+    top:58px;
+    bottom:0;
+    z-index:12;
+}
+.tap-left{
+    left:0;
+    width:34%;
+}
+.tap-right{
+    right:0;
+    width:34%;
+}
+.editor-tools{
+    position:absolute;
+    top:68px;
+    right:10px;
+    z-index:22;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+.editor-bottom{
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:0;
+    z-index:22;
+    padding:14px 12px calc(14px + env(safe-area-inset-bottom));
+    display:flex;
+    gap:10px;
+    align-items:center;
+    background:linear-gradient(transparent,rgba(0,0,0,.76));
+}
+.editor-bottom .primary-btn{
+    flex:1;
+}
+.story-overlay-text{
+    position:absolute;
+    left:50%;
+    top:45%;
+    transform:translate(-50%,-50%);
+    z-index:15;
+    color:white;
+    font-size:30px;
+    font-weight:900;
+    text-align:center;
+    text-shadow:0 2px 10px rgba(0,0,0,.85);
+    max-width:88%;
+    overflow-wrap:anywhere;
+}
+.mention-sticker{
+    position:absolute;
+    left:50%;
+    top:58%;
+    transform:translateX(-50%);
+    z-index:15;
+    background:rgba(255,255,255,.92);
+    color:#000;
+    padding:8px 13px;
+    border-radius:999px;
+    font-weight:900;
+    max-width:88%;
+    overflow-wrap:anywhere;
+}
+.music-sticker{
+    position:absolute;
+    left:50%;
+    bottom:96px;
+    transform:translateX(-50%);
+    z-index:15;
+    background:rgba(0,0,0,.72);
+    color:white;
+    padding:10px 14px;
+    border-radius:14px;
+    display:none;
+    align-items:center;
+    gap:8px;
+    font-weight:800;
+    max-width:88%;
+}
+.music-sticker span{
+    font-size:20px;
+}
+.editor-panel,.sheet-bg{
+    position:absolute;
+    inset:0;
+    z-index:50;
+    display:none;
+    align-items:flex-end;
+    background:rgba(0,0,0,.55);
+}
+.editor-panel.active,.sheet-bg.active{
+    display:flex;
+}
+.panel-card,.sheet-card{
+    width:100%;
+    background:#1c1c1c;
+    border-radius:18px 18px 0 0;
+    padding:16px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+.panel-card h3,.sheet-card h3{
+    font-size:16px;
+}
+.panel-card input{
+    width:100%;
+    padding:13px 14px;
+    border-radius:12px;
+    border:1px solid #333;
+    background:#111;
+    color:white;
+    outline:none;
+    font-size:16px;
+}
+.panel-actions{
+    display:flex;
+    gap:10px;
+}
+.panel-actions button{
+    flex:1;
+}
+.highlight-toggle{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    color:white;
+    font-weight:700;
+    background:rgba(255,255,255,.12);
+    padding:10px 12px;
+    border-radius:12px;
+}
+.highlight-toggle input{
+    width:18px;
+    height:18px;
+    accent-color:#0095f6;
+}
+.loading-box{
+    position:absolute;
+    inset:0;
+    z-index:80;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    gap:12px;
+    background:rgba(0,0,0,.82);
+    text-align:center;
+    padding:24px;
+}
+.loading-box.active{
+    display:flex;
+}
+.loader{
+    width:32px;
+    height:32px;
+    border:3px solid rgba(255,255,255,.28);
+    border-top-color:white;
+    border-radius:50%;
+    animation:spin .8s linear infinite;
+}
+@keyframes spin{
+    to{transform:rotate(360deg)}
+}
+.status-text{
+    color:#a8a8a8;
+    max-width:320px;
+    line-height:1.4;
+}
+@media(min-width:700px){
+    body{
+        background:#121212;
+    }
+    .story-shell{
+        height:100dvh;
+        box-shadow:0 0 0 1px #262626;
+    }
+}
+</style>
 </head>
 
 <body>
-    <input type="file" id="story-file-input" accept="image/*,video/*" style="display:none;">
 
-    <section class="screen picker-screen active" id="picker-screen">
-        <button class="icon-btn" onclick="window.location.href='home.html'" style="position:absolute; top:14px; left:14px;"><span class="material-icons">close</span></button>
-        <div class="picker-icon"><span class="material-icons">add_photo_alternate</span></div>
-        <h2>Create story</h2>
-        <p style="color:#a8a8a8; max-width:320px;">Photo ya video choose karo, phir text, mention, music aur highlight add karke share karo.</p>
-        <button class="primary-btn" id="choose-media-btn">Choose from gallery</button>
-        <button class="ghost-btn" onclick="window.location.href='home.html'">Back home</button>
-    </section>
+<input type="file" id="story-file-input" accept="image/*,video/*" style="display:none;">
 
-    <section class="screen" id="editor-screen">
-        <div class="story-shell">
-            <img class="story-media" id="editor-image" alt="Story preview" style="display:none;">
-            <video class="story-media" id="editor-video" playsinline muted loop style="display:none;"></video>
+<section class="screen picker-screen active" id="picker-screen">
+    <button class="icon-btn" onclick="window.location.href='home.html'" style="position:absolute;top:14px;left:14px;">
+        <span class="material-icons">close</span>
+    </button>
 
-            <div class="top-bar">
-                <div class="story-user">
-                    <img id="editor-avatar" src="https://picsum.photos/100/100?random=1" alt="User">
-                    <span id="editor-username">Your story</span>
+    <div class="picker-icon">
+        <span class="material-icons">add_photo_alternate</span>
+    </div>
+
+    <h2>Create story</h2>
+    <p class="status-text">Photo ya video choose karo. Text, mention, music aur highlight add karke real story share karo.</p>
+
+    <button class="primary-btn" id="choose-media-btn">Choose from gallery</button>
+    <button class="ghost-btn" onclick="window.location.href='home.html'">Back home</button>
+</section>
+
+<section class="screen" id="editor-screen">
+    <div class="story-shell">
+        <img class="story-media" id="editor-image" alt="Story preview" style="display:none;">
+        <video class="story-media" id="editor-video" playsinline muted loop style="display:none;"></video>
+
+        <div class="top-bar">
+            <div class="story-user">
+                <img id="editor-avatar" src="https://picsum.photos/100/100?random=1" alt="User">
+                <span id="editor-username">Your story</span>
+            </div>
+
+            <button class="icon-btn" onclick="window.location.href='home.html'">
+                <span class="material-icons">close</span>
+            </button>
+        </div>
+
+        <div class="editor-tools">
+            <button class="icon-btn" id="text-tool"><span class="material-icons">text_fields</span></button>
+            <button class="icon-btn" id="mention-tool"><span class="material-icons">alternate_email</span></button>
+            <button class="icon-btn" id="music-tool"><span class="material-icons">music_note</span></button>
+        </div>
+
+        <div class="story-overlay-text" id="story-text-overlay"></div>
+        <div class="mention-sticker" id="mention-sticker" style="display:none;"></div>
+        <div class="music-sticker" id="music-sticker">
+            <span class="material-icons">music_note</span>
+            <b id="music-label"></b>
+        </div>
+
+        <div class="editor-bottom">
+            <label class="highlight-toggle">
+                <input type="checkbox" id="highlight-checkbox">
+                Highlight
+            </label>
+            <button class="primary-btn" id="share-story-btn">Share Story</button>
+        </div>
+
+        <div class="editor-panel" id="editor-panel">
+            <div class="panel-card">
+                <h3 id="panel-title">Add text</h3>
+                <input type="text" id="panel-input" placeholder="Type here..." maxlength="80">
+                <div class="panel-actions">
+                    <button class="ghost-btn" id="panel-cancel">Cancel</button>
+                    <button class="primary-btn" id="panel-done">Done</button>
                 </div>
-                <button class="icon-btn" onclick="window.location.href='home.html'"><span class="material-icons">close</span></button>
-            </div>
-
-            <div class="editor-tools">
-                <button class="icon-btn" id="text-tool"><span class="material-icons">text_fields</span></button>
-                <button class="icon-btn" id="mention-tool"><span class="material-icons">alternate_email</span></button>
-                <button class="icon-btn" id="music-tool"><span class="material-icons">music_note</span></button>
-            </div>
-
-            <div class="story-overlay-text" id="story-text-overlay"></div>
-            <div class="mention-sticker" id="mention-sticker" style="display:none;"></div>
-            <div class="music-sticker" id="music-sticker"><span class="material-icons">music_note</span><b id="music-label"></b></div>
-
-            <div class="editor-bottom">
-                <label class="highlight-toggle"><input type="checkbox" id="highlight-checkbox"> Highlight</label>
-                <button class="primary-btn" id="share-story-btn">Share Story</button>
-            </div>
-
-            <div class="editor-panel" id="editor-panel">
-                <div class="panel-card">
-                    <h3 id="panel-title">Add text</h3>
-                    <input type="text" id="panel-input" placeholder="Type here..." maxlength="80">
-                    <div class="panel-actions">
-                        <button class="ghost-btn" id="panel-cancel">Cancel</button>
-                        <button class="primary-btn" id="panel-done">Done</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="loading-box" id="loading-box">
-                <div class="loader"></div>
-                <strong id="loading-text">Uploading story...</strong>
             </div>
         </div>
-    </section>
 
-    <section class="screen" id="viewer-screen">
-        <div class="story-shell">
-            <div class="progress-wrap"><div class="progress-fill" id="progress-fill"></div></div>
+        <div class="loading-box" id="upload-loading">
+            <div class="loader"></div>
+            <strong id="upload-loading-text">Uploading story...</strong>
+        </div>
+    </div>
+</section>
 
-            <img class="story-media" id="viewer-image" alt="Story" style="display:none;">
-            <video class="story-media" id="viewer-video" playsinline autoplay muted loop style="display:none;"></video>
+<section class="screen" id="viewer-screen">
+    <div class="story-shell">
+        <div class="progress-list" id="progress-list"></div>
 
-            <div class="top-bar">
-                <div class="story-user">
-                    <img id="viewer-avatar" src="https://picsum.photos/100/100?random=1" alt="User">
-                    <span id="viewer-username">username</span>
-                </div>
-                <button class="icon-btn" onclick="window.location.href='home.html'"><span class="material-icons">close</span></button>
+        <img class="story-media" id="viewer-image" alt="Story" style="display:none;">
+        <video class="story-media" id="viewer-video" playsinline autoplay muted style="display:none;"></video>
+
+        <div class="tap-zone tap-left" id="tap-left"></div>
+        <div class="tap-zone tap-right" id="tap-right"></div>
+
+        <div class="top-bar">
+            <div class="story-user">
+                <img id="viewer-avatar" src="https://picsum.photos/100/100?random=1" alt="User">
+                <span id="viewer-username">username</span>
             </div>
 
-            <div class="story-overlay-text" id="viewer-text-overlay"></div>
-            <div class="mention-sticker" id="viewer-mention-sticker" style="display:none;"></div>
-            <div class="music-sticker" id="viewer-music-sticker"><span class="material-icons">music_note</span><b id="viewer-music-label"></b></div>
-
-            <div class="loading-box active" id="viewer-loading">
-                <div class="loader"></div>
-                <strong>Loading story...</strong>
+            <div class="top-actions">
+                <button class="icon-btn" id="viewer-share-btn">
+                    <span class="material-icons">send</span>
+                </button>
+                <button class="icon-btn" id="viewer-more-btn">
+                    <span class="material-icons">more_horiz</span>
+                </button>
+                <button class="icon-btn" onclick="window.location.href='home.html'">
+                    <span class="material-icons">close</span>
+                </button>
             </div>
         </div>
-    </section>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-        import { getFirestore, doc, getDoc, collection, addDoc, getDocs, query, where, orderBy, limit } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-storage.js";
+        <div class="story-overlay-text" id="viewer-text-overlay"></div>
+        <div class="mention-sticker" id="viewer-mention-sticker" style="display:none;"></div>
+        <div class="music-sticker" id="viewer-music-sticker">
+            <span class="material-icons">music_note</span>
+            <b id="viewer-music-label"></b>
+        </div>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyBrqMn7FrFW3jslaDNM0ui-VW4w6K_3Nmk",
-            authDomain: "insta-clone-863ae.firebaseapp.com",
-            projectId: "insta-clone-863ae",
-            storageBucket: "insta-clone-863ae.firebasestorage.app",
-            messagingSenderId: "599343109250",
-            appId: "1:599343109250:web:1306ec63908ba21c54509b"
+        <div class="sheet-bg" id="viewer-sheet">
+            <div class="sheet-card">
+                <h3>Story options</h3>
+                <button class="primary-btn" id="save-highlight-btn">Save to highlight</button>
+                <button class="danger-btn" id="delete-story-btn">Delete story</button>
+                <button class="ghost-btn" id="close-sheet-btn">Cancel</button>
+            </div>
+        </div>
+
+        <div class="loading-box active" id="viewer-loading">
+            <div class="loader"></div>
+            <strong>Loading story...</strong>
+        </div>
+    </div>
+</section>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+import {
+    getFirestore,
+    doc,
+    getDoc,
+    collection,
+    addDoc,
+    getDocs,
+    query,
+    where,
+    orderBy,
+    deleteDoc,
+    serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+import {
+    getStorage,
+    ref,
+    uploadBytes,
+    getDownloadURL
+} from "https://www.gstatic.com/firebasejs/12.14.0/firebase-storage.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBrqMn7FrFW3jslaDNM0ui-VW4w6K_3Nmk",
+    authDomain: "insta-clone-863ae.firebaseapp.com",
+    projectId: "insta-clone-863ae",
+    storageBucket: "insta-clone-863ae.firebasestorage.app",
+    messagingSenderId: "599343109250",
+    appId: "1:599343109250:web:1306ec63908ba21c54509b"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const storage = getStorage(app);
+
+const $ = (id) => document.getElementById(id);
+
+const params = new URLSearchParams(window.location.search);
+const mode = params.get("mode") || "create";
+const targetUser = params.get("user");
+const currentUsername = localStorage.getItem("active_user");
+
+const defaultAvatar = "https://picsum.photos/100/100?random=1";
+
+let currentProfilePic = defaultAvatar;
+let currentDisplayUsername = currentUsername || "";
+let selectedFile = null;
+let selectedMediaType = "image";
+let panelMode = "text";
+
+let viewerStories = [];
+let activeStoryIndex = 0;
+let activeStory = null;
+let progressTimer = null;
+
+const storyDraft = {
+    text: "",
+    mention: "",
+    music: "",
+    highlight: false
+};
+
+if (!currentUsername) {
+    window.location.href = "index.html";
+}
+
+init();
+
+async function init() {
+    await loadCurrentUser();
+
+    if (mode === "view") {
+        showScreen("viewer-screen");
+        await loadStoriesForViewer(targetUser || currentUsername);
+    } else {
+        showScreen("picker-screen");
+    }
+}
+
+async function loadCurrentUser() {
+    try {
+        const snap = await getDoc(doc(db, "users", currentUsername));
+
+        if (snap.exists()) {
+            const data = snap.data();
+            currentProfilePic = data.profilePic || defaultAvatar;
+            currentDisplayUsername = data.username || currentUsername;
+        }
+    } catch (err) {
+        console.error("Current user load failed:", err);
+    }
+
+    $("editor-avatar").src = currentProfilePic;
+    $("editor-username").innerText = currentDisplayUsername;
+}
+
+function showScreen(id) {
+    document.querySelectorAll(".screen").forEach((screen) => screen.classList.remove("active"));
+    $(id).classList.add("active");
+}
+
+function isActiveStory(story) {
+    const expiresAt = story.expiresAt && story.expiresAt.toDate ? story.expiresAt.toDate() : null;
+    return !expiresAt || expiresAt > new Date();
+}
+
+$("choose-media-btn").addEventListener("click", () => $("story-file-input").click());
+
+$("story-file-input").addEventListener("change", () => {
+    selectedFile = $("story-file-input").files[0];
+    if (!selectedFile) return;
+
+    const isVideo = selectedFile.type.startsWith("video/");
+    const isImage = selectedFile.type.startsWith("image/");
+
+    if (!isVideo && !isImage) {
+        alert("Only photo or video allowed.");
+        selectedFile = null;
+        $("story-file-input").value = "";
+        return;
+    }
+
+    selectedMediaType = isVideo ? "video" : "image";
+
+    const localUrl = URL.createObjectURL(selectedFile);
+
+    $("editor-image").style.display = selectedMediaType === "image" ? "block" : "none";
+    $("editor-video").style.display = selectedMediaType === "video" ? "block" : "none";
+
+    if (selectedMediaType === "image") {
+        $("editor-image").src = localUrl;
+    } else {
+        $("editor-video").src = localUrl;
+        $("editor-video").play().catch(() => {});
+    }
+
+    showScreen("editor-screen");
+});
+
+$("text-tool").addEventListener("click", () => openEditorPanel("text", "Add text", "Write something..."));
+$("mention-tool").addEventListener("click", () => openEditorPanel("mention", "Mention someone", "@username"));
+$("music-tool").addEventListener("click", () => openEditorPanel("music", "Add music", "Song name"));
+
+function openEditorPanel(type, title, placeholder) {
+    panelMode = type;
+    $("panel-title").innerText = title;
+    $("panel-input").placeholder = placeholder;
+    $("panel-input").value = storyDraft[type] || "";
+    $("editor-panel").classList.add("active");
+
+    setTimeout(() => $("panel-input").focus(), 100);
+}
+
+$("panel-cancel").addEventListener("click", () => {
+    $("editor-panel").classList.remove("active");
+});
+
+$("panel-done").addEventListener("click", () => {
+    const value = $("panel-input").value.trim();
+
+    if (panelMode === "text") {
+        storyDraft.text = value;
+        $("story-text-overlay").innerText = value;
+    }
+
+    if (panelMode === "mention") {
+        storyDraft.mention = value ? (value.startsWith("@") ? value : `@${value}`) : "";
+        $("mention-sticker").style.display = storyDraft.mention ? "block" : "none";
+        $("mention-sticker").innerText = storyDraft.mention;
+    }
+
+    if (panelMode === "music") {
+        storyDraft.music = value;
+        $("music-sticker").style.display = value ? "flex" : "none";
+        $("music-label").innerText = value;
+    }
+
+    $("editor-panel").classList.remove("active");
+});
+
+$("share-story-btn").addEventListener("click", uploadStory);
+
+async function uploadStory() {
+    if (!selectedFile) {
+        alert("Pehle photo ya video choose karo.");
+        return;
+    }
+
+    $("share-story-btn").disabled = true;
+    $("upload-loading").classList.add("active");
+
+    try {
+        const safeName = selectedFile.name.replace(/[^\w.-]+/g, "_");
+        const storagePath = `stories/${currentUsername}/${Date.now()}_${safeName}`;
+        const storageRef = ref(storage, storagePath);
+
+        await uploadBytes(storageRef, selectedFile);
+        const mediaUrl = await getDownloadURL(storageRef);
+
+        const storyPayload = {
+            userId: currentUsername,
+            username: currentDisplayUsername,
+            profilePic: currentProfilePic,
+            mediaUrl,
+            mediaType: selectedMediaType,
+            text: storyDraft.text,
+            mention: storyDraft.mention,
+            music: storyDraft.music,
+            isHighlight: $("highlight-checkbox").checked,
+            createdAt: serverTimestamp(),
+            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
         };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const storage = getStorage(app);
+        const storyRef = await addDoc(collection(db, "stories"), storyPayload);
 
-        const params = new URLSearchParams(window.location.search);
-        const mode = params.get("mode") || "create";
-        const targetUser = params.get("user");
-        const currentUsername = localStorage.getItem("active_user");
-
-        if (!currentUsername) {
-            window.location.href = "login.html";
+        if ($("highlight-checkbox").checked) {
+            await addDoc(collection(db, "highlights"), {
+                ...storyPayload,
+                storyId: storyRef.id,
+                title: storyDraft.music || storyDraft.text || "Highlight",
+                savedAt: serverTimestamp()
+            });
         }
 
-        let currentProfilePic = "https://picsum.photos/100/100?random=1";
-        let selectedFile = null;
-        let selectedMediaType = "image";
-        let panelMode = "text";
+        window.location.href = `story-view.html?mode=view&user=${encodeURIComponent(currentUsername)}`;
+    } catch (err) {
+        console.error("Story upload failed:", err);
+        alert("Story upload nahi hui. Firebase Storage rules check karo.");
+        $("share-story-btn").disabled = false;
+        $("upload-loading").classList.remove("active");
+    }
+}
 
-        const storyData = {
-            text: "",
-            mention: "",
-            music: "",
-            highlight: false
-        };
+async function loadStoriesForViewer(username) {
+    try {
+        const snap = await getDocs(
+            query(
+                collection(db, "stories"),
+                where("userId", "==", username),
+                orderBy("createdAt", "asc")
+            )
+        );
 
-        const $ = (id) => document.getElementById(id);
+        viewerStories = [];
 
-        init();
+        snap.forEach((storyDoc) => {
+            const story = {
+                id: storyDoc.id,
+                ...storyDoc.data()
+            };
 
-        async function init() {
-            await loadCurrentUser();
-
-            if (mode === "view") {
-                showScreen("viewer-screen");
-                await loadStoryForViewer(targetUser || currentUsername);
-            } else {
-                showScreen("picker-screen");
-            }
-        }
-
-        async function loadCurrentUser() {
-            try {
-                const userSnap = await getDoc(doc(db, "users", currentUsername));
-                if (userSnap.exists()) {
-                    const userData = userSnap.data();
-                    currentProfilePic = userData.profilePic || currentProfilePic;
-                }
-            } catch (err) {
-                console.error("User load failed:", err);
-            }
-
-            $("editor-avatar").src = currentProfilePic;
-            $("editor-username").innerText = currentUsername;
-        }
-
-        function showScreen(id) {
-            document.querySelectorAll(".screen").forEach((screen) => screen.classList.remove("active"));
-            $(id).classList.add("active");
-        }
-
-        $("choose-media-btn").addEventListener("click", () => $("story-file-input").click());
-
-        $("story-file-input").addEventListener("change", () => {
-            selectedFile = $("story-file-input").files[0];
-            if (!selectedFile) return;
-
-            selectedMediaType = selectedFile.type.startsWith("video/") ? "video" : "image";
-            const localUrl = URL.createObjectURL(selectedFile);
-
-            $("editor-image").style.display = selectedMediaType === "image" ? "block" : "none";
-            $("editor-video").style.display = selectedMediaType === "video" ? "block" : "none";
-
-            if (selectedMediaType === "image") {
-                $("editor-image").src = localUrl;
-            } else {
-                $("editor-video").src = localUrl;
-                $("editor-video").play();
-            }
-
-            showScreen("editor-screen");
-        });
-
-        $("text-tool").addEventListener("click", () => openPanel("text", "Add text", "Write something..."));
-        $("mention-tool").addEventListener("click", () => openPanel("mention", "Mention someone", "@username"));
-        $("music-tool").addEventListener("click", () => openPanel("music", "Add music", "Song name"));
-
-        function openPanel(type, title, placeholder) {
-            panelMode = type;
-            $("panel-title").innerText = title;
-            $("panel-input").placeholder = placeholder;
-            $("panel-input").value = storyData[type] || "";
-            $("editor-panel").classList.add("active");
-            setTimeout(() => $("panel-input").focus(), 100);
-        }
-
-        $("panel-cancel").addEventListener("click", () => $("editor-panel").classList.remove("active"));
-
-        $("panel-done").addEventListener("click", () => {
-            const value = $("panel-input").value.trim();
-
-            if (panelMode === "text") {
-                storyData.text = value;
-                $("story-text-overlay").innerText = value;
-            }
-
-            if (panelMode === "mention") {
-                storyData.mention = value.startsWith("@") || value === "" ? value : `@${value}`;
-                $("mention-sticker").style.display = storyData.mention ? "block" : "none";
-                $("mention-sticker").innerText = storyData.mention;
-            }
-
-            if (panelMode === "music") {
-                storyData.music = value;
-                $("music-sticker").style.display = value ? "flex" : "none";
-                $("music-label").innerText = value;
-            }
-
-            $("editor-panel").classList.remove("active");
-        });
-
-        $("share-story-btn").addEventListener("click", async () => {
-            if (!selectedFile) {
-                alert("Pehle photo ya video choose karo.");
-                return;
-            }
-
-            storyData.highlight = $("highlight-checkbox").checked;
-            $("loading-box").classList.add("active");
-
-            try {
-                const safeName = selectedFile.name.replaceAll(" ", "_");
-                const storagePath = `stories/${currentUsername}/${Date.now()}_${safeName}`;
-                const storageRef = ref(storage, storagePath);
-
-                await uploadBytes(storageRef, selectedFile);
-                const mediaUrl = await getDownloadURL(storageRef);
-
-                const storyPayload = {
-                    userId: currentUsername,
-                    profilePic: currentProfilePic,
-                    mediaUrl,
-                    mediaType: selectedMediaType,
-                    text: storyData.text,
-                    mention: storyData.mention,
-                    music: storyData.music,
-                    isHighlight: storyData.highlight,
-                    createdAt: new Date(),
-                    expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
-                };
-
-                await addDoc(collection(db, "stories"), storyPayload);
-
-                if (storyData.highlight) {
-                    await addDoc(collection(db, "highlights"), {
-                        ...storyPayload,
-                        savedAt: new Date()
-                    });
-                }
-
-                window.location.href = `story-view.html?mode=view&user=${encodeURIComponent(currentUsername)}`;
-            } catch (err) {
-                console.error("Story upload failed:", err);
-                $("loading-box").classList.remove("active");
-                alert("Story upload nahi hui. Firebase Storage rules check karo.");
+            if (isActiveStory(story)) {
+                viewerStories.push(story);
             }
         });
 
-        async function loadStoryForViewer(username) {
-            try {
-                const storyQuery = query(
-                    collection(db, "stories"),
-                    where("userId", "==", username),
-                    orderBy("createdAt", "desc"),
-                    limit(1)
-                );
-
-                const storySnap = await getDocs(storyQuery);
-
-                if (storySnap.empty) {
-                    $("viewer-loading").innerHTML = "<strong>No active story found.</strong><button class='primary-btn' onclick=\"window.location.href='home.html'\">Back home</button>";
-                    return;
-                }
-
-                let story = null;
-                storySnap.forEach((docSnap) => story = docSnap.data());
-
-                $("viewer-avatar").src = story.profilePic || currentProfilePic;
-                $("viewer-username").innerText = story.userId || username;
-
-                $("viewer-image").style.display = story.mediaType === "image" ? "block" : "none";
-                $("viewer-video").style.display = story.mediaType === "video" ? "block" : "none";
-
-                if (story.mediaType === "video") {
-                    $("viewer-video").src = story.mediaUrl;
-                    $("viewer-video").play();
-                } else {
-                    $("viewer-image").src = story.mediaUrl;
-                }
-
-                $("viewer-text-overlay").innerText = story.text || "";
-
-                $("viewer-mention-sticker").style.display = story.mention ? "block" : "none";
-                $("viewer-mention-sticker").innerText = story.mention || "";
-
-                $("viewer-music-sticker").style.display = story.music ? "flex" : "none";
-                $("viewer-music-label").innerText = story.music || "";
-
-                $("viewer-loading").classList.remove("active");
-                startProgress();
-            } catch (err) {
-                console.error("Story view failed:", err);
-                $("viewer-loading").innerHTML = "<strong>Story load nahi hui.</strong><button class='primary-btn' onclick=\"window.location.href='home.html'\">Back home</button>";
-            }
+        if (viewerStories.length === 0) {
+            showViewerError("No active story found.");
+            return;
         }
 
-        function startProgress() {
-            const bar = $("progress-fill");
-            bar.style.transition = "none";
-            bar.style.width = "0%";
+        activeStoryIndex = 0;
+        renderProgressBars();
+        showStoryAtIndex(activeStoryIndex);
+    } catch (err) {
+        console.error("Story view failed:", err);
+        showViewerError("Story load nahi hui. Firebase rules check karo.");
+    }
+}
 
-            setTimeout(() => {
-                bar.style.transition = "width 7s linear";
-                bar.style.width = "100%";
-            }, 80);
+function showViewerError(text) {
+    $("viewer-loading").classList.add("active");
+    $("viewer-loading").innerHTML = `
+        <strong>${text}</strong>
+        <button class="primary-btn" onclick="window.location.href='home.html'">Back home</button>
+    `;
+}
 
-            setTimeout(() => {
-                window.location.href = "home.html";
-            }, 7200);
+function renderProgressBars() {
+    $("progress-list").innerHTML = "";
+
+    viewerStories.forEach(() => {
+        const track = document.createElement("div");
+        track.className = "progress-track";
+        track.innerHTML = `<div class="progress-fill"></div>`;
+        $("progress-list").appendChild(track);
+    });
+}
+
+function showStoryAtIndex(index) {
+    if (index < 0) {
+        window.location.href = "home.html";
+        return;
+    }
+
+    if (index >= viewerStories.length) {
+        window.location.href = "home.html";
+        return;
+    }
+
+    activeStoryIndex = index;
+    activeStory = viewerStories[index];
+
+    $("viewer-avatar").src = activeStory.profilePic || defaultAvatar;
+    $("viewer-username").innerText = activeStory.username || activeStory.userId || "user";
+
+    $("viewer-image").style.display = activeStory.mediaType === "image" ? "block" : "none";
+    $("viewer-video").style.display = activeStory.mediaType === "video" ? "block" : "none";
+
+    $("viewer-video").pause();
+    $("viewer-video").removeAttribute("src");
+    $("viewer-image").removeAttribute("src");
+
+    if (activeStory.mediaType === "video") {
+        $("viewer-video").src = activeStory.mediaUrl || "";
+        $("viewer-video").currentTime = 0;
+        $("viewer-video").play().catch(() => {});
+    } else {
+        $("viewer-image").src = activeStory.mediaUrl || "";
+    }
+
+    $("viewer-text-overlay").innerText = activeStory.text || "";
+
+    $("viewer-mention-sticker").style.display = activeStory.mention ? "block" : "none";
+    $("viewer-mention-sticker").innerText = activeStory.mention || "";
+
+    $("viewer-music-sticker").style.display = activeStory.music ? "flex" : "none";
+    $("viewer-music-label").innerText = activeStory.music || "";
+
+    $("delete-story-btn").style.display = activeStory.userId === currentUsername ? "block" : "none";
+    $("save-highlight-btn").style.display = activeStory.userId === currentUsername ? "block" : "none";
+
+    $("viewer-loading").classList.remove("active");
+    startProgressForActiveStory();
+}
+
+function startProgressForActiveStory() {
+    clearTimeout(progressTimer);
+
+    const fills = Array.from(document.querySelectorAll("#progress-list .progress-fill"));
+
+    fills.forEach((fill, i) => {
+        fill.style.transition = "none";
+        fill.style.width = i < activeStoryIndex ? "100%" : "0%";
+    });
+
+    const activeFill = fills[activeStoryIndex];
+    const duration = activeStory.mediaType === "video" ? 12000 : 7000;
+
+    setTimeout(() => {
+        activeFill.style.transition = `width ${duration}ms linear`;
+        activeFill.style.width = "100%";
+    }, 80);
+
+    progressTimer = setTimeout(() => {
+        showStoryAtIndex(activeStoryIndex + 1);
+    }, duration + 150);
+}
+
+$("tap-left").addEventListener("click", () => showStoryAtIndex(activeStoryIndex - 1));
+$("tap-right").addEventListener("click", () => showStoryAtIndex(activeStoryIndex + 1));
+
+$("viewer-more-btn").addEventListener("click", () => {
+    if (!activeStory) return;
+    $("viewer-sheet").classList.add("active");
+});
+
+$("close-sheet-btn").addEventListener("click", () => {
+    $("viewer-sheet").classList.remove("active");
+});
+
+$("viewer-sheet").addEventListener("click", (e) => {
+    if (e.target === $("viewer-sheet")) {
+        $("viewer-sheet").classList.remove("active");
+    }
+});
+
+$("save-highlight-btn").addEventListener("click", async () => {
+    if (!activeStory || activeStory.userId !== currentUsername) return;
+
+    try {
+        await addDoc(collection(db, "highlights"), {
+            ...activeStory,
+            storyId: activeStory.id,
+            title: activeStory.music || activeStory.text || "Highlight",
+            savedAt: serverTimestamp()
+        });
+
+        $("viewer-sheet").classList.remove("active");
+        alert("Saved to highlight.");
+    } catch (err) {
+        console.error(err);
+        alert("Highlight save nahi hua.");
+    }
+});
+
+$("delete-story-btn").addEventListener("click", async () => {
+    if (!activeStory || activeStory.userId !== currentUsername) return;
+
+    const confirmDelete = confirm("Delete this story?");
+    if (!confirmDelete) return;
+
+    try {
+        await deleteDoc(doc(db, "stories", activeStory.id));
+
+        viewerStories.splice(activeStoryIndex, 1);
+        $("viewer-sheet").classList.remove("active");
+
+        if (viewerStories.length === 0) {
+            window.location.href = "home.html";
+            return;
         }
-    </script>
+
+        if (activeStoryIndex >= viewerStories.length) {
+            activeStoryIndex = viewerStories.length - 1;
+        }
+
+        renderProgressBars();
+        showStoryAtIndex(activeStoryIndex);
+    } catch (err) {
+        console.error(err);
+        alert("Story delete nahi hui. Firebase rules check karo.");
+    }
+});
+
+$("viewer-share-btn").addEventListener("click", () => {
+    if (!activeStory) return;
+
+    const params = new URLSearchParams({
+        shareType: "story",
+        storyId: activeStory.id,
+        storyUrl: activeStory.mediaUrl || "",
+        thumbnailUrl: activeStory.mediaUrl || "",
+        title: `Story by ${activeStory.username || activeStory.userId || "user"}`,
+        caption: activeStory.text || "",
+        storyUser: activeStory.userId || ""
+    });
+
+    window.location.href = `messages.html?${params.toString()}`;
+});
+</script>
+
 </body>
 </html>
