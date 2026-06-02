@@ -148,7 +148,13 @@ form{
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+import {
+    getFirestore,
+    collection,
+    query,
+    where,
+    getDocs
+} from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyBrqMn7FrFW3jslaDNM0ui-VW4w6K_3Nmk",
@@ -169,94 +175,122 @@ const errorMsg = document.getElementById("error-msg");
 
 loginBtn.addEventListener("click", loginUser);
 
-passwordInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-        e.preventDefault();
-        loginUser();
-    }
-});
+passwordInput.addEventListener("keydown", handleEnterLogin);
+identityInput.addEventListener("keydown", handleEnterLogin);
 
-identityInput.addEventListener("keydown", (e) => {
+function handleEnterLogin(e) {
     if (e.key === "Enter") {
         e.preventDefault();
         loginUser();
     }
-});
+}
 
 async function loginUser() {
-    const identity = identityInput.value.trim();
-    const identityLower = identity.toLowerCase();
+    const rawIdentity = identityInput.value.trim();
+    const identityLower = rawIdentity.toLowerCase();
+    const phoneNumber = normalizePhone(rawIdentity);
     const password = passwordInput.value.trim();
 
     hideError();
 
-    if (!identity || !password) {
+    if (!rawIdentity || !password) {
         showError("Please fill in all fields.");
         return;
     }
 
-    loginBtn.disabled = true;
-    loginBtn.innerText = "Logging in...";
+    setLoading(true);
 
     try {
         const usersRef = collection(db, "users");
-
         let foundUser = null;
 
-        const emailQuery = query(
-            usersRef,
-            where("email", "==", identityLower),
-            where("password", "==", password)
-        );
+        if (isProbablyEmail(rawIdentity)) {
+            foundUser = await findUserByField(usersRef, "email", identityLower, password);
+        }
 
-        const emailSnap = await getDocs(emailQuery);
-
-        if (!emailSnap.empty) {
-            foundUser = emailSnap.docs[0].data();
+        if (!foundUser && phoneNumber) {
+            foundUser = await findUserByField(usersRef, "phone", phoneNumber, password);
         }
 
         if (!foundUser) {
-            const usernameQuery = query(
-                usersRef,
-                where("username", "==", identity),
-                where("password", "==", password)
-            );
-
-            const usernameSnap = await getDocs(usernameQuery);
-
-            if (!usernameSnap.empty) {
-                foundUser = usernameSnap.docs[0].data();
-            }
+            foundUser = await findUserByField(usersRef, "username", identityLower, password);
         }
 
         if (!foundUser) {
-            const usernameLowerQuery = query(
-                usersRef,
-                where("username", "==", identityLower),
-                where("password", "==", password)
-            );
-
-            const usernameLowerSnap = await getDocs(usernameLowerQuery);
-
-            if (!usernameLowerSnap.empty) {
-                foundUser = usernameLowerSnap.docs[0].data();
-            }
+            foundUser = await findUserByField(usersRef, "username", rawIdentity, password);
         }
 
         if (foundUser && foundUser.username) {
             localStorage.setItem("active_user", foundUser.username);
+            localStorage.setItem("active_user_doc_id", foundUser.docId);
+            localStorage.setItem("active_user_full_name", foundUser.fullName || foundUser.name || "");
+            localStorage.setItem("active_user_profile_pic", foundUser.profilePic || "");
+
             window.location.href = "home.html";
-        } else {
-            showError("Sorry, your username, email, or password was incorrect.");
-            loginBtn.disabled = false;
-            loginBtn.innerText = "Log in";
+            return;
         }
+
+        showError("Sorry, your phone number, username, email, or password was incorrect.");
+        setLoading(false);
     } catch (err) {
         console.error(err);
         showError("Server error. Try again.");
-        loginBtn.disabled = false;
-        loginBtn.innerText = "Log in";
+        setLoading(false);
     }
+}
+
+async function findUserByField(usersRef, fieldName, fieldValue, password) {
+    if (!fieldValue) return null;
+
+    const userQuery = query(
+        usersRef,
+        where(fieldName, "==", fieldValue),
+        where("password", "==", password)
+    );
+
+    const snap = await getDocs(userQuery);
+
+    if (snap.empty) return null;
+
+    const userDoc = snap.docs[0];
+
+    return {
+        docId: userDoc.id,
+        ...userDoc.data()
+    };
+}
+
+function normalizePhone(value) {
+    let phone = value.trim();
+
+    phone = phone.replace(/\s+/g, "");
+    phone = phone.replace(/-/g, "");
+    phone = phone.replace(/[()]/g, "");
+
+    if (phone.startsWith("+91")) {
+        phone = phone.slice(3);
+    }
+
+    if (phone.startsWith("91") && phone.length === 12) {
+        phone = phone.slice(2);
+    }
+
+    phone = phone.replace(/\D/g, "");
+
+    if (/^[6-9]\d{9}$/.test(phone)) {
+        return phone;
+    }
+
+    return "";
+}
+
+function isProbablyEmail(value) {
+    return value.includes("@");
+}
+
+function setLoading(isLoading) {
+    loginBtn.disabled = isLoading;
+    loginBtn.innerText = isLoading ? "Logging in..." : "Log in";
 }
 
 function showError(text) {
