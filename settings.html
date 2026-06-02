@@ -1,281 +1,528 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Settings • Instagram</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Grand+Hotel&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <style>
-        :root {
-            --bg-color: #fafafa;
-            --border-color: #dbdbdb;
-            --text-main: #262626;
-            --text-muted: #8e8e8e;
-            --card-bg: #ffffff;
-            --btn-blue: #0095f6;
-            --danger-red: #ed4956;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Settings • Instagram</title>
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
+<link href="https://fonts.googleapis.com/css2?family=Grand+Hotel&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            padding-top: 60px;
-            padding-bottom: 60px;
-        }
-
-        a { text-decoration: none; color: inherit; }
-
-        /* --- 📌 TOP NAVIGATION BAR --- */
-        .top-navbar {
-            position: fixed; top: 0; left: 0; width: 100%; height: 60px;
-            background-color: var(--card-bg); border-bottom: 1px solid var(--border-color);
-            display: flex; justify-content: center; align-items: center; z-index: 1000;
-        }
-        .nav-container {
-            width: 100%; max-width: 975px; padding: 0 20px;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .logo-text { font-family: 'Grand Hotel', cursive; font-size: 30px; }
-        .nav-icons { display: flex; gap: 22px; align-items: center; }
-        .nav-icons i { font-size: 22px; cursor: pointer; }
-        .nav-profile-pic { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 1px solid black; }
-
-        /* --- 📱 BOTTOM NAVBAR FOR MOBILE --- */
-        .bottom-navbar {
-            position: fixed; bottom: 0; left: 0; width: 100%; height: 52px;
-            background-color: var(--card-bg); border-top: 1px solid var(--border-color);
-            display: none; justify-content: space-around; align-items: center; z-index: 1000;
-        }
-        .bottom-navbar i { font-size: 22px; }
-
-        /* --- ⚙️ SETTINGS MAIN DUAL PANEL --- */
-        .settings-container {
-            max-width: 935px;
-            margin: 30px auto 0 auto;
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            display: flex;
-            min-height: 70vh;
-        }
-
-        /* Left Menu Sidebar */
-        .settings-sidebar {
-            flex: 1;
-            border-right: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-            list-style: none;
-        }
-        .menu-item {
-            padding: 16px 24px;
-            font-size: 16px;
-            cursor: pointer;
-            border-left: 2px solid transparent;
-        }
-        .menu-item:hover {
-            background-color: #fafafa;
-        }
-        .menu-item.active {
-            font-weight: 600;
-            border-left: 2px solid var(--text-main);
-        }
-        .menu-item.logout {
-            color: var(--danger-red);
-            font-weight: 600;
-            border-top: 1px solid var(--border-color);
-            margin-top: auto; /* Push to bottom of sidebar */
-        }
-
-        /* Right Content Container Form Workspace */
-        .settings-content {
-            flex: 2.5;
-            padding: 40px 60px;
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-        }
-
-        /* User Picture Edit Meta Row */
-        .edit-pic-row {
-            display: flex;
-            align-items: center;
-            gap: 30px;
-            margin-bottom: 10px;
-        }
-        .edit-pic-row img {
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-left: auto; /* Push label alignment exactly */
-        }
-        .user-meta-info {
-            flex: 3;
-            display: flex;
-            flex-direction: column;
-        }
-        .meta-username { font-size: 20px; font-weight: 600; }
-        .change-pic-btn { color: var(--btn-blue); font-size: 14px; font-weight: 600; cursor: pointer; }
-
-        /* Standard Input Forms Rows */
-        .form-row {
-            display: flex;
-            align-items: flex-start;
-            gap: 30px;
-            width: 100%;
-        }
-        .form-row label {
-            flex: 1;
-            text-align: right;
-            font-weight: 600;
-            font-size: 16px;
-            padding-top: 6px;
-        }
-        .input-field-block {
-            flex: 3;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .input-field-block input, .input-field-block textarea {
-            width: 100%;
-            padding: 8px 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            font-size: 16px;
-            outline: none;
-        }
-        .input-field-block textarea {
-            height: 80px;
-            resize: none;
-        }
-        .field-subtext {
-            font-size: 12px;
-            color: var(--text-muted);
-            line-height: 16px;
-        }
-
-        .submit-settings-btn {
-            background-color: var(--btn-blue);
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-weight: 600;
-            font-size: 14px;
-            cursor: pointer;
-            width: fit-content;
-            margin-left: calc(25% + 8px); /* Line up right under input nodes */
-        }
-
-        /* --- 📱 MOBILE VIEW OPTIMIZATIONS --- */
-        @media (max-width: 768px) {
-            .top-navbar .nav-icons { display: none; }
-            .bottom-navbar { display: flex; }
-            
-            .settings-container { border: none; flex-direction: column; margin-top: 10px; }
-            .settings-sidebar { display: grid; grid-template-columns: repeat(3, 1fr); border-bottom: 1px solid var(--border-color); border-right: none; }
-            .menu-item { padding: 12px; text-align: center; font-size: 14px; border-left: none; border-bottom: 2px solid transparent; }
-            .menu-item.active { border-left: none; border-bottom: 2px solid var(--text-main); }
-            .menu-item.logout { margin-top: 0; border-top: none; }
-            
-            .settings-content { padding: 30px 16px; }
-            .form-row { flex-direction: column; gap: 8px; }
-            .form-row label { text-align: left; }
-            .submit-settings-btn { margin-left: 0; width: 100%; text-align: center; padding: 10px; }
-        }
-    </style>
+<style>
+:root{
+    --bg-color:#fafafa;
+    --border-color:#dbdbdb;
+    --text-main:#262626;
+    --text-muted:#8e8e8e;
+    --card-bg:#ffffff;
+    --btn-blue:#0095f6;
+    --danger-red:#ed4956;
+}
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+body{
+    background-color:var(--bg-color);
+    color:var(--text-main);
+    padding-top:60px;
+    padding-bottom:60px;
+}
+a{
+    text-decoration:none;
+    color:inherit;
+}
+button,input,textarea{
+    font:inherit;
+}
+button{
+    cursor:pointer;
+}
+.top-navbar{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:60px;
+    background-color:var(--card-bg);
+    border-bottom:1px solid var(--border-color);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:1000;
+}
+.nav-container{
+    width:100%;
+    max-width:975px;
+    padding:0 20px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+.logo-text{
+    font-family:'Grand Hotel',cursive;
+    font-size:30px;
+}
+.nav-icons{
+    display:flex;
+    gap:22px;
+    align-items:center;
+}
+.nav-icons i{
+    font-size:22px;
+}
+.nav-profile-pic{
+    width:26px;
+    height:26px;
+    border-radius:50%;
+    object-fit:cover;
+    border:1px solid black;
+}
+.bottom-navbar{
+    position:fixed;
+    bottom:0;
+    left:0;
+    width:100%;
+    height:52px;
+    background-color:var(--card-bg);
+    border-top:1px solid var(--border-color);
+    display:none;
+    justify-content:space-around;
+    align-items:center;
+    z-index:1000;
+}
+.bottom-navbar i{
+    font-size:22px;
+}
+.bottom-navbar img{
+    width:24px;
+    height:24px;
+    border-radius:50%;
+    object-fit:cover;
+    border:1.5px solid black;
+}
+.settings-container{
+    max-width:935px;
+    margin:30px auto 0;
+    background-color:var(--card-bg);
+    border:1px solid var(--border-color);
+    border-radius:4px;
+    display:flex;
+    min-height:70vh;
+}
+.settings-sidebar{
+    flex:1;
+    border-right:1px solid var(--border-color);
+    display:flex;
+    flex-direction:column;
+    list-style:none;
+}
+.menu-item{
+    padding:16px 24px;
+    font-size:16px;
+    cursor:pointer;
+    border-left:2px solid transparent;
+}
+.menu-item:hover{
+    background-color:#fafafa;
+}
+.menu-item.active{
+    font-weight:600;
+    border-left:2px solid var(--text-main);
+}
+.menu-item.logout{
+    color:var(--danger-red);
+    font-weight:600;
+    border-top:1px solid var(--border-color);
+    margin-top:auto;
+}
+.settings-content{
+    flex:2.5;
+    padding:40px 60px;
+    display:flex;
+    flex-direction:column;
+    gap:24px;
+}
+.edit-pic-row{
+    display:flex;
+    align-items:center;
+    gap:30px;
+    margin-bottom:10px;
+}
+.edit-pic-row img{
+    width:44px;
+    height:44px;
+    border-radius:50%;
+    object-fit:cover;
+}
+.user-meta-info{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+}
+.meta-username{
+    font-size:20px;
+    font-weight:600;
+}
+.change-pic-btn{
+    color:var(--btn-blue);
+    font-size:14px;
+    font-weight:600;
+}
+.form-row{
+    display:flex;
+    align-items:flex-start;
+    gap:30px;
+    width:100%;
+}
+.form-row label{
+    flex:1;
+    text-align:right;
+    font-weight:600;
+    font-size:16px;
+    padding-top:6px;
+}
+.input-field-block{
+    flex:3;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
+.input-field-block input,
+.input-field-block textarea{
+    width:100%;
+    padding:8px 12px;
+    border:1px solid var(--border-color);
+    border-radius:4px;
+    font-size:16px;
+    outline:none;
+    background:white;
+}
+.input-field-block textarea{
+    height:80px;
+    resize:none;
+}
+.field-subtext{
+    font-size:12px;
+    color:var(--text-muted);
+    line-height:16px;
+}
+.submit-settings-btn{
+    background-color:var(--btn-blue);
+    color:white;
+    border:none;
+    padding:7px 16px;
+    border-radius:8px;
+    font-weight:600;
+    font-size:14px;
+    width:fit-content;
+    margin-left:calc(25% + 8px);
+}
+.submit-settings-btn:disabled{
+    opacity:.6;
+    cursor:default;
+}
+.status-msg{
+    font-size:13px;
+    color:var(--text-muted);
+    margin-left:calc(25% + 8px);
+    display:none;
+}
+@media(max-width:768px){
+    .top-navbar .nav-icons{
+        display:none;
+    }
+    .bottom-navbar{
+        display:flex;
+    }
+    .settings-container{
+        border:none;
+        flex-direction:column;
+        margin-top:10px;
+    }
+    .settings-sidebar{
+        display:grid;
+        grid-template-columns:repeat(3,1fr);
+        border-bottom:1px solid var(--border-color);
+        border-right:none;
+    }
+    .menu-item{
+        padding:12px;
+        text-align:center;
+        font-size:14px;
+        border-left:none;
+        border-bottom:2px solid transparent;
+    }
+    .menu-item.active{
+        border-left:none;
+        border-bottom:2px solid var(--text-main);
+    }
+    .menu-item.logout{
+        margin-top:0;
+        border-top:none;
+    }
+    .settings-content{
+        padding:30px 16px;
+    }
+    .form-row{
+        flex-direction:column;
+        gap:8px;
+    }
+    .form-row label{
+        text-align:left;
+    }
+    .submit-settings-btn,
+    .status-msg{
+        margin-left:0;
+        width:100%;
+    }
+}
+</style>
 </head>
+
 <body>
 
-    <nav class="top-navbar">
-        <div class="nav-container">
-            <div class="logo">
-                <a href="home.html" class="logo-text">Instagram</a>
-            </div>
-            <div class="nav-icons">
-                <a href="home.html"><i class="fa-regular fa-house"></i></a>
-                <a href="messages.html"><i class="fa-regular fa-paper-plane"></i></a>
-                <a href="create.html"><i class="fa-regular fa-square-plus"></i></a>
-                <a href="explore.html"><i class="fa-regular fa-compass"></i></a>
-                <a href="notifications.html"><i class="fa-regular fa-heart"></i></a>
-                <a href="profile.html"><img src="https://picsum.photos/150/150?random=1" alt="Profile" class="nav-profile-pic"></a>
+<nav class="top-navbar">
+    <div class="nav-container">
+        <div class="logo">
+            <a href="home.html" class="logo-text">Instagram</a>
+        </div>
+
+        <div class="nav-icons">
+            <a href="home.html"><i class="fa-solid fa-house"></i></a>
+            <a href="messages.html"><i class="fa-regular fa-paper-plane"></i></a>
+            <a href="create.html"><i class="fa-regular fa-square-plus"></i></a>
+            <a href="explore.html"><i class="fa-regular fa-compass"></i></a>
+            <a href="notifications.html"><i class="fa-regular fa-heart"></i></a>
+            <a href="profile.html"><img src="https://picsum.photos/150/150?random=1" alt="Profile" class="nav-profile-pic" id="nav-avatar"></a>
+        </div>
+    </div>
+</nav>
+
+<main class="settings-container">
+    <ul class="settings-sidebar">
+        <li class="menu-item active">Edit Profile</li>
+        <li class="menu-item">Change Password</li>
+        <li class="menu-item">Privacy and Security</li>
+        <li class="menu-item logout" id="logout-btn">Log Out</li>
+    </ul>
+
+    <section class="settings-content">
+        <div class="edit-pic-row">
+            <img src="https://picsum.photos/150/150?random=1" alt="avatar" id="profile-avatar">
+            <div class="user-meta-info">
+                <span class="meta-username" id="settings-username">Loading...</span>
+                <span class="change-pic-btn">Change Profile Photo from profile page</span>
             </div>
         </div>
-    </nav>
 
-    <main class="settings-container">
-        
-        <ul class="settings-sidebar">
-            <li class="menu-item active">Edit Profile</li>
-            <li class="menu-item">Change Password</li>
-            <li class="menu-item">Privacy and Security</li>
-            <li class="menu-item logout" onclick="window.location.href='index.html'">Log Out</li>
-        </ul>
-
-        <section class="settings-content">
-            
-            <div class="edit-pic-row">
-                <img src="https://picsum.photos/150/150?random=1" alt="avatar">
-                <div class="user-meta-info">
-                    <span class="meta-username">my_username</span>
-                    <span class="change-pic-btn">Change Profile Photo</span>
-                </div>
+        <div class="form-row">
+            <label>Name</label>
+            <div class="input-field-block">
+                <input type="text" id="name-input" placeholder="Name">
+                <p class="field-subtext">Help people discover your account by using your full name, nickname, or business name.</p>
             </div>
+        </div>
 
-            <div class="form-row">
-                <label>Name</label>
-                <div class="input-field-block">
-                    <input type="text" value="Your Name">
-                    <p class="field-subtext">Help people discover your account by using the name you're known by: either your full name, nickname, or business name.</p>
-                </div>
+        <div class="form-row">
+            <label>Username</label>
+            <div class="input-field-block">
+                <input type="text" id="username-input" placeholder="Username">
+                <p class="field-subtext">This changes your display username. Keep it simple and Instagram-style.</p>
             </div>
+        </div>
 
-            <div class="form-row">
-                <label>Username</label>
-                <div class="input-field-block">
-                    <input type="text" value="my_username">
-                </div>
+        <div class="form-row">
+            <label>Website</label>
+            <div class="input-field-block">
+                <input type="text" id="website-input" placeholder="https://example.com">
             </div>
+        </div>
 
-            <div class="form-row">
-                <label>Website</label>
-                <div class="input-field-block">
-                    <input type="text" value="https://github.com">
-                </div>
+        <div class="form-row">
+            <label>Bio</label>
+            <div class="input-field-block">
+                <textarea id="bio-input" placeholder="Write your bio..."></textarea>
             </div>
+        </div>
 
-            <div class="form-row">
-                <label>Bio</label>
-                <div class="input-field-block">
-                    <textarea>Developer & Creator 💻🔥 Build premium responsive nodes!</textarea>
-                </div>
-            </div>
+        <button class="submit-settings-btn" id="save-settings-btn">Submit</button>
+        <div class="status-msg" id="status-msg"></div>
+    </section>
+</main>
 
-            <button class="submit-settings-btn" onclick="alert('Profile Updated Successfully!')">Submit</button>
+<nav class="bottom-navbar">
+    <a href="home.html"><i class="fa-solid fa-house"></i></a>
+    <a href="search.html"><i class="fa-solid fa-magnifying-glass"></i></a>
+    <a href="create.html"><i class="fa-regular fa-square-plus"></i></a>
+    <a href="reels.html"><i class="fa-regular fa-clapperboard"></i></a>
+    <a href="profile.html"><img src="https://picsum.photos/150/150?random=1" id="bottom-avatar" alt="Profile"></a>
+</nav>
 
-        </section>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+import {
+    getFirestore,
+    doc,
+    getDoc,
+    setDoc
+} from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
-    </main>
+const firebaseConfig = {
+    apiKey: "AIzaSyBrqMn7FrFW3jslaDNM0ui-VW4w6K_3Nmk",
+    authDomain: "insta-clone-863ae.firebaseapp.com",
+    projectId: "insta-clone-863ae",
+    storageBucket: "insta-clone-863ae.firebasestorage.app",
+    messagingSenderId: "599343109250",
+    appId: "1:599343109250:web:1306ec63908ba21c54509b"
+};
 
-    <nav class="bottom-navbar">
-        <a href="home.html"><i class="fa-regular fa-house"></i></a>
-        <a href="search.html"><i class="fa-regular fa-magnifying-glass"></i></a>
-        <a href="create.html"><i class="fa-regular fa-square-plus"></i></a>
-        <a href="explore.html"><i class="fa-regular fa-compass"></i></a>
-        <a href="profile.html"><img src="https://picsum.photos/150/150?random=1" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1.5px solid black;"></a>
-    </nav>
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const activeUser = localStorage.getItem("active_user");
+
+const nameInput = document.getElementById("name-input");
+const usernameInput = document.getElementById("username-input");
+const websiteInput = document.getElementById("website-input");
+const bioInput = document.getElementById("bio-input");
+
+const saveBtn = document.getElementById("save-settings-btn");
+const logoutBtn = document.getElementById("logout-btn");
+const statusMsg = document.getElementById("status-msg");
+
+const settingsUsername = document.getElementById("settings-username");
+const profileAvatar = document.getElementById("profile-avatar");
+const navAvatar = document.getElementById("nav-avatar");
+const bottomAvatar = document.getElementById("bottom-avatar");
+
+const defaultAvatar = "https://picsum.photos/150/150?random=1";
+
+if (!activeUser) {
+    window.location.href = "index.html";
+}
+
+loadUserSettings();
+
+saveBtn.addEventListener("click", saveUserSettings);
+
+logoutBtn.addEventListener("click", () => {
+    localStorage.removeItem("active_user");
+    localStorage.removeItem("active_user_doc_id");
+    localStorage.removeItem("active_user_full_name");
+    localStorage.removeItem("active_user_name");
+    localStorage.removeItem("active_user_display_name");
+    localStorage.removeItem("active_user_profile_pic");
+    window.location.href = "index.html";
+});
+
+function getDisplayName(userData) {
+    return (
+        userData.fullName ||
+        userData.name ||
+        userData.displayName ||
+        userData.fullname ||
+        userData.username ||
+        "Instagram User"
+    );
+}
+
+async function loadUserSettings() {
+    showStatus("Loading profile...", false);
+
+    try {
+        const userRef = doc(db, "users", activeUser);
+        const snap = await getDoc(userRef);
+
+        if (!snap.exists()) {
+            showStatus("User profile not found.", true);
+            return;
+        }
+
+        const data = snap.data();
+        const displayName = getDisplayName(data);
+        const username = data.username || activeUser;
+        const avatar = data.profilePic || defaultAvatar;
+
+        settingsUsername.innerText = username;
+        nameInput.value = displayName === "Instagram User" ? "" : displayName;
+        usernameInput.value = username;
+        websiteInput.value = data.website || "";
+        bioInput.value = data.bio || "";
+
+        profileAvatar.src = avatar;
+        navAvatar.src = avatar;
+        bottomAvatar.src = avatar;
+
+        hideStatus();
+    } catch (err) {
+        console.error(err);
+        showStatus("Profile load failed. Firebase rules ya internet check karo.", true);
+    }
+}
+
+async function saveUserSettings() {
+    const fullName = nameInput.value.trim() || "Instagram User";
+    const username = usernameInput.value.trim().toLowerCase() || activeUser;
+    const website = websiteInput.value.trim();
+    const bio = bioInput.value.trim();
+
+    if (username.includes(" ")) {
+        showStatus("Username cannot contain spaces.", true);
+        return;
+    }
+
+    if (!/^[a-z0-9._]+$/.test(username)) {
+        showStatus("Username can only use letters, numbers, dots and underscores.", true);
+        return;
+    }
+
+    saveBtn.disabled = true;
+    saveBtn.innerText = "Saving...";
+    showStatus("Saving profile...", false);
+
+    try {
+        await setDoc(doc(db, "users", activeUser), {
+            username: username,
+
+            fullName: fullName,
+            name: fullName,
+            displayName: fullName,
+
+            website: website,
+            bio: bio,
+            updatedAt: new Date()
+        }, { merge: true });
+
+        localStorage.setItem("active_user_full_name", fullName);
+        localStorage.setItem("active_user_name", fullName);
+        localStorage.setItem("active_user_display_name", fullName);
+
+        settingsUsername.innerText = username;
+
+        showStatus("Profile updated successfully.", false);
+    } catch (err) {
+        console.error(err);
+        showStatus("Profile save failed. Firebase rules check karo.", true);
+    } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerText = "Submit";
+    }
+}
+
+function showStatus(text, isError) {
+    statusMsg.innerText = text;
+    statusMsg.style.display = "block";
+    statusMsg.style.color = isError ? "#ed4956" : "#8e8e8e";
+}
+
+function hideStatus() {
+    statusMsg.innerText = "";
+    statusMsg.style.display = "none";
+}
+</script>
 
 </body>
 </html>
