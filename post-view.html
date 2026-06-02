@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Post • Instagram</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Grand+Hotel&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+<style>
+:root{
+    --bg:#fafafa;
+    --card:#ffffff;
+    --border:#dbdbdb;
+    --text:#262626;
+    --muted:#8e8e8e;
+    --blue:#0095f6;
+    --red:#ed4956;
+}
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+body{
+    background:var(--bg);
+    color:var(--text);
+    padding-top:60px;
+    padding-bottom:60px;
+}
+a{
+    color:inherit;
+    text-decoration:none;
+}
+button,input{
+    font:inherit;
+}
+button{
+    border:0;
+    background:none;
+    cursor:pointer;
+}
+.top-navbar{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:60px;
+    background:var(--card);
+    border-bottom:1px solid var(--border);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:1000;
+}
+.nav-inner{
+    width:100%;
+    max-width:975px;
+    padding:0 18px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+.nav-left{
+    display:flex;
+    align-items:center;
+    gap:14px;
+}
+.logo-text{
+    font-family:'Grand Hotel',cursive;
+    font-size:30px;
+}
+.icon-btn{
+    width:36px;
+    height:36px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--text);
+}
+.icon-btn span{
+    font-size:26px;
+}
+.nav-avatar{
+    width:28px;
+    height:28px;
+    border-radius:50%;
+    object-fit:cover;
+    border:1px solid #000;
+}
+.wrapper{
+    width:100%;
+    max-width:935px;
+    margin:30px auto;
+    padding:0 20px;
+}
+.post-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:8px;
+    overflow:hidden;
+    display:grid;
+    grid-template-columns:minmax(0,1.15fr) 360px;
+    min-height:560px;
+}
+.media-side{
+    background:#000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:560px;
+}
+.media-side img,
+.media-side video{
+    width:100%;
+    height:100%;
+    max-height:720px;
+    object-fit:contain;
+    background:#000;
+}
+.info-side{
+    display:flex;
+    flex-direction:column;
+    min-width:0;
+    border-left:1px solid var(--border);
+}
+.post-header{
+    min-height:60px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 14px;
+    border-bottom:1px solid var(--border);
+}
+.user-meta{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    min-width:0;
+}
+.user-meta img{
+    width:34px;
+    height:34px;
+    border-radius:50%;
+    object-fit:cover;
+}
+.user-meta strong{
+    font-size:14px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+.caption-box{
+    padding:14px;
+    display:flex;
+    gap:10px;
+    border-bottom:1px solid var(--border);
+    font-size:14px;
+    line-height:1.4;
+}
+.caption-box img{
+    width:34px;
+    height:34px;
+    border-radius:50%;
+    object-fit:cover;
+}
+.caption-text{
+    word-break:break-word;
+}
+.caption-text strong{
+    margin-right:6px;
+}
+.comments-box{
+    flex:1;
+    overflow-y:auto;
+    padding:14px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    font-size:14px;
+}
+.comment-row{
+    display:flex;
+    gap:10px;
+    line-height:1.35;
+}
+.comment-row img{
+    width:30px;
+    height:30px;
+    border-radius:50%;
+    object-fit:cover;
+    background:#efefef;
+}
+.comment-row strong{
+    margin-right:6px;
+}
+.actions{
+    border-top:1px solid var(--border);
+    padding:12px 14px;
+}
+.action-icons{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:10px;
+}
+.left-icons{
+    display:flex;
+    gap:16px;
+}
+.action-icons span{
+    font-size:27px;
+    cursor:pointer;
+}
+.liked{
+    color:var(--red)!important;
+}
+.likes-text{
+    font-size:14px;
+    font-weight:700;
+    margin-bottom:6px;
+}
+.time-text{
+    font-size:11px;
+    color:var(--muted);
+    text-transform:uppercase;
+}
+.comment-input{
+    border-top:1px solid var(--border);
+    padding:13px 14px;
+    display:flex;
+    gap:10px;
+    align-items:center;
+}
+.comment-input input{
+    flex:1;
+    border:0;
+    outline:0;
+    font-size:14px;
+}
+.comment-input button{
+    color:var(--blue);
+    font-weight:700;
+}
+.empty{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:50px 20px;
+    text-align:center;
+    color:var(--muted);
+}
+.toast{
+    position:fixed;
+    left:50%;
+    bottom:72px;
+    transform:translateX(-50%) translateY(18px);
+    background:rgba(0,0,0,.82);
+    color:white;
+    padding:10px 14px;
+    border-radius:999px;
+    font-size:13px;
+    font-weight:700;
+    opacity:0;
+    transition:.25s;
+    z-index:2000;
+}
+.toast.show{
+    opacity:1;
+    transform:translateX(-50%) translateY(0);
+}
+@media(max-width:768px){
+    body{
+        padding-top:54px;
+    }
+    .top-navbar{
+        height:54px;
+    }
+    .wrapper{
+        margin:0;
+        padding:0;
+    }
+    .post-card{
+        border-left:0;
+        border-right:0;
+        border-radius:0;
+        display:flex;
+        flex-direction:column;
+        min-height:auto;
+    }
+    .media-side{
+        min-height:auto;
+        aspect-ratio:1/1;
+    }
+    .info-side{
+        border-left:0;
+    }
+    .comments-box{
+        max-height:260px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<nav class="top-navbar">
+    <div class="nav-inner">
+        <div class="nav-left">
+            <button class="icon-btn" id="back-btn"><span class="material-icons-outlined">arrow_back</span></button>
+            <a href="home.html" class="logo-text">Instagram</a>
+        </div>
+
+        <a href="profile.html">
+            <img src="https://picsum.photos/150/150?random=1" class="nav-avatar" id="nav-avatar" alt="Profile">
+        </a>
+    </div>
+</nav>
+
+<main class="wrapper" id="page-root">
+    <div class="empty">Loading post...</div>
+</main>
+
+<div class="toast" id="toast">Done</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+import {
+    getFirestore,
+    doc,
+    getDoc,
+    collection,
+    addDoc,
+    updateDoc,
+    onSnapshot,
+    query,
+    orderBy,
+    arrayUnion,
+    arrayRemove,
+    increment,
+    serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBrqMn7FrFW3jslaDNM0ui-VW4w6K_3Nmk",
+    authDomain: "insta-clone-863ae.firebaseapp.com",
+    projectId: "insta-clone-863ae",
+    storageBucket: "insta-clone-863ae.firebasestorage.app",
+    messagingSenderId: "599343109250",
+    appId: "1:599343109250:web:1306ec63908ba21c54509b"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const $ = (id) => document.getElementById(id);
+const currentUser = localStorage.getItem("active_user");
+
+const params = new URLSearchParams(window.location.search);
+const postId = params.get("post") || params.get("postId") || params.get("id");
+
+const defaultAvatar = "https://picsum.photos/150/150?random=1";
+
+let currentProfilePic = defaultAvatar;
+let currentPost = null;
+
+if (!currentUser) {
+    window.location.href = "index.html";
+}
+
+if (!postId) {
+    $("page-root").innerHTML = `<div class="empty">Post ID missing.</div>`;
+}
+
+function esc(value) {
+    return String(value || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+function toast(text) {
+    $("toast").innerText = text;
+    $("toast").classList.add("show");
+
+    setTimeout(() => {
+        $("toast").classList.remove("show");
+    }, 1500);
+}
+
+function formatDate(timestamp) {
+    try {
+        const date = timestamp && timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+        return date.toLocaleDateString([], { month: "long", day: "numeric" });
+    } catch (err) {
+        return "";
+    }
+}
+
+$("back-btn").onclick = () => {
+    if (document.referrer) history.back();
+    else window.location.href = "home.html";
+};
+
+async function loadMe() {
+    try {
+        const snap = await getDoc(doc(db, "users", currentUser));
+
+        if (snap.exists()) {
+            currentProfilePic = snap.data().profilePic || defaultAvatar;
+        }
+
+        $("nav-avatar").src = currentProfilePic;
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+async function loadPost() {
+    if (!postId) return;
+
+    try {
+        const snap = await getDoc(doc(db, "posts", postId));
+
+        if (!snap.exists()) {
+            $("page-root").innerHTML = `<div class="empty">Post not found.</div>`;
+            return;
+        }
+
+        currentPost = snap.data();
+        renderPost();
+        listenComments();
+    } catch (err) {
+        console.error(err);
+        $("page-root").innerHTML = `<div class="empty">Post load nahi hua. Firebase rules check karo.</div>`;
+    }
+}
+
+function renderPost() {
+    const author = currentPost.userId || currentPost.username || "anonymous";
+    const avatar = currentPost.profilePic || defaultAvatar;
+    const likedBy = Array.isArray(currentPost.likedBy) ? currentPost.likedBy : [];
+    const isLiked = likedBy.includes(currentUser);
+
+    const mediaType = currentPost.mediaType || (currentPost.videoUrl ? "video" : "image");
+    const mediaUrl = currentPost.postImg || currentPost.imageUrl || currentPost.mediaUrl || currentPost.videoUrl || "";
+
+    $("page-root").innerHTML = `
+        <article class="post-card">
+            <div class="media-side">
+                ${
+                    mediaType === "video"
+                    ? `<video src="${esc(mediaUrl)}" controls playsinline></video>`
+                    : `<img src="${esc(mediaUrl || defaultAvatar)}" alt="Post">`
+                }
+            </div>
+
+            <section class="info-side">
+                <div class="post-header">
+                    <a href="user-profile.html?username=${encodeURIComponent(author)}" class="user-meta">
+                        <img src="${esc(avatar)}" alt="${esc(author)}">
+                        <strong>${esc(author)}</strong>
+                    </a>
+                    <span class="material-icons-outlined">more_horiz</span>
+                </div>
+
+                <div class="caption-box">
+                    <img src="${esc(avatar)}" alt="${esc(author)}">
+                    <div class="caption-text">
+                        <strong>${esc(author)}</strong>${esc(currentPost.caption || "")}
+                    </div>
+                </div>
+
+                <div class="comments-box" id="comments-box">
+                    <div style="color:var(--muted);">Loading comments...</div>
+                </div>
+
+                <div class="actions">
+                    <div class="action-icons">
+                        <div class="left-icons">
+                            <span class="${isLiked ? "material-icons liked" : "material-icons-outlined"}" id="like-btn">${isLiked ? "favorite" : "favorite_border"}</span>
+                            <span class="material-icons-outlined" id="focus-comment-btn">chat_bubble_outline</span>
+                            <span class="material-icons-outlined" id="share-btn">send</span>
+                        </div>
+                        <span class="material-icons-outlined" id="save-btn">bookmark_border</span>
+                    </div>
+
+                    <div class="likes-text" id="likes-text">${currentPost.likesCount || 0} likes</div>
+                    <div class="time-text">${formatDate(currentPost.timestamp)}</div>
+                </div>
+
+                <div class="comment-input">
+                    <input id="comment-input" placeholder="Add a comment...">
+                    <button id="post-comment-btn">Post</button>
+                </div>
+            </section>
+        </article>
+    `;
+
+    $("like-btn").onclick = toggleLike;
+    $("focus-comment-btn").onclick = () => $("comment-input").focus();
+    $("share-btn").onclick = sharePostToMessages;
+    $("save-btn").onclick = () => {
+        $("save-btn").innerText = $("save-btn").innerText.trim() === "bookmark" ? "bookmark_border" : "bookmark";
+        toast("Saved");
+    };
+    $("post-comment-btn").onclick = addComment;
+
+    $("comment-input").addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            addComment();
+        }
+    });
+}
+
+async function toggleLike() {
+    const btn = $("like-btn");
+    const likesText = $("likes-text");
+    const isLiked = btn.innerText.trim() === "favorite";
+    const currentCount = Number((likesText.innerText || "0").split(" ")[0]) || 0;
+
+    btn.innerText = isLiked ? "favorite_border" : "favorite";
+    btn.className = isLiked ? "material-icons-outlined" : "material-icons liked";
+    likesText.innerText = `${Math.max(0, currentCount + (isLiked ? -1 : 1))} likes`;
+
+    try {
+        await updateDoc(doc(db, "posts", postId), {
+            likedBy: isLiked ? arrayRemove(currentUser) : arrayUnion(currentUser),
+            likesCount: increment(isLiked ? -1 : 1)
+        });
+    } catch (err) {
+        console.error(err);
+        toast("Like update failed");
+    }
+}
+
+async function addComment() {
+    const input = $("comment-input");
+    const text = input.value.trim();
+
+    if (!text) return;
+
+    input.value = "";
+
+    try {
+        await addDoc(collection(db, "comments"), {
+            postId,
+            text,
+            commentedBy: currentUser,
+            profilePic: currentProfilePic,
+            likedBy: [],
+            likesCount: 0,
+            timestamp: serverTimestamp()
+        });
+
+        await updateDoc(doc(db, "posts", postId), {
+            commentsCount: increment(1)
+        });
+    } catch (err) {
+        console.error(err);
+        input.value = text;
+        toast("Comment post nahi hua");
+    }
+}
+
+function listenComments() {
+    const commentsQuery = query(collection(db, "comments"), orderBy("timestamp", "asc"));
+
+    onSnapshot(commentsQuery, (snap) => {
+        const box = $("comments-box");
+        if (!box) return;
+
+        box.innerHTML = "";
+        let count = 0;
+
+        snap.forEach((commentDoc) => {
+            const comment = commentDoc.data();
+
+            if (comment.postId !== postId) return;
+
+            count++;
+
+            const row = document.createElement("div");
+            row.className = "comment-row";
+            row.innerHTML = `
+                <img src="${esc(comment.profilePic || defaultAvatar)}" alt="${esc(comment.commentedBy || "user")}">
+                <div>
+                    <strong>${esc(comment.commentedBy || "anonymous")}</strong>${esc(comment.text || "")}
+                </div>
+            `;
+
+            box.appendChild(row);
+        });
+
+        if (count === 0) {
+            box.innerHTML = `<div style="color:var(--muted);">No comments yet.</div>`;
+        }
+    });
+}
+
+function sharePostToMessages() {
+    const author = currentPost.userId || currentPost.username || "anonymous";
+    const mediaType = currentPost.mediaType || (currentPost.videoUrl ? "video" : "image");
+    const mediaUrl = currentPost.postImg || currentPost.imageUrl || currentPost.mediaUrl || currentPost.videoUrl || "";
+
+    const shareParams = new URLSearchParams({
+        shareType: "post",
+        postId,
+        postUrl: mediaUrl,
+        imageUrl: mediaType === "image" ? mediaUrl : "",
+        videoUrl: mediaType === "video" ? mediaUrl : "",
+        thumbnailUrl: mediaUrl,
+        title: `Post by ${author}`,
+        caption: currentPost.caption || ""
+    });
+
+    window.location.href = `messages.html?${shareParams.toString()}`;
+}
+
+await loadMe();
+await loadPost();
+</script>
+
+</body>
+</html>
