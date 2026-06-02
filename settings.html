@@ -34,7 +34,7 @@ a{
     text-decoration:none;
     color:inherit;
 }
-button,input,textarea{
+button,input,textarea,select{
     font:inherit;
 }
 button{
@@ -110,7 +110,7 @@ button{
     border:1px solid var(--border-color);
     border-radius:4px;
     display:flex;
-    min-height:70vh;
+    min-height:72vh;
 }
 .settings-sidebar{
     flex:1;
@@ -141,19 +141,34 @@ button{
 .settings-content{
     flex:2.5;
     padding:40px 60px;
-    display:flex;
+}
+.panel{
+    display:none;
     flex-direction:column;
     gap:24px;
+}
+.panel.active{
+    display:flex;
+}
+.panel-title{
+    font-size:22px;
+    font-weight:700;
+    margin-bottom:4px;
+}
+.panel-subtitle{
+    color:var(--text-muted);
+    font-size:13px;
+    line-height:1.4;
 }
 .edit-pic-row{
     display:flex;
     align-items:center;
-    gap:30px;
-    margin-bottom:10px;
+    gap:18px;
+    margin-bottom:4px;
 }
 .edit-pic-row img{
-    width:44px;
-    height:44px;
+    width:52px;
+    height:52px;
     border-radius:50%;
     object-fit:cover;
 }
@@ -161,6 +176,7 @@ button{
     flex:1;
     display:flex;
     flex-direction:column;
+    gap:4px;
 }
 .meta-username{
     font-size:20px;
@@ -170,6 +186,9 @@ button{
     color:var(--btn-blue);
     font-size:14px;
     font-weight:600;
+    background:none;
+    border:none;
+    width:fit-content;
 }
 .form-row{
     display:flex;
@@ -191,17 +210,18 @@ button{
     gap:8px;
 }
 .input-field-block input,
-.input-field-block textarea{
+.input-field-block textarea,
+.input-field-block select{
     width:100%;
-    padding:8px 12px;
+    padding:9px 12px;
     border:1px solid var(--border-color);
     border-radius:4px;
-    font-size:16px;
+    font-size:15px;
     outline:none;
     background:white;
 }
 .input-field-block textarea{
-    height:80px;
+    height:86px;
     resize:none;
 }
 .field-subtext{
@@ -213,12 +233,15 @@ button{
     background-color:var(--btn-blue);
     color:white;
     border:none;
-    padding:7px 16px;
+    padding:8px 18px;
     border-radius:8px;
     font-weight:600;
     font-size:14px;
     width:fit-content;
     margin-left:calc(25% + 8px);
+}
+.submit-settings-btn.danger{
+    background:var(--danger-red);
 }
 .submit-settings-btn:disabled{
     opacity:.6;
@@ -228,6 +251,69 @@ button{
     font-size:13px;
     color:var(--text-muted);
     margin-left:calc(25% + 8px);
+    display:none;
+}
+.setting-card{
+    border:1px solid var(--border-color);
+    border-radius:12px;
+    overflow:hidden;
+}
+.setting-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:16px;
+    padding:16px;
+    border-bottom:1px solid var(--border-color);
+}
+.setting-row:last-child{
+    border-bottom:none;
+}
+.setting-title{
+    font-weight:700;
+    font-size:15px;
+}
+.setting-desc{
+    color:var(--text-muted);
+    font-size:12px;
+    margin-top:4px;
+    line-height:1.35;
+}
+.switch{
+    position:relative;
+    width:44px;
+    height:26px;
+    flex:0 0 auto;
+}
+.switch input{
+    display:none;
+}
+.switch span{
+    position:absolute;
+    inset:0;
+    background:#c7c7c7;
+    border-radius:999px;
+    transition:.2s;
+}
+.switch span:before{
+    content:"";
+    position:absolute;
+    width:20px;
+    height:20px;
+    left:3px;
+    top:3px;
+    background:white;
+    border-radius:50%;
+    transition:.2s;
+    box-shadow:0 1px 3px rgba(0,0,0,.25);
+}
+.switch input:checked + span{
+    background:var(--btn-blue);
+}
+.switch input:checked + span:before{
+    transform:translateX(18px);
+}
+.hidden{
     display:none;
 }
 @media(max-width:768px){
@@ -249,9 +335,9 @@ button{
         border-right:none;
     }
     .menu-item{
-        padding:12px;
+        padding:12px 8px;
         text-align:center;
-        font-size:14px;
+        font-size:13px;
         border-left:none;
         border-bottom:2px solid transparent;
     }
@@ -264,7 +350,7 @@ button{
         border-top:none;
     }
     .settings-content{
-        padding:30px 16px;
+        padding:28px 16px;
     }
     .form-row{
         flex-direction:column;
@@ -286,9 +372,7 @@ button{
 
 <nav class="top-navbar">
     <div class="nav-container">
-        <div class="logo">
-            <a href="home.html" class="logo-text">Instagram</a>
-        </div>
+        <a href="home.html" class="logo-text">Instagram</a>
 
         <div class="nav-icons">
             <a href="home.html"><i class="fa-solid fa-house"></i></a>
@@ -303,53 +387,161 @@ button{
 
 <main class="settings-container">
     <ul class="settings-sidebar">
-        <li class="menu-item active">Edit Profile</li>
-        <li class="menu-item">Change Password</li>
-        <li class="menu-item">Privacy and Security</li>
+        <li class="menu-item active" data-panel="edit-panel">Edit Profile</li>
+        <li class="menu-item" data-panel="password-panel">Change Password</li>
+        <li class="menu-item" data-panel="privacy-panel">Privacy and Security</li>
         <li class="menu-item logout" id="logout-btn">Log Out</li>
     </ul>
 
     <section class="settings-content">
-        <div class="edit-pic-row">
-            <img src="https://picsum.photos/150/150?random=1" alt="avatar" id="profile-avatar">
-            <div class="user-meta-info">
-                <span class="meta-username" id="settings-username">Loading...</span>
-                <span class="change-pic-btn">Change Profile Photo from profile page</span>
+
+        <div class="panel active" id="edit-panel">
+            <div>
+                <h2 class="panel-title">Edit profile</h2>
+                <p class="panel-subtitle">Update your public profile information.</p>
             </div>
+
+            <div class="edit-pic-row">
+                <img src="https://picsum.photos/150/150?random=1" alt="avatar" id="profile-avatar">
+                <div class="user-meta-info">
+                    <span class="meta-username" id="settings-username">Loading...</span>
+                    <button class="change-pic-btn" id="change-photo-btn" type="button">Change Profile Photo</button>
+                    <input type="file" id="profile-photo-input" accept="image/*" class="hidden">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label>Name</label>
+                <div class="input-field-block">
+                    <input type="text" id="name-input" placeholder="Name">
+                    <p class="field-subtext">Use your full name, nickname, or business name.</p>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label>Username</label>
+                <div class="input-field-block">
+                    <input type="text" id="username-input" placeholder="Username">
+                    <p class="field-subtext">This changes your display username. Your login document stays the same.</p>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label>Website</label>
+                <div class="input-field-block">
+                    <input type="text" id="website-input" placeholder="https://example.com">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label>Bio</label>
+                <div class="input-field-block">
+                    <textarea id="bio-input" placeholder="Write your bio..."></textarea>
+                </div>
+            </div>
+
+            <button class="submit-settings-btn" id="save-profile-btn">Submit</button>
+            <div class="status-msg" id="profile-status"></div>
         </div>
 
-        <div class="form-row">
-            <label>Name</label>
-            <div class="input-field-block">
-                <input type="text" id="name-input" placeholder="Name">
-                <p class="field-subtext">Help people discover your account by using your full name, nickname, or business name.</p>
+        <div class="panel" id="password-panel">
+            <div>
+                <h2 class="panel-title">Change password</h2>
+                <p class="panel-subtitle">Use a strong password with at least 6 characters.</p>
             </div>
+
+            <div class="form-row">
+                <label>Current password</label>
+                <div class="input-field-block">
+                    <input type="password" id="current-password-input" placeholder="Current password">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label>New password</label>
+                <div class="input-field-block">
+                    <input type="password" id="new-password-input" placeholder="New password">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label>Confirm password</label>
+                <div class="input-field-block">
+                    <input type="password" id="confirm-password-input" placeholder="Confirm new password">
+                </div>
+            </div>
+
+            <button class="submit-settings-btn" id="save-password-btn">Change Password</button>
+            <div class="status-msg" id="password-status"></div>
         </div>
 
-        <div class="form-row">
-            <label>Username</label>
-            <div class="input-field-block">
-                <input type="text" id="username-input" placeholder="Username">
-                <p class="field-subtext">This changes your display username. Keep it simple and Instagram-style.</p>
+        <div class="panel" id="privacy-panel">
+            <div>
+                <h2 class="panel-title">Privacy and security</h2>
+                <p class="panel-subtitle">Control who can see and interact with your account.</p>
             </div>
+
+            <div class="setting-card">
+                <div class="setting-row">
+                    <div>
+                        <div class="setting-title">Private account</div>
+                        <div class="setting-desc">Only approved followers can see your posts.</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="private-account-input">
+                        <span></span>
+                    </label>
+                </div>
+
+                <div class="setting-row">
+                    <div>
+                        <div class="setting-title">Show activity status</div>
+                        <div class="setting-desc">Let people see when you are active.</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="activity-status-input">
+                        <span></span>
+                    </label>
+                </div>
+
+                <div class="setting-row">
+                    <div>
+                        <div class="setting-title">Allow message requests</div>
+                        <div class="setting-desc">People can send you message requests.</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="message-requests-input">
+                        <span></span>
+                    </label>
+                </div>
+
+                <div class="setting-row">
+                    <div>
+                        <div class="setting-title">Push notifications</div>
+                        <div class="setting-desc">Receive likes, comments, follows, and messages notifications.</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="notifications-input">
+                        <span></span>
+                    </label>
+                </div>
+
+                <div class="setting-row">
+                    <div>
+                        <div class="setting-title">Hide like counts</div>
+                        <div class="setting-desc">Hide like counts on your posts where supported.</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="hide-likes-input">
+                        <span></span>
+                    </label>
+                </div>
+            </div>
+
+            <button class="submit-settings-btn" id="save-privacy-btn">Save Privacy Settings</button>
+            <div class="status-msg" id="privacy-status"></div>
         </div>
 
-        <div class="form-row">
-            <label>Website</label>
-            <div class="input-field-block">
-                <input type="text" id="website-input" placeholder="https://example.com">
-            </div>
-        </div>
-
-        <div class="form-row">
-            <label>Bio</label>
-            <div class="input-field-block">
-                <textarea id="bio-input" placeholder="Write your bio..."></textarea>
-            </div>
-        </div>
-
-        <button class="submit-settings-btn" id="save-settings-btn">Submit</button>
-        <div class="status-msg" id="status-msg"></div>
     </section>
 </main>
 
@@ -369,6 +561,12 @@ import {
     getDoc,
     setDoc
 } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+import {
+    getStorage,
+    ref,
+    uploadBytes,
+    getDownloadURL
+} from "https://www.gstatic.com/firebasejs/12.14.0/firebase-storage.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyBrqMn7FrFW3jslaDNM0ui-VW4w6K_3Nmk",
@@ -381,34 +579,83 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const storage = getStorage(app);
 
 const activeUser = localStorage.getItem("active_user");
+const defaultAvatar = "https://picsum.photos/150/150?random=1";
+
+let currentUserData = {};
+let selectedProfilePhotoFile = null;
+let currentProfilePic = defaultAvatar;
+
+if (!activeUser) {
+    window.location.href = "index.html";
+}
+
+const menuItems = document.querySelectorAll(".menu-item[data-panel]");
+const panels = document.querySelectorAll(".panel");
+
+const profileAvatar = document.getElementById("profile-avatar");
+const navAvatar = document.getElementById("nav-avatar");
+const bottomAvatar = document.getElementById("bottom-avatar");
+const settingsUsername = document.getElementById("settings-username");
 
 const nameInput = document.getElementById("name-input");
 const usernameInput = document.getElementById("username-input");
 const websiteInput = document.getElementById("website-input");
 const bioInput = document.getElementById("bio-input");
 
-const saveBtn = document.getElementById("save-settings-btn");
-const logoutBtn = document.getElementById("logout-btn");
-const statusMsg = document.getElementById("status-msg");
+const changePhotoBtn = document.getElementById("change-photo-btn");
+const profilePhotoInput = document.getElementById("profile-photo-input");
+const saveProfileBtn = document.getElementById("save-profile-btn");
 
-const settingsUsername = document.getElementById("settings-username");
-const profileAvatar = document.getElementById("profile-avatar");
-const navAvatar = document.getElementById("nav-avatar");
-const bottomAvatar = document.getElementById("bottom-avatar");
+const currentPasswordInput = document.getElementById("current-password-input");
+const newPasswordInput = document.getElementById("new-password-input");
+const confirmPasswordInput = document.getElementById("confirm-password-input");
+const savePasswordBtn = document.getElementById("save-password-btn");
 
-const defaultAvatar = "https://picsum.photos/150/150?random=1";
+const privateAccountInput = document.getElementById("private-account-input");
+const activityStatusInput = document.getElementById("activity-status-input");
+const messageRequestsInput = document.getElementById("message-requests-input");
+const notificationsInput = document.getElementById("notifications-input");
+const hideLikesInput = document.getElementById("hide-likes-input");
+const savePrivacyBtn = document.getElementById("save-privacy-btn");
 
-if (!activeUser) {
-    window.location.href = "index.html";
-}
+menuItems.forEach((item) => {
+    item.addEventListener("click", () => {
+        menuItems.forEach((menu) => menu.classList.remove("active"));
+        panels.forEach((panel) => panel.classList.remove("active"));
 
-loadUserSettings();
+        item.classList.add("active");
+        document.getElementById(item.dataset.panel).classList.add("active");
+    });
+});
 
-saveBtn.addEventListener("click", saveUserSettings);
+changePhotoBtn.addEventListener("click", () => profilePhotoInput.click());
 
-logoutBtn.addEventListener("click", () => {
+profilePhotoInput.addEventListener("change", () => {
+    const file = profilePhotoInput.files[0];
+
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+        showStatus("profile-status", "Please select an image file.", true);
+        profilePhotoInput.value = "";
+        return;
+    }
+
+    selectedProfilePhotoFile = file;
+    const previewUrl = URL.createObjectURL(file);
+    profileAvatar.src = previewUrl;
+    navAvatar.src = previewUrl;
+    bottomAvatar.src = previewUrl;
+});
+
+saveProfileBtn.addEventListener("click", saveProfile);
+savePasswordBtn.addEventListener("click", savePassword);
+savePrivacyBtn.addEventListener("click", savePrivacySettings);
+
+document.getElementById("logout-btn").addEventListener("click", () => {
     localStorage.removeItem("active_user");
     localStorage.removeItem("active_user_doc_id");
     localStorage.removeItem("active_user_full_name");
@@ -430,60 +677,78 @@ function getDisplayName(userData) {
 }
 
 async function loadUserSettings() {
-    showStatus("Loading profile...", false);
+    showStatus("profile-status", "Loading profile...", false);
 
     try {
-        const userRef = doc(db, "users", activeUser);
-        const snap = await getDoc(userRef);
+        const snap = await getDoc(doc(db, "users", activeUser));
 
         if (!snap.exists()) {
-            showStatus("User profile not found.", true);
+            showStatus("profile-status", "User profile not found.", true);
             return;
         }
 
-        const data = snap.data();
-        const displayName = getDisplayName(data);
-        const username = data.username || activeUser;
-        const avatar = data.profilePic || defaultAvatar;
+        currentUserData = snap.data();
+
+        const displayName = getDisplayName(currentUserData);
+        const username = currentUserData.username || activeUser;
+        currentProfilePic = currentUserData.profilePic || defaultAvatar;
 
         settingsUsername.innerText = username;
         nameInput.value = displayName === "Instagram User" ? "" : displayName;
         usernameInput.value = username;
-        websiteInput.value = data.website || "";
-        bioInput.value = data.bio || "";
+        websiteInput.value = currentUserData.website || "";
+        bioInput.value = currentUserData.bio || "";
 
-        profileAvatar.src = avatar;
-        navAvatar.src = avatar;
-        bottomAvatar.src = avatar;
+        profileAvatar.src = currentProfilePic;
+        navAvatar.src = currentProfilePic;
+        bottomAvatar.src = currentProfilePic;
 
-        hideStatus();
+        const settings = currentUserData.settings || {};
+
+        privateAccountInput.checked = !!settings.privateAccount;
+        activityStatusInput.checked = settings.showActivityStatus !== false;
+        messageRequestsInput.checked = settings.allowMessageRequests !== false;
+        notificationsInput.checked = settings.pushNotifications !== false;
+        hideLikesInput.checked = !!settings.hideLikeCount;
+
+        hideStatus("profile-status");
     } catch (err) {
         console.error(err);
-        showStatus("Profile load failed. Firebase rules ya internet check karo.", true);
+        showStatus("profile-status", "Profile load failed. Firebase rules ya internet check karo.", true);
     }
 }
 
-async function saveUserSettings() {
+async function saveProfile() {
     const fullName = nameInput.value.trim() || "Instagram User";
     const username = usernameInput.value.trim().toLowerCase() || activeUser;
     const website = websiteInput.value.trim();
     const bio = bioInput.value.trim();
 
     if (username.includes(" ")) {
-        showStatus("Username cannot contain spaces.", true);
+        showStatus("profile-status", "Username cannot contain spaces.", true);
         return;
     }
 
     if (!/^[a-z0-9._]+$/.test(username)) {
-        showStatus("Username can only use letters, numbers, dots and underscores.", true);
+        showStatus("profile-status", "Username can only use letters, numbers, dots and underscores.", true);
         return;
     }
 
-    saveBtn.disabled = true;
-    saveBtn.innerText = "Saving...";
-    showStatus("Saving profile...", false);
+    saveProfileBtn.disabled = true;
+    saveProfileBtn.innerText = "Saving...";
+    showStatus("profile-status", "Saving profile...", false);
 
     try {
+        let uploadedPhotoUrl = currentProfilePic;
+
+        if (selectedProfilePhotoFile) {
+            saveProfileBtn.innerText = "Uploading photo...";
+            const safeName = selectedProfilePhotoFile.name.replace(/[^\w.-]+/g, "_");
+            const photoRef = ref(storage, `profile-pictures/${activeUser}/${Date.now()}_${safeName}`);
+            await uploadBytes(photoRef, selectedProfilePhotoFile);
+            uploadedPhotoUrl = await getDownloadURL(photoRef);
+        }
+
         await setDoc(doc(db, "users", activeUser), {
             username: username,
 
@@ -493,35 +758,131 @@ async function saveUserSettings() {
 
             website: website,
             bio: bio,
+            profilePic: uploadedPhotoUrl || defaultAvatar,
             updatedAt: new Date()
         }, { merge: true });
+
+        currentProfilePic = uploadedPhotoUrl || defaultAvatar;
+        selectedProfilePhotoFile = null;
+
+        settingsUsername.innerText = username;
+        profileAvatar.src = currentProfilePic;
+        navAvatar.src = currentProfilePic;
+        bottomAvatar.src = currentProfilePic;
 
         localStorage.setItem("active_user_full_name", fullName);
         localStorage.setItem("active_user_name", fullName);
         localStorage.setItem("active_user_display_name", fullName);
+        localStorage.setItem("active_user_profile_pic", currentProfilePic);
 
-        settingsUsername.innerText = username;
-
-        showStatus("Profile updated successfully.", false);
+        showStatus("profile-status", "Profile updated successfully.", false);
     } catch (err) {
         console.error(err);
-        showStatus("Profile save failed. Firebase rules check karo.", true);
+        showStatus("profile-status", "Profile save failed. Storage/Firestore rules check karo.", true);
     } finally {
-        saveBtn.disabled = false;
-        saveBtn.innerText = "Submit";
+        saveProfileBtn.disabled = false;
+        saveProfileBtn.innerText = "Submit";
     }
 }
 
-function showStatus(text, isError) {
-    statusMsg.innerText = text;
-    statusMsg.style.display = "block";
-    statusMsg.style.color = isError ? "#ed4956" : "#8e8e8e";
+async function savePassword() {
+    const currentPassword = currentPasswordInput.value.trim();
+    const newPassword = newPasswordInput.value.trim();
+    const confirmPassword = confirmPasswordInput.value.trim();
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+        showStatus("password-status", "Fill all password fields.", true);
+        return;
+    }
+
+    if ((currentUserData.password || "") !== currentPassword) {
+        showStatus("password-status", "Current password is incorrect.", true);
+        return;
+    }
+
+    if (newPassword.length < 6) {
+        showStatus("password-status", "New password must be at least 6 characters.", true);
+        return;
+    }
+
+    if (newPassword !== confirmPassword) {
+        showStatus("password-status", "New passwords do not match.", true);
+        return;
+    }
+
+    savePasswordBtn.disabled = true;
+    savePasswordBtn.innerText = "Saving...";
+    showStatus("password-status", "Updating password...", false);
+
+    try {
+        await setDoc(doc(db, "users", activeUser), {
+            password: newPassword,
+            updatedAt: new Date()
+        }, { merge: true });
+
+        currentUserData.password = newPassword;
+
+        currentPasswordInput.value = "";
+        newPasswordInput.value = "";
+        confirmPasswordInput.value = "";
+
+        showStatus("password-status", "Password changed successfully.", false);
+    } catch (err) {
+        console.error(err);
+        showStatus("password-status", "Password update failed. Firebase rules check karo.", true);
+    } finally {
+        savePasswordBtn.disabled = false;
+        savePasswordBtn.innerText = "Change Password";
+    }
 }
 
-function hideStatus() {
-    statusMsg.innerText = "";
-    statusMsg.style.display = "none";
+async function savePrivacySettings() {
+    const settings = {
+        privateAccount: privateAccountInput.checked,
+        showActivityStatus: activityStatusInput.checked,
+        allowMessageRequests: messageRequestsInput.checked,
+        pushNotifications: notificationsInput.checked,
+        hideLikeCount: hideLikesInput.checked
+    };
+
+    savePrivacyBtn.disabled = true;
+    savePrivacyBtn.innerText = "Saving...";
+    showStatus("privacy-status", "Saving privacy settings...", false);
+
+    try {
+        await setDoc(doc(db, "users", activeUser), {
+            settings: settings,
+            isPrivate: settings.privateAccount,
+            updatedAt: new Date()
+        }, { merge: true });
+
+        currentUserData.settings = settings;
+        currentUserData.isPrivate = settings.privateAccount;
+
+        showStatus("privacy-status", "Privacy settings saved.", false);
+    } catch (err) {
+        console.error(err);
+        showStatus("privacy-status", "Privacy settings save failed.", true);
+    } finally {
+        savePrivacyBtn.disabled = false;
+        savePrivacyBtn.innerText = "Save Privacy Settings";
+    }
 }
+
+function showStatus(id, text, isError) {
+    const el = document.getElementById(id);
+    el.innerText = text;
+    el.style.display = "block";
+    el.style.color = isError ? "#ed4956" : "#8e8e8e";
+}
+
+function hideStatus(id) {
+    const el = document.getElementById(id);
+    el.innerText = "";
+    el.style.display = "none";
+}
+
+loadUserSettings();
 </script>
 
 </body>
