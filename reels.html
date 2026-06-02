@@ -4,484 +4,1174 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Instagram Reels</title>
+
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
 <style>
-:root{--bg:#000;--panel:#121212;--soft:#1f1f1f;--border:#2d2d2d;--text:#fff;--muted:#a8a8a8;--blue:#0095f6;--red:#ed4956}
-*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
-html,body{width:100%;height:100%;height:100dvh;background:#000;color:#fff;overflow:hidden}
-button,input,textarea{font:inherit}button{cursor:pointer;border:0}
-.page{width:100%;height:100dvh;display:flex;background:#000}
-.topbar{position:fixed;top:0;left:0;right:0;height:54px;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:0 14px;background:linear-gradient(rgba(0,0,0,.65),transparent)}
-.topbar a,.icon-btn{color:white;text-decoration:none;background:rgba(0,0,0,.35);width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center}
-.top-title{font-size:18px;font-weight:800;text-shadow:0 1px 8px #000}
-.reels-feed{width:100%;height:100%;overflow-y:auto;scroll-snap-type:y mandatory;scrollbar-width:none}
-.reels-feed::-webkit-scrollbar{display:none}
-.reel{position:relative;width:100%;height:100dvh;scroll-snap-align:start;background:#000;display:flex;align-items:center;justify-content:center;overflow:hidden}
-.reel video{width:100%;height:100%;object-fit:cover;background:#000}
-.reel::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 55%,rgba(0,0,0,.72))}
-.tap-heart{position:absolute;z-index:8;font-size:92px;color:#fff;text-shadow:0 4px 18px rgba(0,0,0,.55);opacity:0;transform:scale(.55);pointer-events:none}
-.tap-heart.show{animation:pop-heart .72s ease forwards}
-@keyframes pop-heart{0%{opacity:0;transform:scale(.5)}18%{opacity:1;transform:scale(1.08)}60%{opacity:.95;transform:scale(.96)}100%{opacity:0;transform:scale(1.18)}}
-.reel-info{position:absolute;left:14px;right:82px;bottom:72px;z-index:5;display:flex;flex-direction:column;gap:9px}
-.userline{display:flex;align-items:center;gap:10px;font-weight:800}
-.userline img{width:36px;height:36px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,.5)}
-.follow-btn{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.55);border-radius:8px;padding:5px 9px;font-size:12px;font-weight:800}
-.caption{font-size:14px;line-height:1.35;overflow-wrap:anywhere}
-.music{display:flex;align-items:center;gap:6px;color:#eee;font-size:13px}
-.actions{position:absolute;right:10px;bottom:82px;z-index:6;display:flex;flex-direction:column;gap:17px;align-items:center}
-.action{background:transparent;color:white;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;font-weight:700}
-.action .material-icons{font-size:30px;text-shadow:0 2px 8px #000}
-.liked .material-icons{color:var(--red)}
-.saved .material-icons{color:white}
-.empty{height:100dvh;display:flex;align-items:center;justify-content:center;flex-direction:column;color:var(--muted);gap:12px;text-align:center;padding:24px}
-.primary{background:var(--blue);color:white;padding:11px 16px;border-radius:10px;font-weight:800}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:flex-end;justify-content:center;z-index:100;padding:12px}
-.modal.open{display:flex}
-.sheet{width:min(460px,100%);max-height:82vh;background:#181818;border:1px solid #333;border-radius:18px 18px 12px 12px;overflow:hidden;display:flex;flex-direction:column}
-.sheet-head{height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;border-bottom:1px solid #303030}
-.sheet-body{padding:14px;overflow-y:auto;display:flex;flex-direction:column;gap:12px}
-.close{background:transparent;color:white;font-size:22px}
-.field{display:flex;flex-direction:column;gap:6px}
-.field label{font-size:12px;color:var(--muted);font-weight:800}
-.field input,.field textarea{background:#0b0b0b;color:white;border:1px solid #333;border-radius:10px;padding:11px;outline:none}
-.search{background:#0b0b0b;color:white;border:1px solid #333;border-radius:10px;padding:11px;outline:none;width:100%}
-.field textarea{min-height:80px;resize:vertical}
-.user-row{display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;cursor:pointer}
-.user-row:hover{background:#252525}
-.user-row img{width:38px;height:38px;border-radius:50%;object-fit:cover}
-.comment-row{font-size:14px;line-height:1.35;display:flex;gap:10px}
-.comment-row img{width:30px;height:30px;border-radius:50%;object-fit:cover;background:#222;flex-shrink:0}
-.comment-row b{margin-right:6px}
-.comment-time{color:var(--muted);font-size:11px;margin-top:3px}
-.comment-input{display:flex;gap:8px;border-top:1px solid #303030;padding:12px}
-.comment-input input{flex:1;background:#0b0b0b;color:white;border:1px solid #333;border-radius:999px;padding:10px 12px;outline:none}
-.toast{position:fixed;left:50%;bottom:74px;transform:translateX(-50%) translateY(18px);background:rgba(255,255,255,.92);color:#000;padding:10px 14px;border-radius:999px;font-size:13px;font-weight:800;opacity:0;transition:.25s;z-index:200}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-@media(min-width:760px){.reels-feed{max-width:430px;margin:0 auto;border-left:1px solid #222;border-right:1px solid #222}.topbar{max-width:430px;left:50%;transform:translateX(-50%)}}
+:root{
+    --bg:#000;
+    --panel:#121212;
+    --soft:#1f1f1f;
+    --border:#2d2d2d;
+    --text:#fff;
+    --muted:#a8a8a8;
+    --blue:#0095f6;
+    --red:#ed4956;
+}
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+html,body{
+    width:100%;
+    height:100%;
+    height:100dvh;
+    background:#000;
+    color:#fff;
+    overflow:hidden;
+}
+button,input,textarea{
+    font:inherit;
+}
+button{
+    cursor:pointer;
+    border:0;
+}
+.page{
+    width:100%;
+    height:100dvh;
+    display:flex;
+    background:#000;
+}
+.topbar{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    height:54px;
+    z-index:50;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 14px;
+    background:linear-gradient(rgba(0,0,0,.65),transparent);
+}
+.topbar a,.icon-btn{
+    color:white;
+    text-decoration:none;
+    background:rgba(0,0,0,.35);
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+.top-title{
+    font-size:18px;
+    font-weight:800;
+    text-shadow:0 1px 8px #000;
+}
+.reels-feed{
+    width:100%;
+    height:100%;
+    overflow-y:auto;
+    scroll-snap-type:y mandatory;
+    scrollbar-width:none;
+}
+.reels-feed::-webkit-scrollbar{
+    display:none;
+}
+.reel{
+    position:relative;
+    width:100%;
+    height:100dvh;
+    scroll-snap-align:start;
+    background:#000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+}
+.reel-media{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    background:#000;
+    display:block;
+}
+.reel::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(transparent 55%,rgba(0,0,0,.72));
+    pointer-events:none;
+}
+.tap-heart{
+    position:absolute;
+    z-index:8;
+    font-size:92px;
+    color:#fff;
+    text-shadow:0 4px 18px rgba(0,0,0,.55);
+    opacity:0;
+    transform:scale(.55);
+    pointer-events:none;
+}
+.tap-heart.show{
+    animation:pop-heart .72s ease forwards;
+}
+@keyframes pop-heart{
+    0%{opacity:0;transform:scale(.5)}
+    18%{opacity:1;transform:scale(1.08)}
+    60%{opacity:.95;transform:scale(.96)}
+    100%{opacity:0;transform:scale(1.18)}
+}
+.reel-info{
+    position:absolute;
+    left:14px;
+    right:82px;
+    bottom:72px;
+    z-index:5;
+    display:flex;
+    flex-direction:column;
+    gap:9px;
+}
+.userline{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-weight:800;
+    cursor:pointer;
+}
+.userline img{
+    width:36px;
+    height:36px;
+    border-radius:50%;
+    object-fit:cover;
+    border:1px solid rgba(255,255,255,.5);
+}
+.follow-btn{
+    background:rgba(255,255,255,.15);
+    color:#fff;
+    border:1px solid rgba(255,255,255,.55);
+    border-radius:8px;
+    padding:5px 9px;
+    font-size:12px;
+    font-weight:800;
+}
+.caption{
+    font-size:14px;
+    line-height:1.35;
+    overflow-wrap:anywhere;
+}
+.music{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    color:#eee;
+    font-size:13px;
+}
+.actions{
+    position:absolute;
+    right:10px;
+    bottom:82px;
+    z-index:6;
+    display:flex;
+    flex-direction:column;
+    gap:17px;
+    align-items:center;
+}
+.action{
+    background:transparent;
+    color:white;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:4px;
+    font-size:12px;
+    font-weight:700;
+}
+.action .material-icons{
+    font-size:30px;
+    text-shadow:0 2px 8px #000;
+}
+.liked .material-icons{
+    color:var(--red);
+}
+.empty{
+    height:100dvh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    color:var(--muted);
+    gap:12px;
+    text-align:center;
+    padding:24px;
+}
+.primary{
+    background:var(--blue);
+    color:white;
+    padding:11px 16px;
+    border-radius:10px;
+    font-weight:800;
+}
+.primary:disabled{
+    opacity:.55;
+    cursor:default;
+}
+.modal{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.75);
+    display:none;
+    align-items:flex-end;
+    justify-content:center;
+    z-index:100;
+    padding:12px;
+}
+.modal.open{
+    display:flex;
+}
+.sheet{
+    width:min(460px,100%);
+    max-height:82vh;
+    background:#181818;
+    border:1px solid #333;
+    border-radius:18px 18px 12px 12px;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+}
+.sheet-head{
+    height:52px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 16px;
+    border-bottom:1px solid #303030;
+}
+.sheet-body{
+    padding:14px;
+    overflow-y:auto;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+.close{
+    background:transparent;
+    color:white;
+    font-size:22px;
+}
+.field{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+}
+.field label{
+    font-size:12px;
+    color:var(--muted);
+    font-weight:800;
+}
+.field input,.field textarea{
+    background:#0b0b0b;
+    color:white;
+    border:1px solid #333;
+    border-radius:10px;
+    padding:11px;
+    outline:none;
+}
+.field textarea{
+    min-height:80px;
+    resize:vertical;
+}
+.search{
+    background:#0b0b0b;
+    color:white;
+    border:1px solid #333;
+    border-radius:10px;
+    padding:11px;
+    outline:none;
+    width:100%;
+}
+.user-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px;
+    border-radius:10px;
+    cursor:pointer;
+}
+.user-row:hover{
+    background:#252525;
+}
+.user-row img{
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    object-fit:cover;
+}
+.comment-row{
+    font-size:14px;
+    line-height:1.35;
+    display:flex;
+    gap:10px;
+}
+.comment-row img{
+    width:30px;
+    height:30px;
+    border-radius:50%;
+    object-fit:cover;
+    background:#222;
+    flex-shrink:0;
+}
+.comment-row b{
+    margin-right:6px;
+}
+.comment-time{
+    color:var(--muted);
+    font-size:11px;
+    margin-top:3px;
+}
+.comment-input{
+    display:flex;
+    gap:8px;
+    border-top:1px solid #303030;
+    padding:12px;
+}
+.comment-input input{
+    flex:1;
+    background:#0b0b0b;
+    color:white;
+    border:1px solid #333;
+    border-radius:999px;
+    padding:10px 12px;
+    outline:none;
+}
+.toast{
+    position:fixed;
+    left:50%;
+    bottom:74px;
+    transform:translateX(-50%) translateY(18px);
+    background:rgba(255,255,255,.92);
+    color:#000;
+    padding:10px 14px;
+    border-radius:999px;
+    font-size:13px;
+    font-weight:800;
+    opacity:0;
+    transition:.25s;
+    z-index:200;
+}
+.toast.show{
+    opacity:1;
+    transform:translateX(-50%) translateY(0);
+}
+@media(min-width:760px){
+    .reels-feed{
+        max-width:430px;
+        margin:0 auto;
+        border-left:1px solid #222;
+        border-right:1px solid #222;
+    }
+    .topbar{
+        max-width:430px;
+        left:50%;
+        transform:translateX(-50%);
+    }
+}
 </style>
 </head>
+
 <body>
+
 <div class="topbar">
-  <a href="home.html"><span class="material-icons">arrow_back</span></a>
-  <div class="top-title">Reels</div>
-  <button class="icon-btn" id="open-create"><span class="material-icons">add</span></button>
+    <a href="home.html"><span class="material-icons">arrow_back</span></a>
+    <div class="top-title">Reels</div>
+    <button class="icon-btn" id="open-create"><span class="material-icons">add</span></button>
 </div>
 
 <main class="page">
-  <section class="reels-feed" id="reels-feed">
-    <div class="empty"><strong>Loading reels...</strong></div>
-  </section>
+    <section class="reels-feed" id="reels-feed">
+        <div class="empty"><strong>Loading reels...</strong></div>
+    </section>
 </main>
 
 <div class="modal" id="create-modal">
-  <div class="sheet">
-    <div class="sheet-head"><h3>Create reel</h3><button class="close" data-close="create-modal">&times;</button></div>
-    <div class="sheet-body">
-      <input type="file" id="reel-file" accept="video/*" style="display:none">
-      <button class="primary" id="choose-video">Choose video</button>
-      <div id="chosen-file" style="color:var(--muted);font-size:13px;">No video selected</div>
-      <div class="field"><label>Caption</label><textarea id="reel-caption" placeholder="Write a caption..."></textarea></div>
-      <div class="field"><label>Music / audio name</label><input id="reel-music" placeholder="Original audio"></div>
-      <button class="primary" id="upload-reel">Upload Reel</button>
+    <div class="sheet">
+        <div class="sheet-head">
+            <h3>Create reel</h3>
+            <button class="close" data-close="create-modal">&times;</button>
+        </div>
+
+        <div class="sheet-body">
+            <input type="file" id="reel-file" accept="image/*,video/*" style="display:none">
+            <button class="primary" id="choose-media">Choose photo or video</button>
+            <div id="chosen-file" style="color:var(--muted);font-size:13px;">No media selected</div>
+
+            <div class="field">
+                <label>Caption</label>
+                <textarea id="reel-caption" placeholder="Write a caption..."></textarea>
+            </div>
+
+            <div class="field">
+                <label>Music / audio name</label>
+                <input id="reel-music" placeholder="Original audio">
+            </div>
+
+            <button class="primary" id="upload-reel">Upload Reel</button>
+        </div>
     </div>
-  </div>
 </div>
 
 <div class="modal" id="share-modal">
-  <div class="sheet">
-    <div class="sheet-head"><h3>Share</h3><button class="close" data-close="share-modal">&times;</button></div>
-    <div class="sheet-body">
-      <button class="primary" id="copy-link-btn">Copy reel link</button>
-      <input class="search" id="share-search" placeholder="Search users">
-      <div style="font-weight:800;">Send to</div>
-      <div id="share-users-list"></div>
+    <div class="sheet">
+        <div class="sheet-head">
+            <h3>Share</h3>
+            <button class="close" data-close="share-modal">&times;</button>
+        </div>
+
+        <div class="sheet-body">
+            <button class="primary" id="copy-link-btn">Copy reel link</button>
+            <input class="search" id="share-search" placeholder="Search users">
+            <div style="font-weight:800;">Send to</div>
+            <div id="share-users-list"></div>
+        </div>
     </div>
-  </div>
 </div>
 
 <div class="modal" id="comments-modal">
-  <div class="sheet">
-    <div class="sheet-head"><h3>Comments</h3><button class="close" data-close="comments-modal">&times;</button></div>
-    <div class="sheet-body" id="comments-list"></div>
-    <div class="comment-input">
-      <input id="comment-text" placeholder="Add a comment...">
-      <button class="primary" id="post-comment">Post</button>
+    <div class="sheet">
+        <div class="sheet-head">
+            <h3>Comments</h3>
+            <button class="close" data-close="comments-modal">&times;</button>
+        </div>
+
+        <div class="sheet-body" id="comments-list"></div>
+
+        <div class="comment-input">
+            <input id="comment-text" placeholder="Add a comment...">
+            <button class="primary" id="post-comment">Post</button>
+        </div>
     </div>
-  </div>
 </div>
 
 <div class="toast" id="toast">Done</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, onSnapshot, query, orderBy, doc, updateDoc, arrayUnion, arrayRemove, increment, setDoc, runTransaction, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-storage.js";
+import {
+    getFirestore,
+    collection,
+    addDoc,
+    getDocs,
+    onSnapshot,
+    query,
+    orderBy,
+    doc,
+    updateDoc,
+    arrayUnion,
+    arrayRemove,
+    increment,
+    setDoc,
+    runTransaction,
+    serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+import {
+    getStorage,
+    ref,
+    uploadBytes,
+    getDownloadURL
+} from "https://www.gstatic.com/firebasejs/12.14.0/firebase-storage.js";
 
-const firebaseConfig={apiKey:"AIzaSyBrqMn7FrFW3jslaDNM0ui-VW4w6K_3Nmk",authDomain:"insta-clone-863ae.firebaseapp.com",projectId:"insta-clone-863ae",storageBucket:"insta-clone-863ae.firebasestorage.app",messagingSenderId:"599343109250",appId:"1:599343109250:web:1306ec63908ba21c54509b"};
-const app=initializeApp(firebaseConfig);
-const db=getFirestore(app);
-const storage=getStorage(app);
+const firebaseConfig = {
+    apiKey: "AIzaSyBrqMn7FrFW3jslaDNM0ui-VW4w6K_3Nmk",
+    authDomain: "insta-clone-863ae.firebaseapp.com",
+    projectId: "insta-clone-863ae",
+    storageBucket: "insta-clone-863ae.firebasestorage.app",
+    messagingSenderId: "599343109250",
+    appId: "1:599343109250:web:1306ec63908ba21c54509b"
+};
 
-const $=id=>document.getElementById(id);
-const currentUser=localStorage.getItem("active_user");
-if(!currentUser) window.location.href="index.html";
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const storage = getStorage(app);
 
-let currentProfilePic="https://picsum.photos/150/150?random=1";
-let selectedFile=null;
-let reels=[];
-let activeReel=null;
-let allUsers=[];
-let userMap={};
-let commentsUnsub=null;
-let reelObserver=null;
-let viewedInSession=new Set();
+const $ = (id) => document.getElementById(id);
+const currentUser = localStorage.getItem("active_user");
 
-function toast(t){$("toast").innerText=t;$("toast").classList.add("show");setTimeout(()=>$("toast").classList.remove("show"),1500)}
-function esc(v){return String(v||"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
-function openModal(id){$(id).classList.add("open")}
-function closeModal(id){$(id).classList.remove("open");if(id==="comments-modal"&&commentsUnsub){commentsUnsub();commentsUnsub=null}}
-function countLabel(n){const x=Number(n||0);if(x>=1000000)return`${(x/1000000).toFixed(x>=10000000?0:1)}M`;if(x>=1000)return`${(x/1000).toFixed(x>=10000?0:1)}K`;return String(x)}
-function timeAgo(ts){try{const d=ts&&ts.toDate?ts.toDate():new Date(ts);const s=Math.max(0,Math.floor((Date.now()-d.getTime())/1000));if(s<60)return"now";const m=Math.floor(s/60);if(m<60)return`${m}m`;const h=Math.floor(m/60);if(h<24)return`${h}h`;return`${Math.floor(h/24)}d`}catch(e){return""}}
-document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>closeModal(b.dataset.close));
-document.querySelectorAll(".modal").forEach(m=>m.addEventListener("click",e=>{if(e.target===m)closeModal(m.id)}));
-
-async function loadMe(){
-  const users=await getDocs(collection(db,"users"));
-  allUsers=[];
-  userMap={};
-  users.forEach(u=>{
-    const d=u.data(), name=d.username||u.id;
-    const profilePic=d.profilePic||"https://picsum.photos/100/100?random=9";
-    userMap[name]={id:name,profilePic};
-    if(name===currentUser) currentProfilePic=profilePic;
-    if(name!==currentUser) allUsers.push({id:name,profilePic});
-  });
+if (!currentUser) {
+    window.location.href = "index.html";
 }
 
-function renderShareUsers(){
-  const search=$("share-search").value.trim().toLowerCase();
-  $("share-users-list").innerHTML="";
-  const users=allUsers.filter(u=>u.id.toLowerCase().includes(search));
-  if(users.length===0){
-    $("share-users-list").innerHTML=`<div style="color:var(--muted);padding:12px;">No users found</div>`;
-    return;
-  }
-  users.forEach(u=>{
-    const row=document.createElement("div");
-    row.className="user-row";
-    row.innerHTML=`<img src="${esc(u.profilePic)}"><div><b>${esc(u.id)}</b><div style="color:var(--muted);font-size:12px;">Send reel in chat</div></div>`;
-    row.onclick=()=>shareReelToChat(u.id,row);
-    $("share-users-list").appendChild(row);
-  });
+let currentProfilePic = "https://picsum.photos/150/150?random=1";
+let selectedFile = null;
+let selectedFileType = "";
+let reels = [];
+let activeReel = null;
+let allUsers = [];
+let userMap = {};
+let commentsUnsub = null;
+let reelObserver = null;
+let viewedInSession = new Set();
+
+function esc(value) {
+    return String(value || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
 }
 
-function listenReels(){
-  const q=query(collection(db,"reels"),orderBy("timestamp","desc"));
-  onSnapshot(q,snap=>{
-    reels=[];
-    snap.forEach(d=>reels.push({id:d.id,...d.data()}));
-    renderReels();
-    openReelFromUrl();
-  });
+function getDisplayName(data) {
+    return data.fullName || data.name || data.displayName || data.fullname || data.username || "Instagram User";
 }
 
-function renderReels(){
-  const feed=$("reels-feed");
-  feed.innerHTML="";
-  if(reels.length===0){
-    feed.innerHTML=`<div class="empty"><strong>No reels yet</strong><span>Upload your first reel.</span><button class="primary" onclick="document.getElementById('open-create').click()">Create Reel</button></div>`;
-    return;
-  }
-  reels.forEach(r=>{
-    const liked=(r.likedBy||[]).includes(currentUser);
-    const saved=(r.savedBy||[]).includes(currentUser);
-    const el=document.createElement("article");
-    el.className="reel";
-    el.id=`reel-${r.id}`;
-    el.innerHTML=`
-      <video src="${esc(r.videoUrl)}" playsinline loop></video>
-      <div class="reel-info">
-        <div class="userline" data-profile>
-          <img src="${esc(r.profilePic||userMap[r.userId||""]?.profilePic||currentProfilePic)}"><span>${esc(r.userId||"user")}</span>
-          ${(r.userId||"")===currentUser?"":`<button class="follow-btn" data-follow>Follow</button>`}
-        </div>
-        <div class="caption">${esc(r.caption||"")}</div>
-        <div class="music"><span class="material-icons" style="font-size:16px">music_note</span>${esc(r.music||"Original audio")}</div>
-      </div>
-      <div class="actions">
-        <button class="action ${liked?"liked":""}" data-action="like"><span class="material-icons">favorite</span><span>${countLabel(r.likesCount)}</span></button>
-        <button class="action" data-action="comment"><span class="material-icons">chat_bubble</span><span>${countLabel(r.commentsCount)}</span></button>
-        <button class="action" data-action="share"><span class="material-icons">send</span><span>Share</span></button>
-        <button class="action ${saved?"saved":""}" data-action="save"><span class="material-icons">${saved?"bookmark":"bookmark_border"}</span><span>Save</span></button>
-        <button class="action" data-action="story"><span class="material-icons">add_circle</span><span>Story</span></button>
-      </div>`;
-    el.insertAdjacentHTML("beforeend",`<span class="material-icons tap-heart">favorite</span>`);
-    el.querySelector("[data-profile]").onclick=e=>{
-      if(e.target.closest("[data-follow]"))return;
-      location.href=`user-profile.html?username=${encodeURIComponent(r.userId||"")}`;
-    };
-    const followBtn=el.querySelector("[data-follow]");
-    if(followBtn)followBtn.onclick=()=>toggleFollow(r.userId,followBtn);
-    el.querySelectorAll("[data-action]").forEach(btn=>btn.onclick=()=>handleAction(btn.dataset.action,r));
-    wireVideoGestures(el,r);
-    feed.appendChild(el);
-  });
-  observeVideos();
+function toast(text) {
+    $("toast").innerText = text;
+    $("toast").classList.add("show");
+    setTimeout(() => $("toast").classList.remove("show"), 1500);
 }
 
-function observeVideos(){
-  if(reelObserver)reelObserver.disconnect();
-  reelObserver=new IntersectionObserver(entries=>{
-    entries.forEach(e=>{
-      const v=e.target.querySelector("video");
-      if(!v)return;
-      if(e.isIntersecting){
-        document.querySelectorAll(".reel video").forEach(other=>{if(other!==v)other.pause()});
-        v.play().catch(()=>{});
-        activeReel=reels.find(r=>`reel-${r.id}`===e.target.id);
-        if(activeReel)markViewed(activeReel);
-      }
-      else v.pause();
-    });
-  },{threshold:.65});
-  document.querySelectorAll(".reel").forEach(r=>reelObserver.observe(r));
+function openModal(id) {
+    $(id).classList.add("open");
 }
 
-function wireVideoGestures(el,r){
-  const video=el.querySelector("video");
-  let lastTap=0;
-  video.addEventListener("click",async()=>{
-    const now=Date.now();
-    if(now-lastTap<290){
-      const heart=el.querySelector(".tap-heart");
-      heart.classList.remove("show");
-      void heart.offsetWidth;
-      heart.classList.add("show");
-      if(!(r.likedBy||[]).includes(currentUser))await toggleLike(r);
-    }else{
-      if(video.paused)video.play().catch(()=>{});
-      else video.pause();
+function closeModal(id) {
+    $(id).classList.remove("open");
+
+    if (id === "comments-modal" && commentsUnsub) {
+        commentsUnsub();
+        commentsUnsub = null;
     }
-    lastTap=now;
-  });
 }
 
-async function markViewed(r){
-  if(viewedInSession.has(r.id))return;
-  viewedInSession.add(r.id);
-  try{
-    const reelRef=doc(db,"reels",r.id);
-    await runTransaction(db,async(tx)=>{
-      const snap=await tx.get(reelRef);
-      if(!snap.exists())return;
-      const data=snap.data();
-      const viewedBy=Array.isArray(data.viewedBy)?data.viewedBy:[];
-      if(viewedBy.includes(currentUser))return;
-      tx.update(reelRef,{viewedBy:arrayUnion(currentUser),viewsCount:increment(1)});
+function countLabel(value) {
+    const number = Number(value || 0);
+
+    if (number >= 1000000) return `${(number / 1000000).toFixed(number >= 10000000 ? 0 : 1)}M`;
+    if (number >= 1000) return `${(number / 1000).toFixed(number >= 10000 ? 0 : 1)}K`;
+
+    return String(number);
+}
+
+function timeAgo(timestamp) {
+    try {
+        const date = timestamp && timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+        const seconds = Math.max(0, Math.floor((Date.now() - date.getTime()) / 1000));
+
+        if (seconds < 60) return "now";
+
+        const minutes = Math.floor(seconds / 60);
+        if (minutes < 60) return `${minutes}m`;
+
+        const hours = Math.floor(minutes / 60);
+        if (hours < 24) return `${hours}h`;
+
+        return `${Math.floor(hours / 24)}d`;
+    } catch (e) {
+        return "";
+    }
+}
+
+document.querySelectorAll("[data-close]").forEach((button) => {
+    button.onclick = () => closeModal(button.dataset.close);
+});
+
+document.querySelectorAll(".modal").forEach((modal) => {
+    modal.addEventListener("click", (e) => {
+        if (e.target === modal) closeModal(modal.id);
     });
-  }catch(e){
-    console.warn("View count failed",e);
-  }
-}
+});
 
-async function handleAction(action,r){
-  activeReel=r;
-  if(action==="like") return toggleLike(r);
-  if(action==="comment") return openComments(r);
-  if(action==="share"){await loadMe();renderShareUsers();openModal("share-modal");return}
-  if(action==="save") return toggleSave(r);
-  if(action==="story") return addReelToStory(r);
-}
+async function loadUsers() {
+    const users = await getDocs(collection(db, "users"));
 
-async function toggleLike(r){
-  const reelRef=doc(db,"reels",r.id);
-  await runTransaction(db,async(tx)=>{
-    const snap=await tx.get(reelRef);
-    if(!snap.exists())return;
-    const data=snap.data();
-    const likedBy=Array.isArray(data.likedBy)?data.likedBy:[];
-    const liked=likedBy.includes(currentUser);
-    const nextCount=Math.max(0,Number(data.likesCount||0)+(liked?-1:1));
-    tx.update(reelRef,{
-      likedBy:liked?arrayRemove(currentUser):arrayUnion(currentUser),
-      likesCount:nextCount
+    allUsers = [];
+    userMap = {};
+
+    users.forEach((userDoc) => {
+        const data = userDoc.data();
+        const username = data.username || userDoc.id;
+        const profilePic = data.profilePic || "https://picsum.photos/100/100?random=9";
+
+        userMap[username] = {
+            id: username,
+            profilePic,
+            displayName: getDisplayName(data)
+        };
+
+        if (username === currentUser || userDoc.id === currentUser) {
+            currentProfilePic = profilePic;
+        } else {
+            allUsers.push({
+                id: username,
+                profilePic,
+                displayName: getDisplayName(data)
+            });
+        }
     });
-  });
 }
 
-async function toggleSave(r){
-  const saved=(r.savedBy||[]).includes(currentUser);
-  await updateDoc(doc(db,"reels",r.id),{savedBy:saved?arrayRemove(currentUser):arrayUnion(currentUser)});
-  toast(saved?"Removed":"Saved");
+function renderShareUsers() {
+    const search = $("share-search").value.trim().toLowerCase();
+    const list = $("share-users-list");
+
+    list.innerHTML = "";
+
+    const users = allUsers.filter((user) =>
+        user.id.toLowerCase().includes(search) ||
+        user.displayName.toLowerCase().includes(search)
+    );
+
+    if (users.length === 0) {
+        list.innerHTML = `<div style="color:var(--muted);padding:12px;">No users found</div>`;
+        return;
+    }
+
+    users.forEach((user) => {
+        const row = document.createElement("div");
+        row.className = "user-row";
+        row.innerHTML = `
+            <img src="${esc(user.profilePic)}" alt="${esc(user.id)}">
+            <div>
+                <b>${esc(user.id)}</b>
+                <div style="color:var(--muted);font-size:12px;">${esc(user.displayName)}</div>
+            </div>
+        `;
+
+        row.onclick = () => shareReelToChat(user.id, row);
+        list.appendChild(row);
+    });
 }
 
-async function addReelToStory(r){
-  await addDoc(collection(db,"stories"),{
-    userId:currentUser,
-    profilePic:currentProfilePic,
-    mediaUrl:r.videoUrl,
-    mediaType:"video",
-    text:r.caption||"",
-    mention:"",
-    music:r.music||"Original audio",
-    reelId:r.id,
-    isHighlight:false,
-    createdAt:serverTimestamp(),
-    expiresAt:new Date(Date.now()+24*60*60*1000)
-  });
-  toast("Added to story");
+function listenReels() {
+    const reelsQuery = query(collection(db, "reels"), orderBy("timestamp", "desc"));
+
+    onSnapshot(reelsQuery, (snap) => {
+        reels = [];
+
+        snap.forEach((reelDoc) => {
+            reels.push({
+                id: reelDoc.id,
+                ...reelDoc.data()
+            });
+        });
+
+        renderReels();
+        openReelFromUrl();
+    });
 }
 
-async function toggleFollow(targetUser,btn){
-  if(!targetUser||targetUser===currentUser)return;
-  btn.disabled=true;
-  try{
-    await setDoc(doc(db,"follows",`${currentUser}_${targetUser}`),{
-      follower:currentUser,
-      following:targetUser,
-      timestamp:serverTimestamp()
-    },{merge:true});
-    btn.innerText="Following";
-    toast("Following");
-  }catch(e){
-    console.error(e);
-    toast("Follow failed");
-  }
-  btn.disabled=false;
+function renderReels() {
+    const feed = $("reels-feed");
+    feed.innerHTML = "";
+
+    if (reels.length === 0) {
+        feed.innerHTML = `
+            <div class="empty">
+                <strong>No reels yet</strong>
+                <span>Upload your first reel.</span>
+                <button class="primary" onclick="document.getElementById('open-create').click()">Create Reel</button>
+            </div>
+        `;
+        return;
+    }
+
+    reels.forEach((reel) => {
+        const liked = (reel.likedBy || []).includes(currentUser);
+        const saved = (reel.savedBy || []).includes(currentUser);
+
+        const mediaType = reel.mediaType || (reel.videoUrl ? "video" : "image");
+        const mediaUrl = reel.mediaUrl || reel.videoUrl || reel.imageUrl || reel.thumbnailUrl || "";
+
+        const reelEl = document.createElement("article");
+        reelEl.className = "reel";
+        reelEl.id = `reel-${reel.id}`;
+
+        reelEl.innerHTML = `
+            ${
+                mediaType === "video"
+                    ? `<video class="reel-media" src="${esc(mediaUrl)}" playsinline loop></video>`
+                    : `<img class="reel-media" src="${esc(mediaUrl)}" alt="Reel">`
+            }
+
+            <div class="reel-info">
+                <div class="userline" data-profile>
+                    <img src="${esc(reel.profilePic || userMap[reel.userId || ""]?.profilePic || currentProfilePic)}" alt="User">
+                    <span>${esc(reel.userId || "user")}</span>
+                    ${(reel.userId || "") === currentUser ? "" : `<button class="follow-btn" data-follow>Follow</button>`}
+                </div>
+
+                <div class="caption">${esc(reel.caption || "")}</div>
+
+                <div class="music">
+                    <span class="material-icons" style="font-size:16px;">music_note</span>
+                    ${esc(reel.music || "Original audio")}
+                </div>
+            </div>
+
+            <div class="actions">
+                <button class="action ${liked ? "liked" : ""}" data-action="like">
+                    <span class="material-icons">favorite</span>
+                    <span>${countLabel(reel.likesCount)}</span>
+                </button>
+
+                <button class="action" data-action="comment">
+                    <span class="material-icons">chat_bubble</span>
+                    <span>${countLabel(reel.commentsCount)}</span>
+                </button>
+
+                <button class="action" data-action="share">
+                    <span class="material-icons">send</span>
+                    <span>Share</span>
+                </button>
+
+                <button class="action ${saved ? "saved" : ""}" data-action="save">
+                    <span class="material-icons">${saved ? "bookmark" : "bookmark_border"}</span>
+                    <span>Save</span>
+                </button>
+
+                <button class="action" data-action="story">
+                    <span class="material-icons">add_circle</span>
+                    <span>Story</span>
+                </button>
+            </div>
+
+            <span class="material-icons tap-heart">favorite</span>
+        `;
+
+        reelEl.querySelector("[data-profile]").onclick = (e) => {
+            if (e.target.closest("[data-follow]")) return;
+            window.location.href = `user-profile.html?username=${encodeURIComponent(reel.userId || "")}`;
+        };
+
+        const followBtn = reelEl.querySelector("[data-follow]");
+        if (followBtn) {
+            followBtn.onclick = () => toggleFollow(reel.userId, followBtn);
+        }
+
+        reelEl.querySelectorAll("[data-action]").forEach((button) => {
+            button.onclick = () => handleAction(button.dataset.action, reel);
+        });
+
+        wireMediaGestures(reelEl, reel);
+        feed.appendChild(reelEl);
+    });
+
+    observeReels();
 }
 
-async function shareReelToChat(targetUser,row){
-  if(!activeReel)return;
-  const roomId=[currentUser,targetUser].sort().join("_chat_room_");
-  if(row)row.style.opacity=".55";
-  const payload={
-    sender:currentUser,
-    receiver:targetUser,
-    type:"reel",
-    text:"Shared a reel",
-    reelId:activeReel.id,
-    reelUrl:activeReel.videoUrl,
-    thumbnailUrl:activeReel.thumbnailUrl||activeReel.videoUrl,
-    title:"Reel",
-    caption:activeReel.caption||"",
-    status:"sent",
-    deliveredAt:serverTimestamp(),
-    seenBy:[currentUser],
-    seenAt:null,
-    timestamp:serverTimestamp()
-  };
-  await addDoc(collection(db,"chats",roomId,"messages"),payload);
-  await setDoc(doc(db,"chats",roomId),{
-    lastMessageText:"Shared a reel",
-    lastMessageType:"reel",
-    lastMessageSender:currentUser,
-    isRead:false,
-    readBy:[currentUser],
-    timestamp:serverTimestamp()
-  },{merge:true});
-  if(row)row.style.opacity="1";
-  toast(`Sent to ${targetUser}`);
+function observeReels() {
+    if (reelObserver) reelObserver.disconnect();
+
+    reelObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            const video = entry.target.querySelector("video");
+
+            if (entry.isIntersecting) {
+                document.querySelectorAll(".reel video").forEach((otherVideo) => {
+                    if (otherVideo !== video) otherVideo.pause();
+                });
+
+                if (video) video.play().catch(() => {});
+
+                activeReel = reels.find((reel) => `reel-${reel.id}` === entry.target.id);
+                if (activeReel) markViewed(activeReel);
+            } else {
+                if (video) video.pause();
+            }
+        });
+    }, { threshold: .65 });
+
+    document.querySelectorAll(".reel").forEach((reel) => reelObserver.observe(reel));
 }
 
-$("copy-link-btn").onclick=async()=>{
-  if(!activeReel)return;
-  const link=`${location.origin}${location.pathname}?reel=${encodeURIComponent(activeReel.id)}`;
-  await navigator.clipboard.writeText(link);
-  toast("Link copied");
+function wireMediaGestures(reelEl, reel) {
+    const media = reelEl.querySelector(".reel-media");
+    let lastTap = 0;
+
+    media.addEventListener("click", async () => {
+        const now = Date.now();
+
+        if (now - lastTap < 290) {
+            const heart = reelEl.querySelector(".tap-heart");
+            heart.classList.remove("show");
+            void heart.offsetWidth;
+            heart.classList.add("show");
+
+            if (!(reel.likedBy || []).includes(currentUser)) {
+                await toggleLike(reel);
+            }
+        } else {
+            if (media.tagName.toLowerCase() === "video") {
+                if (media.paused) media.play().catch(() => {});
+                else media.pause();
+            }
+        }
+
+        lastTap = now;
+    });
+}
+
+async function markViewed(reel) {
+    if (viewedInSession.has(reel.id)) return;
+
+    viewedInSession.add(reel.id);
+
+    try {
+        const reelRef = doc(db, "reels", reel.id);
+
+        await runTransaction(db, async (transaction) => {
+            const snap = await transaction.get(reelRef);
+            if (!snap.exists()) return;
+
+            const data = snap.data();
+            const viewedBy = Array.isArray(data.viewedBy) ? data.viewedBy : [];
+
+            if (viewedBy.includes(currentUser)) return;
+
+            transaction.update(reelRef, {
+                viewedBy: arrayUnion(currentUser),
+                viewsCount: increment(1)
+            });
+        });
+    } catch (err) {
+        console.warn("View count failed:", err);
+    }
+}
+
+async function handleAction(action, reel) {
+    activeReel = reel;
+
+    if (action === "like") return toggleLike(reel);
+    if (action === "comment") return openComments(reel);
+
+    if (action === "share") {
+        await loadUsers();
+        renderShareUsers();
+        openModal("share-modal");
+        return;
+    }
+
+    if (action === "save") return toggleSave(reel);
+    if (action === "story") return addReelToStory(reel);
+}
+
+async function toggleLike(reel) {
+    const reelRef = doc(db, "reels", reel.id);
+
+    await runTransaction(db, async (transaction) => {
+        const snap = await transaction.get(reelRef);
+        if (!snap.exists()) return;
+
+        const data = snap.data();
+        const likedBy = Array.isArray(data.likedBy) ? data.likedBy : [];
+        const liked = likedBy.includes(currentUser);
+
+        transaction.update(reelRef, {
+            likedBy: liked ? arrayRemove(currentUser) : arrayUnion(currentUser),
+            likesCount: Math.max(0, Number(data.likesCount || 0) + (liked ? -1 : 1))
+        });
+    });
+}
+
+async function toggleSave(reel) {
+    const saved = (reel.savedBy || []).includes(currentUser);
+
+    await updateDoc(doc(db, "reels", reel.id), {
+        savedBy: saved ? arrayRemove(currentUser) : arrayUnion(currentUser)
+    });
+
+    toast(saved ? "Removed" : "Saved");
+}
+
+async function addReelToStory(reel) {
+    const mediaType = reel.mediaType || (reel.videoUrl ? "video" : "image");
+    const mediaUrl = reel.mediaUrl || reel.videoUrl || reel.imageUrl || reel.thumbnailUrl || "";
+
+    await addDoc(collection(db, "stories"), {
+        userId: currentUser,
+        username: currentUser,
+        profilePic: currentProfilePic,
+        mediaUrl,
+        mediaType,
+        text: reel.caption || "",
+        mention: "",
+        music: reel.music || "Original audio",
+        reelId: reel.id,
+        isHighlight: false,
+        createdAt: serverTimestamp(),
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
+    });
+
+    toast("Added to story");
+}
+
+async function toggleFollow(targetUser, button) {
+    if (!targetUser || targetUser === currentUser) return;
+
+    button.disabled = true;
+
+    try {
+        await setDoc(doc(db, "follows", `${currentUser}_${targetUser}`), {
+            follower: currentUser,
+            following: targetUser,
+            timestamp: serverTimestamp()
+        }, { merge: true });
+
+        button.innerText = "Following";
+        toast("Following");
+    } catch (err) {
+        console.error(err);
+        toast("Follow failed");
+    }
+
+    button.disabled = false;
+}
+
+async function shareReelToChat(targetUser, row) {
+    if (!activeReel) return;
+
+    const roomId = [currentUser, targetUser].sort().join("_chat_room_");
+
+    if (row) row.style.opacity = ".55";
+
+    const mediaType = activeReel.mediaType || (activeReel.videoUrl ? "video" : "image");
+    const mediaUrl = activeReel.mediaUrl || activeReel.videoUrl || activeReel.imageUrl || activeReel.thumbnailUrl || "";
+
+    await addDoc(collection(db, "chats", roomId, "messages"), {
+        sender: currentUser,
+        receiver: targetUser,
+        type: "reel",
+        text: "Shared a reel",
+        reelId: activeReel.id,
+        reelUrl: mediaType === "video" ? mediaUrl : "",
+        imageUrl: mediaType === "image" ? mediaUrl : "",
+        videoUrl: mediaType === "video" ? mediaUrl : "",
+        thumbnailUrl: mediaUrl,
+        title: "Reel",
+        caption: activeReel.caption || "",
+        status: "sent",
+        deliveredAt: serverTimestamp(),
+        seenBy: [currentUser],
+        seenAt: null,
+        timestamp: serverTimestamp()
+    });
+
+    await setDoc(doc(db, "chats", roomId), {
+        lastMessageText: "Shared a reel",
+        lastMessageType: "reel",
+        lastMessageSender: currentUser,
+        isRead: false,
+        readBy: [currentUser],
+        timestamp: serverTimestamp()
+    }, { merge: true });
+
+    if (row) row.style.opacity = "1";
+
+    toast(`Sent to ${targetUser}`);
+}
+
+$("copy-link-btn").onclick = async () => {
+    if (!activeReel) return;
+
+    const link = `${location.origin}${location.pathname}?reel=${encodeURIComponent(activeReel.id)}`;
+
+    try {
+        await navigator.clipboard.writeText(link);
+        toast("Link copied");
+    } catch (err) {
+        toast("Copy failed");
+    }
 };
-$("share-search").oninput=renderShareUsers;
 
-async function openComments(r){
-  activeReel=r;
-  openModal("comments-modal");
-  $("comments-list").innerHTML=`<div style="color:var(--muted)">Loading...</div>`;
-  if(commentsUnsub)commentsUnsub();
-  const q=query(collection(db,"reelComments"),orderBy("timestamp","asc"));
-  commentsUnsub=onSnapshot(q,snap=>{
-    if(!activeReel||activeReel.id!==r.id)return;
-    $("comments-list").innerHTML="";
-    let count=0;
-    snap.forEach(c=>{
-      const d=c.data();
-      if(d.reelId===r.id){
-        count++;
-        const pic=d.profilePic||userMap[d.commentedBy||""]?.profilePic||"https://picsum.photos/80/80?random=8";
-        const row=document.createElement("div");
-        row.className="comment-row";
-        row.innerHTML=`<img src="${esc(pic)}"><div><div><b>${esc(d.commentedBy||"user")}</b>${esc(d.text||"")}</div><div class="comment-time">${timeAgo(d.timestamp)}</div></div>`;
-        $("comments-list").appendChild(row);
-      }
+$("share-search").oninput = renderShareUsers;
+
+async function openComments(reel) {
+    activeReel = reel;
+
+    openModal("comments-modal");
+    $("comments-list").innerHTML = `<div style="color:var(--muted);">Loading...</div>`;
+
+    if (commentsUnsub) commentsUnsub();
+
+    const commentsQuery = query(collection(db, "reelComments"), orderBy("timestamp", "asc"));
+
+    commentsUnsub = onSnapshot(commentsQuery, (snap) => {
+        if (!activeReel || activeReel.id !== reel.id) return;
+
+        $("comments-list").innerHTML = "";
+        let count = 0;
+
+        snap.forEach((commentDoc) => {
+            const comment = commentDoc.data();
+
+            if (comment.reelId === reel.id) {
+                count++;
+
+                const pic = comment.profilePic || userMap[comment.commentedBy || ""]?.profilePic || "https://picsum.photos/80/80?random=8";
+
+                const row = document.createElement("div");
+                row.className = "comment-row";
+                row.innerHTML = `
+                    <img src="${esc(pic)}" alt="User">
+                    <div>
+                        <div><b>${esc(comment.commentedBy || "user")}</b>${esc(comment.text || "")}</div>
+                        <div class="comment-time">${timeAgo(comment.timestamp)}</div>
+                    </div>
+                `;
+
+                $("comments-list").appendChild(row);
+            }
+        });
+
+        if (count === 0) {
+            $("comments-list").innerHTML = `<div style="color:var(--muted);text-align:center;padding:20px;">No comments yet.</div>`;
+        }
     });
-    if(count===0)$("comments-list").innerHTML=`<div style="color:var(--muted);text-align:center;padding:20px;">No comments yet.</div>`;
-  });
 }
 
-$("post-comment").onclick=async()=>{
-  const text=$("comment-text").value.trim();
-  if(!text||!activeReel)return;
-  $("post-comment").disabled=true;
-  $("comment-text").value="";
-  try{
-    await addDoc(collection(db,"reelComments"),{reelId:activeReel.id,text,commentedBy:currentUser,profilePic:currentProfilePic,timestamp:serverTimestamp()});
-    await updateDoc(doc(db,"reels",activeReel.id),{commentsCount:increment(1)});
-  }finally{
-    $("post-comment").disabled=false;
-  }
+$("post-comment").onclick = async () => {
+    const text = $("comment-text").value.trim();
+
+    if (!text || !activeReel) return;
+
+    $("post-comment").disabled = true;
+    $("comment-text").value = "";
+
+    try {
+        await addDoc(collection(db, "reelComments"), {
+            reelId: activeReel.id,
+            text,
+            commentedBy: currentUser,
+            profilePic: currentProfilePic,
+            timestamp: serverTimestamp()
+        });
+
+        await updateDoc(doc(db, "reels", activeReel.id), {
+            commentsCount: increment(1)
+        });
+    } catch (err) {
+        console.error(err);
+        toast("Comment failed");
+    } finally {
+        $("post-comment").disabled = false;
+    }
 };
 
-$("open-create").onclick=()=>openModal("create-modal");
-$("choose-video").onclick=()=>$("reel-file").click();
-$("reel-file").onchange=()=>{selectedFile=$("reel-file").files[0];$("chosen-file").innerText=selectedFile?selectedFile.name:"No video selected"};
+$("comment-text").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+        e.preventDefault();
+        $("post-comment").click();
+    }
+});
 
-$("upload-reel").onclick=async()=>{
-  if(!selectedFile){toast("Choose video first");return}
-  $("upload-reel").disabled=true;$("upload-reel").innerText="Uploading...";
-  try{
-    const safe=selectedFile.name.replace(/[^\w.-]+/g,"_");
-    const storageRef=ref(storage,`reels/${currentUser}/${Date.now()}_${safe}`);
-    await uploadBytes(storageRef,selectedFile);
-    const videoUrl=await getDownloadURL(storageRef);
-    await addDoc(collection(db,"reels"),{
-      userId:currentUser,
-      profilePic:currentProfilePic,
-      videoUrl,
-      thumbnailUrl:videoUrl,
-      caption:$("reel-caption").value.trim(),
-      music:$("reel-music").value.trim()||"Original audio",
-      likesCount:0,
-      commentsCount:0,
-      viewsCount:0,
-      likedBy:[],
-      savedBy:[],
-      viewedBy:[],
-      timestamp:serverTimestamp()
-    });
-    closeModal("create-modal");
-    selectedFile=null;
-    $("reel-file").value="";
-    $("chosen-file").innerText="No video selected";
-    $("reel-caption").value="";
-    $("reel-music").value="";
-    toast("Reel uploaded");
-  }catch(e){
-    console.error(e);
-    toast("Upload failed. Storage rules check karo.");
-  }finally{
-    $("upload-reel").disabled=false;$("upload-reel").innerText="Upload Reel";
-  }
+$("open-create").onclick = () => openModal("create-modal");
+$("choose-media").onclick = () => $("reel-file").click();
+
+$("reel-file").onchange = () => {
+    selectedFile = $("reel-file").files[0];
+
+    if (!selectedFile) {
+        selectedFileType = "";
+        $("chosen-file").innerText = "No media selected";
+        return;
+    }
+
+    const isImage = selectedFile.type.startsWith("image/");
+    const isVideo = selectedFile.type.startsWith("video/");
+
+    if (!isImage && !isVideo) {
+        toast("Only image or video allowed");
+        selectedFile = null;
+        selectedFileType = "";
+        $("reel-file").value = "";
+        $("chosen-file").innerText = "No media selected";
+        return;
+    }
+
+    selectedFileType = isVideo ? "video" : "image";
+    $("chosen-file").innerText = `${selectedFile.name} (${selectedFileType})`;
 };
 
-function openReelFromUrl(){
-  const id=new URLSearchParams(location.search).get("reel");
-  if(!id)return;
-  setTimeout(()=>{
-    const el=document.getElementById(`reel-${id}`);
-    if(el)el.scrollIntoView({behavior:"smooth"});
-  },250);
+$("upload-reel").onclick = async () => {
+    if (!selectedFile) {
+        toast("Choose media first");
+        return;
+    }
+
+    $("upload-reel").disabled = true;
+    $("upload-reel").innerText = "Uploading...";
+
+    try {
+        const safeName = selectedFile.name.replace(/[^\w.-]+/g, "_");
+        const storageRef = ref(storage, `reels/${currentUser}/${Date.now()}_${safeName}`);
+
+        await uploadBytes(storageRef, selectedFile);
+        const mediaUrl = await getDownloadURL(storageRef);
+
+        await addDoc(collection(db, "reels"), {
+            userId: currentUser,
+            profilePic: currentProfilePic,
+
+            mediaUrl,
+            mediaType: selectedFileType,
+
+            imageUrl: selectedFileType === "image" ? mediaUrl : "",
+            videoUrl: selectedFileType === "video" ? mediaUrl : "",
+            thumbnailUrl: mediaUrl,
+
+            caption: $("reel-caption").value.trim(),
+            music: $("reel-music").value.trim() || "Original audio",
+
+            likesCount: 0,
+            commentsCount: 0,
+            viewsCount: 0,
+
+            likedBy: [],
+            savedBy: [],
+            viewedBy: [],
+
+            timestamp: serverTimestamp()
+        });
+
+        closeModal("create-modal");
+
+        selectedFile = null;
+        selectedFileType = "";
+        $("reel-file").value = "";
+        $("chosen-file").innerText = "No media selected";
+        $("reel-caption").value = "";
+        $("reel-music").value = "";
+
+        toast("Reel uploaded");
+    } catch (err) {
+        console.error(err);
+        toast("Upload failed. Storage rules check karo.");
+    } finally {
+        $("upload-reel").disabled = false;
+        $("upload-reel").innerText = "Upload Reel";
+    }
+};
+
+function openReelFromUrl() {
+    const id = new URLSearchParams(location.search).get("reel");
+
+    if (!id) return;
+
+    setTimeout(() => {
+        const el = document.getElementById(`reel-${id}`);
+        if (el) el.scrollIntoView({ behavior: "smooth" });
+    }, 250);
 }
 
-await loadMe();
+await loadUsers();
 listenReels();
 </script>
+
 </body>
 </html>
