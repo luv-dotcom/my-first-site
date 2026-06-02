@@ -435,6 +435,11 @@ async function createAccount() {
 
     hideStatus();
 
+    if (!fullName || !username || !password) {
+        showStatus("Full name, username and password are required.");
+        return;
+    }
+
     createBtn.disabled = true;
     createBtn.innerText = "Creating account...";
 
@@ -455,20 +460,40 @@ async function createAccount() {
 
         await setDoc(doc(db, "users", username), {
             username: username,
+
+            fullName: fullName,
+            name: fullName,
+            displayName: fullName,
+
             email: signupEmail,
             phone: signupPhone,
             password: password,
-            fullName: fullName,
+
             bio: bio,
             gender: gender,
             dateOfBirth: dateOfBirth,
             profilePic: profilePic,
+
             followers: [],
             following: [],
-            createdAt: new Date()
+
+            postsCount: 0,
+            followersCount: 0,
+            followingCount: 0,
+
+            isPrivate: false,
+            isVerified: false,
+
+            createdAt: new Date(),
+            updatedAt: new Date()
         });
 
         localStorage.setItem("active_user", username);
+        localStorage.setItem("active_user_full_name", fullName);
+        localStorage.setItem("active_user_name", fullName);
+        localStorage.setItem("active_user_display_name", fullName);
+        localStorage.setItem("active_user_profile_pic", profilePic);
+
         window.location.href = "home.html";
     } catch (err) {
         console.error(err);
